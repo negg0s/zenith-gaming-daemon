@@ -39,25 +39,24 @@ bool ProcConnector::start(ProcEventCallback callback) {
         sa.nl_pid = static_cast<__u32>(getpid());
 
         if (bind(socket_fd_, reinterpret_cast<struct sockaddr*>(&sa), sizeof(sa)) == 0) {
-            // Send subscription packet
-            struct {
-                struct nlmsghdr nl_hdr;
-                struct cn_msg cn_hdr;
-                enum proc_cn_mcast_op op;
-            } msg;
+            // Standard Netlink buffer payload to avoid flexible array struct warnings
+            char buf[NLMSG_SPACE(sizeof(struct cn_msg) + sizeof(enum proc_cn_mcast_op))];
+            std::memset(buf, 0, sizeof(buf));
 
-            std::memset(&msg, 0, sizeof(msg));
-            msg.nl_hdr.nlmsg_len = sizeof(msg);
-            msg.nl_hdr.nlmsg_pid = static_cast<__u32>(getpid());
-            msg.nl_hdr.nlmsg_type = NLMSG_DONE;
+            auto* nl_hdr = reinterpret_cast<struct nlmsghdr*>(buf);
+            nl_hdr->nlmsg_len = sizeof(buf);
+            nl_hdr->nlmsg_pid = static_cast<__u32>(getpid());
+            nl_hdr->nlmsg_type = NLMSG_DONE;
 
-            msg.cn_hdr.id.idx = CN_IDX_PROC;
-            msg.cn_hdr.id.val = CN_VAL_PROC;
-            msg.cn_hdr.len = sizeof(enum proc_cn_mcast_op);
+            auto* cn_hdr = reinterpret_cast<struct cn_msg*>(NLMSG_DATA(nl_hdr));
+            cn_hdr->id.idx = CN_IDX_PROC;
+            cn_hdr->id.val = CN_VAL_PROC;
+            cn_hdr->len = sizeof(enum proc_cn_mcast_op);
 
-            msg.op = PROC_CN_MCAST_LISTEN;
+            auto* op = reinterpret_cast<enum proc_cn_mcast_op*>(cn_hdr->data);
+            *op = PROC_CN_MCAST_LISTEN;
 
-            if (send(socket_fd_, &msg, sizeof(msg), 0) >= 0) {
+            if (send(socket_fd_, buf, sizeof(buf), 0) >= 0) {
                 netlink_available_ = true;
             }
         }
@@ -85,25 +84,24 @@ void ProcConnector::stop() {
 
 #ifdef __linux__
     if (socket_fd_ >= 0) {
-        // Send unsubscribe packet
-        struct {
-            struct nlmsghdr nl_hdr;
-            struct cn_msg cn_hdr;
-            enum proc_cn_mcast_op op;
-        } msg;
+        // Standard Netlink unsubscribe packet
+        char buf[NLMSG_SPACE(sizeof(struct cn_msg) + sizeof(enum proc_cn_mcast_op))];
+        std::memset(buf, 0, sizeof(buf));
 
-        std::memset(&msg, 0, sizeof(msg));
-        msg.nl_hdr.nlmsg_len = sizeof(msg);
-        msg.nl_hdr.nlmsg_pid = static_cast<__u32>(getpid());
-        msg.nl_hdr.nlmsg_type = NLMSG_DONE;
+        auto* nl_hdr = reinterpret_cast<struct nlmsghdr*>(buf);
+        nl_hdr->nlmsg_len = sizeof(buf);
+        nl_hdr->nlmsg_pid = static_cast<__u32>(getpid());
+        nl_hdr->nlmsg_type = NLMSG_DONE;
 
-        msg.cn_hdr.id.idx = CN_IDX_PROC;
-        msg.cn_hdr.id.val = CN_VAL_PROC;
-        msg.cn_hdr.len = sizeof(enum proc_cn_mcast_op);
+        auto* cn_hdr = reinterpret_cast<struct cn_msg*>(NLMSG_DATA(nl_hdr));
+        cn_hdr->id.idx = CN_IDX_PROC;
+        cn_hdr->id.val = CN_VAL_PROC;
+        cn_hdr->len = sizeof(enum proc_cn_mcast_op);
 
-        msg.op = PROC_CN_MCAST_IGNORE;
+        auto* op = reinterpret_cast<enum proc_cn_mcast_op*>(cn_hdr->data);
+        *op = PROC_CN_MCAST_IGNORE;
 
-        (void)send(socket_fd_, &msg, sizeof(msg), 0);
+        (void)send(socket_fd_, buf, sizeof(buf), 0);
 
         close(socket_fd_);
         socket_fd_ = -1;
@@ -158,18 +156,18 @@ void ProcConnector::listener_loop() {
                 ProcEvent ev;
 
                 switch (proc_ev->what) {
-                    case proc_event::PROC_EVENT_FORK:
+                    case PROC_EVENT_FORK:
                         ev.type = ProcEventType::Fork;
                         ev.pid = static_cast<int>(proc_ev->event_data.fork.child_pid);
                         ev.tgid = static_cast<int>(proc_ev->event_data.fork.child_tgid);
                         ev.ppid = static_cast<int>(proc_ev->event_data.fork.parent_pid);
                         break;
-                    case proc_event::PROC_EVENT_EXEC:
+                    case PROC_EVENT_EXEC:
                         ev.type = ProcEventType::Exec;
                         ev.pid = static_cast<int>(proc_ev->event_data.exec.process_pid);
                         ev.tgid = static_cast<int>(proc_ev->event_data.exec.process_tgid);
                         break;
-                    case proc_event::PROC_EVENT_EXIT:
+                    case PROC_EVENT_EXIT:
                         ev.type = ProcEventType::Exit;
                         ev.pid = static_cast<int>(proc_ev->event_data.exit.process_pid);
                         ev.tgid = static_cast<int>(proc_ev->event_data.exit.process_tgid);
