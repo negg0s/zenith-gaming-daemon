@@ -1,0 +1,93 @@
+.TH ZENITHCTL 1 "October 2026" "Zenith 1.1.0" "User Commands Manual"
+.SH NAME
+zenithctl \- CLI and interactive TUI control utility for Zenith Gaming Daemon
+.SH SYNOPSIS
+.B zenithctl
+[\fIOPTIONS\fR] \fICOMMAND\fR [\fIARGUMENTS\fR...]
+.SH DESCRIPTION
+.B zenithctl
+is the primary user-facing interface for controlling, inspecting, diagnosing, and monitoring the
+.B zenith
+gaming optimization daemon via its local UNIX domain socket (\fI/run/zenith/zenith.sock\fR).
+.PP
+It allows non-root users (belonging to group \fBzenith\fR or \fBwheel\fR) to switch profiles, inspect real-time topology, diagnose system health, generate anonymized support reports, and monitor active gaming sessions in a live Terminal User Interface (TUI).
+.SH COMMANDS
+.TP
+.B status [\-\-watch]
+Display current daemon status, detected games, active profile, and applied tweaks.
+If \fB\-\-watch\fR is passed, launches an interactive live TUI dashboard displaying CPU topology (CCD/P/E cores), PSI memory/CPU pressure, GPU temperatures, and recent events.
+.TP
+.B enable
+Enable dynamic game optimizations in the running daemon.
+.TP
+.B disable
+Disable game optimizations and restore all system parameters to their original baseline.
+.TP
+.B profile list
+List all available optimization profiles (\fBsafe\fR, \fBbalanced\fR, \fBaggressive\fR) and show which is currently active.
+.TP
+.B profile set \fINAME\fR
+Switch the active profile to \fINAME\fR.
+.TP
+.B game list
+List all currently running detected gaming processes and their associated PIDs and CCD pinnings.
+.TP
+.B game add \fIPID\fR [\-\-profile \fIPROF\fR]
+Manually register process \fIPID\fR as an active game session.
+.TP
+.B doctor
+Run comprehensive environment diagnostic check (cgroups v2, kernel version, drivers, conflicting services like GameMode/tuned/auto-cpufreq, AMD 3D V-Cache driver, NVML, PSI). Outputs pass/warn/fail status with actionable remediation commands.
+.TP
+.B explain [\fITWEAK_NAME\fR]
+Explain the scientific rationale, kernel paths, risks, and benefits of one or all tweaks.
+.TP
+.B rollback
+Force an immediate emergency rollback of all recorded mutations via the daemon socket.
+.TP
+.B report [\-\-redact]
+Generate a standardized diagnostic support bundle for bug reporting. If \fB\-\-redact\fR is provided, sanitizes usernames, hostnames, and IP addresses.
+.TP
+.B logs [\-n \fICOUNT\fR] [\-\-json]
+Display recent structured log entries recorded by the daemon.
+.TP
+.B completions \fISHELL\fR
+Generate shell autocompletion script for \fBbash\fR, \fBzsh\fR, or \fBfish\fR.
+.TP
+.B version
+Print daemon and client version information.
+.SH OPTIONS
+.TP
+.BR \-s ", " \-\-socket " \fIPATH\fR"
+Override default UNIX domain socket path (\fI/run/zenith/zenith.sock\fR).
+.TP
+.BR \-j ", " \-\-json
+Format output as machine-readable JSON.
+.TP
+.BR \-h ", " \-\-help
+Show usage instructions.
+.SH EXAMPLES
+.PP
+Launch interactive real-time TUI dashboard:
+.RS
+.B zenithctl status \-\-watch
+.RE
+.PP
+Run diagnostic self-check and identify conflicting services:
+.RS
+.B zenithctl doctor
+.RE
+.PP
+Switch active profile to aggressive:
+.RS
+.B zenithctl profile set aggressive
+.RE
+.PP
+Generate shell completions for zsh:
+.RS
+.B zenithctl completions zsh > ~/.zfunc/_zenithctl
+.RE
+.SH SEE ALSO
+.BR zenith (8),
+.BR zenith.conf (5)
+.SH AUTHORS
+Emir (NEGG0) <rokmit599@gmail.com>

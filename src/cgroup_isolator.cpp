@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/cgroup_isolator.hpp"
 #include "zenith/game_detector.hpp"
 

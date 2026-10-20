@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/structured_logger.hpp"
 #include <iomanip>
 #include <ctime>

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/journal.hpp"
 #include "zenith/secure_process.hpp"
 

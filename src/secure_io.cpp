@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/secure_io.hpp"
 
 #include <fcntl.h>

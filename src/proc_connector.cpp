@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/proc_connector.hpp"
 
 #ifdef __linux__

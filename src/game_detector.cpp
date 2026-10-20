@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/game_detector.hpp"
 #include <algorithm>
 #include <cctype>

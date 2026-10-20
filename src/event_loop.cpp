@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/event_loop.hpp"
 #include <system_error>
 #include <cerrno>

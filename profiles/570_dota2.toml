@@ -1,0 +1,15 @@
+# Dota 2 Zenith Game Profile
+name = "Dota 2"
+appid = 570
+executables = ["dota2"]
+
+profile = "balanced"
+ccd_preference = "vcache"
+pin_render_threads = true
+
+realtime_priority = true
+io_class = "best-effort"
+
+gpu_performance = "auto"
+pipewire_quantum = 64
+network_cake = true

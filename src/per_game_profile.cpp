@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/per_game_profile.hpp"
 
 namespace zenith {

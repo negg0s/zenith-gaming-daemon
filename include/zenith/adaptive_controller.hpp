@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #pragma once
 
 #include "zenith/tweaks/tweak_interface.hpp"

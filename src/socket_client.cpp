@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/socket_client.hpp"
 #include "zenith/i18n.hpp"
 

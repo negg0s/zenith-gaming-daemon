@@ -328,6 +328,37 @@ Adopt **Option 3: Multi-Format Native Packaging with Guaranteed Rollback, Reprod
 ### Status
 Accepted and implemented for Stage 11.
 
+---
+
+## ADR-0014: Project Showcase, Public Profile Database & Community Documentation
+
+### Context
+Zenith has reached feature completeness across its low-latency engine, topology detection, security model, and packaging. However, high-performance system daemons frequently suffer from steep learning curves, ambiguous performance expectations ("snake oil" vs reality), and fragmented documentation. 
+
+To ensure maximum adoption, transparency, and community contributions:
+1. Documentation must provide an honest accounting of benefits, limitations, risks, and anti-cheat compliance.
+2. Man pages must adhere to Section 1, 5, and 8 UNIX standards.
+3. A public, community-extensible game profiles database (`profiles/*.toml`) must allow users to contribute specific game settings with automated CI validation.
+4. The project must provide bilingual documentation (EN and RU) and an automated documentation website via MkDocs Material and GitHub Pages.
+
+### Options Considered
+1. **Minimalist README Only**: Rely exclusively on source code comments and short markdown notes. Inadequate for new users; leaves questions regarding anti-cheat safety unanswered.
+2. **Third-Party Wiki**: Host documentation on external wikis (e.g. GitHub Wiki). Difficult to version control alongside code changes; cannot be tested in CI.
+3. **Integrated Documentation Site, UNIX Man Pages, Public Game Profiles & Showcase Repository**:
+   - **Showcase README**: Clear visual elevator pitch, real-time TUI mock, badges, hardware compatibility matrix, and the explicit "What it does / What it does NOT do / Risks / Anti-cheat compliance" section.
+   - **UNIX Man Pages**: `man/zenith.8`, `man/zenithctl.1`, and `man/zenith.conf.5` installed into `${CMAKE_INSTALL_MANDIR}`.
+   - **Community Guidelines**: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `NOTICE`, structured GitHub issue templates (requiring `zenithctl report --redact`), and PR templates.
+   - **Public Game Profiles Database**: Curated `profiles/*.toml` for major titles (*Cyberpunk 2077*, *CS2*, *Dota 2*, *Starfield*, *Baldur's Gate 3*, *Elden Ring*, *Apex Legends*) accompanied by a standalone Python validator script (`scripts/validate_game_profiles.py`) enforced in CI.
+   - **Bilingual Documentation Site**: Modern MkDocs Material site supporting English and Russian, dark/light theme, search, code copy, and Mermaid diagrams deployed via GitHub Actions.
+   - **SPDX Compliance**: Standard `// SPDX-License-Identifier: MIT` headers across all source and header files.
+
+### Decision
+Adopt **Option 3: Integrated Documentation Site, UNIX Man Pages, Public Game Profiles & Showcase Repository**.
+
+### Status
+Accepted and implemented for Stage 12.
+
+
 
 
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/tweaks/cpu_governor_tweak.hpp"
 #include <sstream>
 

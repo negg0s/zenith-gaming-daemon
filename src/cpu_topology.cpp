@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/cpu_topology.hpp"
 #include <map>
 #include <algorithm>

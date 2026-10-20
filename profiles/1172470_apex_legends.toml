@@ -1,0 +1,15 @@
+# Apex Legends Zenith Game Profile
+name = "Apex Legends"
+appid = 1172470
+executables = ["r5apex.exe"]
+
+profile = "aggressive"
+ccd_preference = "frequency"
+pin_render_threads = true
+
+realtime_priority = true
+io_class = "realtime"
+
+gpu_performance = "high"
+pipewire_quantum = 32
+network_cake = true

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/tui.hpp"
 #include "zenith/cpu_topology.hpp"
 #include "zenith/pressure_monitor.hpp"

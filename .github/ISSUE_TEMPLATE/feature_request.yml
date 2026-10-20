@@ -1,0 +1,33 @@
+name: 💡 Feature Request
+description: Propose a new tweak, kernel feature, or UX improvement for Zenith
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We welcome proposals for new low-latency kernel optimizations, hardware controls, and UX features!
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Motivation
+      description: Is your feature request related to a specific latency bottleneck or hardware nuance?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution or Tweak
+      description: What kernel interfaces (sysfs/procfs/cgroups), system calls, or CLI commands should be leveraged?
+    validations:
+      required: true
+
+  - type: textarea
+    id: empirical_benefit
+    attributes:
+      label: Empirical Evidence or Expected Impact
+      description: Do you have frametime benchmarks, CapFrameX/MangoHud logs, or citations showing latency reduction?
+    validations:
+      required: false

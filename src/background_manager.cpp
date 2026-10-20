@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/background_manager.hpp"
 #include <algorithm>
 #include <cctype>

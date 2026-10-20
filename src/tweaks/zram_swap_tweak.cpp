@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/tweaks/zram_swap_tweak.hpp"
 
 namespace zenith {

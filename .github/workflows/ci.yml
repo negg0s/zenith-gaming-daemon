@@ -50,6 +50,10 @@ jobs:
           cppcheck --enable=warning,performance,portability --inline-suppr --suppress=missingIncludeSystem --error-exitcode=0 include/ src/
           echo "Static analysis checks clean."
 
+      - name: Validate Public Game Profiles
+        run: |
+          python3 scripts/validate_game_profiles.py
+
       - name: Configure CMake (GCC with ASan/UBSan & Coverage)
         if: matrix.compiler == 'gcc'
         run: |

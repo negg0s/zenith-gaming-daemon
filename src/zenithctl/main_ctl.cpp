@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // src/zenithctl/main_ctl.cpp
 // Zenith Control CLI (zenithctl) - User-facing command-line interface
 

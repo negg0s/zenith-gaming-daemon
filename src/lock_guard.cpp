@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/lock_guard.hpp"
 
 #include <fcntl.h>

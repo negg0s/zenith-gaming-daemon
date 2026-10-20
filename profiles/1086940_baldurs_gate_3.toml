@@ -1,0 +1,15 @@
+# Baldur's Gate 3 Zenith Game Profile
+name = "Baldur's Gate 3"
+appid = 1086940
+executables = ["bg3.exe", "bg3_dx11.exe"]
+
+profile = "balanced"
+ccd_preference = "vcache"
+pin_render_threads = true
+
+realtime_priority = true
+io_class = "best-effort"
+
+gpu_performance = "auto"
+pipewire_quantum = 64
+network_cake = false

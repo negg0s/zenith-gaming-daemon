@@ -1,0 +1,25 @@
+Zenith Gaming Daemon
+Copyright (c) 2026 Emir (NEGG0) <rokmit599@gmail.com>
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+================================================================================
+THIRD-PARTY INTERFACES AND ATTRIBUTIONS
+================================================================================
+
+1. Linux Kernel Interfaces
+   Zenith interacts with standard Linux kernel interfaces (sysfs, procfs, cgroups v2,
+   netlink proc connector, sched_setaffinity, perf_event, and amd_x3d_vcache driver)
+   under the terms of the GNU General Public License version 2 (GPL-2.0) syscall
+   exception as documented in LICENSES/exceptions/Linux-syscall-note in the Linux
+   kernel source tree.
+
+2. PipeWire Library (libpipewire-0.3)
+   Zenith utilizes PipeWire client API interfaces for dynamic quantum and latency
+   configuration under the terms of the MIT License.
+
+3. CycloneDX Software Bill of Materials (SBOM)
+   Standardized in accordance with ECMA-424 and CycloneDX 1.5 specification.
+
+4. Contributor Covenant
+   Code of Conduct adapted from the Contributor Covenant, version 2.1.

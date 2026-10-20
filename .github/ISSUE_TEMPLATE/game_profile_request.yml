@@ -1,0 +1,40 @@
+name: 🎮 Game Profile Request
+description: Request optimization settings or CCD preferences for a specific game
+title: "[PROFILE]: "
+labels: ["game-profile", "good-first-issue"]
+body:
+  - type: input
+    id: game_name
+    attributes:
+      label: Game Title
+      placeholder: "e.g., Space Marine 2 / Deadlock / Path of Exile 2"
+    validations:
+      required: true
+
+  - type: input
+    id: appid
+    attributes:
+      label: Steam AppID (if applicable)
+      placeholder: "e.g., 2183900"
+    validations:
+      required: false
+
+  - type: input
+    id: binary_name
+    attributes:
+      label: Game Executable Name
+      placeholder: "e.g., War.exe, deadlock"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ccd_pref
+    attributes:
+      label: Recommended CCD Preference
+      description: Does this game prefer 3D V-Cache (large cache) or pure frequency (high clocks)?
+      options:
+        - "vcache (AMD 3D V-Cache CCD0)"
+        - "frequency (High frequency CCD1)"
+        - "auto (Default)"
+    validations:
+      required: true

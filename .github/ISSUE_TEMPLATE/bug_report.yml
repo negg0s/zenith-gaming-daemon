@@ -1,0 +1,59 @@
+name: 🐛 Bug Report
+description: Report a reproducible problem, crash, or unexpected behavior in Zenith
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue! Before opening, please run `zenithctl doctor` to check for common misconfigurations.
+
+  - type: input
+    id: environment
+    attributes:
+      label: Linux Distribution & Kernel
+      description: What distribution and kernel version are you running?
+      placeholder: "e.g., CachyOS Linux 6.13.2 / Arch Linux 6.12.8-arch1-1 / Fedora 41"
+    validations:
+      required: true
+
+  - type: input
+    id: hardware
+    attributes:
+      label: CPU and GPU Hardware
+      description: Specific processor model and graphics card.
+      placeholder: "e.g., AMD Ryzen 9 7950X3D + NVIDIA RTX 4080 / Intel Core i7-13700K + Radeon RX 7900 XTX"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the problem is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can maintainers reproduce the issue?
+      placeholder: |
+        1. Start daemon `sudo systemctl start zenith.service`
+        2. Launch game `Cyberpunk 2077` via Steam
+        3. Run `zenithctl status`
+        4. See error ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: report_output
+    attributes:
+      label: Diagnostic Bundle (`zenithctl report --redact`)
+      description: |
+        CRITICAL: Please run `zenithctl report --redact` in your terminal and paste the full output below.
+        This provides sanitized kernel, cgroup, driver, and structured log diagnostics without exposing your username or hostname.
+      render: text
+    validations:
+      required: true

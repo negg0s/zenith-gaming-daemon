@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/latency_controller.hpp"
 
 namespace zenith {

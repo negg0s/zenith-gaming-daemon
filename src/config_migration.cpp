@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/config_migration.hpp"
 #include <algorithm>
 #include <sstream>

@@ -100,6 +100,10 @@ include(GNUInstallDirs)
 install(TARGETS zenith zenithctl zenith-run DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES configs/zenith.conf configs/profiles.conf DESTINATION etc/zenith)
 install(FILES systemd/zenith.service DESTINATION lib/systemd/system)
+install(FILES man/zenith.8 DESTINATION ${CMAKE_INSTALL_MANDIR}/man8)
+install(FILES man/zenithctl.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+install(FILES man/zenith.conf.5 DESTINATION ${CMAKE_INSTALL_MANDIR}/man5)
+install(DIRECTORY profiles/ DESTINATION ${CMAKE_INSTALL_DATADIR}/zenith/profiles FILES_MATCHING PATTERN "*.toml")
 
 # Unit testing
 enable_testing()

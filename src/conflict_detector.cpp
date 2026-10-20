@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/conflict_detector.hpp"
 #include <iostream>
 

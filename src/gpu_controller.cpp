@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/gpu_controller.hpp"
 #include "zenith/secure_process.hpp"
 

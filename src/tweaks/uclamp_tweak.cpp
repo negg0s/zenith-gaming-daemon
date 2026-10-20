@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/tweaks/uclamp_tweak.hpp"
 
 #ifdef __linux__

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/i18n.hpp"
 #include <cstdlib>
 #include <cstring>

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/socket_server.hpp"
 
 #ifdef __linux__

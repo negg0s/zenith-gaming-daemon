@@ -1,0 +1,65 @@
+.TH ZENITH 8 "October 2026" "Zenith 1.1.0" "System Manager's Manual"
+.SH NAME
+zenith \- Ultra-low latency Linux gaming optimizer daemon (C++20)
+.SH SYNOPSIS
+.B zenith
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+.B zenith
+is a high-performance, non-intrusive Linux background daemon designed to minimize frame-time jitter, micro-stutters, and input latency for native and Proton/Wine gaming workloads.
+.PP
+Zenith listens for process lifecycle events via Netlink proc connector, detects running games, and dynamically optimizes CPU core topology (AMD 3D V-Cache CCD pinning, Intel P-core prioritization), memory management, GPU clock power states, IRQ affinities, and PipeWire audio buffers.
+.PP
+Zenith uses a crash-only architecture with a Write-Ahead Log (WAL) located at
+\fI/run/zenith/journal.json\fR, ensuring that all kernel mutations are atomically and safely reverted when games exit or if the daemon unexpectedly terminates.
+.SH OPTIONS
+.TP
+.BR \-c ", " \-\-config " \fIFILE\fR"
+Specify custom configuration path (default: \fI/etc/zenith/zenith.conf\fR).
+.TP
+.BR \-p ", " \-\-profile " \fINAME\fR"
+Force active optimization profile (\fBsafe\fR, \fBbalanced\fR, or \fBaggressive\fR).
+.TP
+.BR \-f ", " \-\-foreground
+Run in the foreground rather than as a background service.
+.TP
+.BR \-\-rollback
+Execute emergency rollback of all recorded mutations recorded in the WAL journal and exit.
+.TP
+.BR \-\-dry\-run
+Simulate optimization decisions and log target actions without writing to sysfs or procfs.
+.TP
+.BR \-v ", " \-\-version
+Print version information and exit.
+.TP
+.BR \-h ", " \-\-help
+Display usage summary and exit.
+.SH FILES
+.TP
+.I /etc/zenith/zenith.conf
+Global daemon configuration file.
+.TP
+.I /etc/zenith/profiles.conf
+Profile definitions and parameter overrides.
+.TP
+.I /run/zenith/zenith.sock
+UNIX domain socket for IPC communication with \fBzenithctl\fR.
+.TP
+.I /run/zenith/journal.json
+Atomic state journal (Write-Ahead Log) for crash recovery.
+.TP
+.I /run/zenith/zenith.lock
+POSIX advisory lock file ensuring single-instance execution.
+.SH SIGNALS
+.TP
+.B SIGTERM, SIGINT
+Gracefully terminates the daemon, triggering an immediate and atomic rollback of all applied kernel and hardware tweaks.
+.TP
+.B SIGHUP
+Reloads configuration files and re-evaluates active gaming sessions.
+.SH SEE ALSO
+.BR zenithctl (1),
+.BR zenith.conf (5),
+.BR systemctl (1)
+.SH AUTHORS
+Emir (NEGG0) <rokmit599@gmail.com>

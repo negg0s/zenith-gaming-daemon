@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/engine.hpp"
 #include "zenith/tweaks/tweak_registry.hpp"
 #include "zenith/conflict_detector.hpp"

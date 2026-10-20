@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/report.hpp"
 #include "zenith/doctor.hpp"
 #include "zenith/cpu_topology.hpp"

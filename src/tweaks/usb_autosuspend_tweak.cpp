@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/tweaks/usb_autosuspend_tweak.hpp"
 
 namespace zenith {

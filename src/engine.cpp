@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/engine.hpp"
 #include "zenith/capability_guard.hpp"
 #include <csignal>

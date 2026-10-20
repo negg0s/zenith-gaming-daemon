@@ -280,3 +280,46 @@
   - `ConfigMigrator` (`include/zenith/config_migration.hpp`, `src/config_migration.cpp`);
   - Unit tests verifying seamless v1.0.0 $\to$ v1.1.0 schema upgrade and idempotence (`tests/test_config_migration.cpp`, 18th CMake test target).
 
+### [x] Stage 12: Project Showcase, Documentation & Distribution Excellence (P0)
+- [x] 12.1 Project Showcase & README Overhaul (`README.md`):
+  - Impactful headline, status badges, ASCII interactive live TUI mock, compatibility matrix;
+  - Honest breakdown: "What it does / What it does NOT do / Risks / Anti-cheat compliance".
+- [x] 12.2 Exhaustive Documentation Suite (`docs/`):
+  - `docs/INSTALL.md`: Installation for Arch AUR, Debian/Ubuntu, Fedora, NixOS, and Source;
+  - `docs/CONFIGURATION.md`: Detailed breakdown of every single key in `zenith.conf`;
+  - `docs/PROFILES.md`: Deep dive into Safe, Balanced, and Aggressive profiles, hysteresis, and adaptive controller;
+  - `docs/TROUBLESHOOTING.md`: Common issues, `zenithctl doctor` guide, conflicting daemon resolution;
+  - `docs/FAQ.md`: Feral GameMode vs Zenith, Steam Deck, anti-cheat, CachyOS kernels;
+  - `docs/ADDING_A_TWEAK.md`: Step-by-step developer guide for creating `ITweak` plugins;
+  - `docs/ADDING_A_GAME_PROFILE.md`: Contributor guide for adding game profiles;
+  - `docs/ru/index.md`: Full Russian documentation overview.
+- [x] 12.3 System Man Pages (`man/`):
+  - `man/zenith.8`: System Manager's Manual for the background daemon;
+  - `man/zenithctl.1`: User Commands Manual for the CLI/TUI client;
+  - `man/zenith.conf.5`: File Formats Manual for configuration keys;
+  - Integrated into `CMakeLists.txt` for automatic installation.
+- [x] 12.4 Repository Standards & Community Health:
+  - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1);
+  - `NOTICE`: Legal notices, third-party interface attributions;
+  - `.github/ISSUE_TEMPLATE/bug_report.yml` (requiring `zenithctl report --redact`);
+  - `.github/ISSUE_TEMPLATE/feature_request.yml`;
+  - `.github/ISSUE_TEMPLATE/game_profile_request.yml`;
+  - `.github/ISSUE_TEMPLATE/config.yml` (linking GitHub Discussions);
+  - `.github/PULL_REQUEST_TEMPLATE.md`.
+- [x] 12.5 Public Game Profiles Database & Validator:
+  - `profiles/*.toml`: Profiles for Cyberpunk 2077, CS2, Dota 2, Starfield, Baldur's Gate 3, Elden Ring, Apex Legends;
+  - `scripts/validate_game_profiles.py`: Standalone schema validator;
+  - Automated validation step integrated into `.github/workflows/ci.yml`.
+- [x] 12.6 Legal, Licensing & SPDX Compliance:
+  - `LICENSE` (MIT) verified;
+  - `// SPDX-License-Identifier: MIT` headers prepended to all 109 C++ source and header files;
+  - `NOTICE` file established.
+- [x] 12.7 Documentation Site (MkDocs Material & GitHub Pages):
+  - `mkdocs.yml`: Material for MkDocs with light/dark toggle, search, code copy, and mermaid support;
+  - English and Russian navigation structure;
+  - Automated deployment workflow `.github/workflows/docs.yml`.
+- [x] 12.8 Final Acceptance & Release Verification:
+  - Release v1.1.0 published with native packages (`.deb`, `.rpm`, `.tar.gz`, SBOM, SHA256SUMS);
+  - Flawless single-command installation path verified.
+
+

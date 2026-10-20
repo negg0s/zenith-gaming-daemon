@@ -1,0 +1,74 @@
+.TH ZENITH.CONF 5 "October 2026" "Zenith 1.1.0" "File Formats Manual"
+.SH NAME
+zenith.conf \- Configuration file for the Zenith Gaming Optimization Daemon
+.SH SYNOPSIS
+\fI/etc/zenith/zenith.conf\fR
+.SH DESCRIPTION
+\fIzenith.conf\fR is an INI-style plain text configuration file read by \fBzenith\fR(8) at startup. Empty lines and lines beginning with '#' or ';' are ignored as comments. Inline comments following values are supported.
+.PP
+The configuration file enforces strict validation: unknown keys, invalid types, or out-of-range integer values result in startup failure to prevent configuration drift.
+.SH SETTINGS
+.TP
+.BR version " = \fISTRING\fR"
+Configuration schema version (default: \fB1.1.0\fR).
+.TP
+.BR profile " = \fIPROFILE\fR" (alias: \fBactive_profile\fR)
+Default profile activated during game sessions. Permitted values:
+.RS
+.IP \fBsafe\fR
+Zero-risk optimizations only. No sysctl alterations, no GPU clock locks, conservative cgroups.
+.IP \fBbalanced\fR
+Default profile. Enables V-Cache/P-core pinning, mild VM tuning, and cgroups v2 background isolation.
+.IP \fBaggressive\fR
+Maximum performance. Enables split-lock disablement, GPU clock lock, real-time audio priority, and CAKE network queueing.
+.RE
+.TP
+.BR cgroup_isolation_enabled " = \fIBOOLEAN\fR"
+Enable cgroups v2 isolation moving non-gaming background processes (Discord, browsers, torrents) to housekeeping cores (default: \fBtrue\fR).
+.TP
+.BR vcache_pinning_enabled " = \fIBOOLEAN\fR"
+Enable AMD 3D V-Cache CCD core pinning via kernel 6.13+ \fBamd_x3d_vcache\fR driver or L3 cache cluster mapping (default: \fBtrue\fR).
+.TP
+.BR hybrid_pinning_enabled " = \fIBOOLEAN\fR"
+Pin game threads to Intel Performance (P) cores and isolate Efficient (E) cores (default: \fBtrue\fR).
+.TP
+.BR sysctl_tuning_enabled " = \fIBOOLEAN\fR"
+Enable dynamic kernel sysctl memory and scheduler adjustments (default: \fBtrue\fR).
+.TP
+.BR split_lock_mitigation_disabled " = \fIBOOLEAN\fR"
+Disable kernel split-lock mitigation (\fBkernel.split_lock_mitigate=0\fR) to prevent severe micro-stutters in older DirectX/Wine titles triggering unaligned atomic instructions (default: \fBtrue\fR in aggressive profile).
+.TP
+.BR thp_always_enabled " = \fIBOOLEAN\fR"
+Control Transparent HugePages mode (default: \fBfalse\fR; sets \fBmadvise\fR for safety).
+.TP
+.BR gpu_clock_lock_enabled " = \fIBOOLEAN\fR"
+Lock GPU compute and VRAM memory clocks to prevent downclock latency spikes during gameplay (default: \fBtrue\fR).
+.TP
+.BR realtime_process_priority " = \fIBOOLEAN\fR"
+Grant elevated priority (nice \-10 or SCHED_RR) to active gaming render loops (default: \fBtrue\fR).
+.TP
+.BR pipewire_quantum_tuning " = \fIBOOLEAN\fR"
+Dynamically tune PipeWire audio buffer quantum during active gameplay (default: \fBtrue\fR).
+.TP
+.BR pipewire_latency_numerator " = \fIINTEGER\fR"
+PipeWire buffer quantum numerator in samples (allowed: 16..8192, default: \fB64\fR).
+.TP
+.BR pipewire_latency_denominator " = \fIINTEGER\fR"
+PipeWire audio sample rate denominator in Hz (allowed: 44100..192000, default: \fB48000\fR).
+.TP
+.BR swappiness " = \fIINTEGER\fR"
+Kernel swappiness ratio (\fBvm.swappiness\fR) applied while gaming (allowed: 0..200, default: \fB10\fR).
+.TP
+.BR dirty_ratio " = \fIINTEGER\fR"
+Percentage of system memory that can be dirty before background flushing starts (allowed: 1..90, default: \fB5\fR).
+.TP
+.BR compaction_proactiveness " = \fIINTEGER\fR"
+Aggressiveness of proactive memory compaction (allowed: 0..100, default: \fB0\fR to prevent background memory stalls).
+.TP
+.BR poll_interval_ms " = \fIINTEGER\fR"
+Fallback process scanning interval in milliseconds when Netlink events are unavailable (allowed: 50..10000, default: \fB500\fR).
+.SH SEE ALSO
+.BR zenith (8),
+.BR zenithctl (1)
+.SH AUTHORS
+Emir (NEGG0) <rokmit599@gmail.com>

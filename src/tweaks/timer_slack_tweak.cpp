@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/tweaks/timer_slack_tweak.hpp"
 
 #ifdef __linux__

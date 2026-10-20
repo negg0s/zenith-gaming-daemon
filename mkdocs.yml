@@ -1,0 +1,68 @@
+site_name: Zenith Gaming Daemon
+site_url: https://negg0.github.io/zenith-gaming-daemon/
+site_description: Ultra-low latency Linux gaming optimizer daemon (C++20)
+site_author: Emir (NEGG0)
+repo_name: NEGG0/zenith-gaming-daemon
+repo_url: https://github.com/NEGG0/zenith-gaming-daemon
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: en
+  palette:
+    - scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+    - scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - tables
+  - attr_list
+
+nav:
+  - Overview: index.md
+  - Installation: INSTALL.md
+  - Configuration: CONFIGURATION.md
+  - Profiles & Tuning: PROFILES.md
+  - Tweaks Catalog: TWEAKS.md
+  - Architecture: ARCHITECTURE.md
+  - Anti-Cheat Safety: ANTI_CHEAT.md
+  - Benchmarks: BENCHMARKS.md
+  - Threat Model: THREAT_MODEL.md
+  - Troubleshooting: TROUBLESHOOTING.md
+  - FAQ: FAQ.md
+  - Developer Guides:
+      - How to Add a Tweak: ADDING_A_TWEAK.md
+      - Adding Game Profiles: ADDING_A_GAME_PROFILE.md
+  - Документация (RU):
+      - Главная: ru/index.md

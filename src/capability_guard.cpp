@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/capability_guard.hpp"
 
 #ifdef __linux__

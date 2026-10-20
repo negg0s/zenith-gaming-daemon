@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/doctor.hpp"
 #include "zenith/conflict_detector.hpp"
 #include "zenith/i18n.hpp"

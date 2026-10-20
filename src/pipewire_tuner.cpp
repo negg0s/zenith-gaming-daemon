@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/pipewire_tuner.hpp"
 #include "zenith/secure_process.hpp"
 #include <cstdlib>

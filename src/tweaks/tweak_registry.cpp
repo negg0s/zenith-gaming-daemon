@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/tweaks/tweak_registry.hpp"
 #include "zenith/tweaks/cpu_governor_tweak.hpp"
 #include "zenith/tweaks/cgroup_weight_tweak.hpp"

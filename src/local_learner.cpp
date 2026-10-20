@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/local_learner.hpp"
 #include <sstream>
 #include <cmath>

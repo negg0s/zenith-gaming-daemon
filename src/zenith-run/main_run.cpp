@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 // src/zenith-run/main_run.cpp
 // Steam Launch Options Wrapper (zenith-run %command%)
 // Supports gamescope, Proton/Wine, D-Bus desktop notifications, and transparent exit code forwarding.

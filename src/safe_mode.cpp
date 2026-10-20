@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/safe_mode.hpp"
 #include <chrono>
 

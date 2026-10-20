@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #include "zenith/config.hpp"
 #include <unordered_set>
 
