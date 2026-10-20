@@ -9,6 +9,10 @@
 #include "zenith/network_tuner.hpp"
 #include "zenith/pipewire_tuner.hpp"
 #include "zenith/process_tuner.hpp"
+#include "zenith/pressure_monitor.hpp"
+#include "zenith/adaptive_controller.hpp"
+#include "zenith/local_learner.hpp"
+#include "zenith/sched_ext_tuner.hpp"
 #include "zenith/audio_network.hpp"
 #include "zenith/game_detector.hpp"
 #include "zenith/journal.hpp"
@@ -38,6 +42,11 @@ public:
     bool is_game_active() const { return active_game_.has_value(); }
     bool is_safe_mode() const { return safe_mode_.is_safe_mode_active(); }
 
+    AdaptiveController& adaptive() { return adaptive_controller_; }
+    LocalLearner& learner() { return local_learner_; }
+    SchedExtTuner& sched_ext() { return sched_ext_; }
+    PressureMonitor& pressure() { return pressure_monitor_; }
+
     StateJournal& get_journal() { return journal_; }
 
 private:
@@ -54,6 +63,10 @@ private:
     IrqTuner irq_;
     NetworkTuner network_;
     PipewireTuner pipewire_;
+    PressureMonitor pressure_monitor_;
+    AdaptiveController adaptive_controller_;
+    LocalLearner local_learner_;
+    SchedExtTuner sched_ext_;
     GameDetector detector_;
 
     std::optional<DetectedGame> active_game_;

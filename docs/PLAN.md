@@ -153,16 +153,26 @@
   - Total decoupling: failure in one subsystem (e.g. GPU, PipeWire, IRQ, Network) does not crash or block the others
   - Comprehensive unit test suite with mock sysfs, mock NVML, and mock IRQ fixtures (`test_latency_subsystems.cpp`)
 
-### [ ] Stage 9: Client-Server IPC & CLI Interface (P1)
-- [ ] UNIX domain socket IPC between CLI client (`zenith`) and background daemon
-- [ ] CLI commands: `daemon`, `run`, `tune`, `revert`, `status`, `profile`
-- [ ] Formatted status output with human-readable hardware and active game telemetry
-- [ ] Integration test for IPC communication and command dispatch
-
-### [ ] Stage 10: Systemd Service & Arch/CachyOS Packaging (P1)
-- [ ] Hardened systemd unit file with fine-grained capabilities (`CAP_SYS_NICE`, `CAP_SYS_ADMIN`, `CAP_SYS_RESOURCE`)
-- [ ] Production PKGBUILD for Arch Linux / CachyOS with validation
-- [ ] Desktop integration / polkit rules for unprivileged client control
+### [ ] Stage 7: Intelligent Adaptive Controller, PSI Telemetry & Local Self-Learning (P0)
+- [ ] Pressure Stall Information (PSI) Monitor (`pressure_monitor`):
+  - Parse `/proc/pressure/cpu`, `/proc/pressure/memory`, `/proc/pressure/io` (`some` and `full`)
+  - Monitor CPU/GPU temperatures, core/package thermal throttle counts
+  - Decoupled `IPressureFs` abstraction for mock and host testing
+- [ ] Adaptive Profile Controller (`adaptive_controller`):
+  - Automatic profile degradation upon threshold breach: `Aggressive` $\to$ `Balanced` $\to$ `Safe`
+  - Anti-oscillation guardrails: hysteresis cycles count + cooldown window before recovery
+  - Comprehensive reason tracking for all state transitions
+  - Handheld & Battery profile ceilings
+- [ ] Offline Local Learning & Profile Suggester (`local_learner`):
+  - Parse local MangoHud frametime CSV logs (`avg_fps`, `1%_low`, `0.1%_low`, `frametime_variance`, `stutters`)
+  - Game-specific profile recommendation engine (`zenithctl suggest`)
+  - Zero telemetry guarantee: strictly local JSON storage in `/var/lib/zenith/learning_db.json`
+- [ ] Sched_ext (scx) BPF Extensibility Scheduler Controller (`sched_ext_tuner`):
+  - Probe Linux 6.12+ `/sys/kernel/sched_ext/state` and scheduler binaries (`scx_lavd`, `scx_rusty`, `scx_bpfland`)
+  - Disabled by default; non-destructive launch, supervisor, and clean rollback
+- [ ] Comprehensive Unit & Simulation Test Suite (`tests/test_adaptive_controller.cpp`):
+  - Simulated PSI spikes (CPU, Memory, IO) and thermal throttling transitions
+  - Verification of degradation, recovery hysteresis, anti-oscillation, and local profile suggestions
 
 ### [ ] Stage 11: End-to-End Stress Testing & Quality Gate Audit (P0)
 - [ ] Comprehensive integration test suite simulating full game session lifecycle

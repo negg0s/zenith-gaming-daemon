@@ -61,6 +61,10 @@ set(ZENITH_SOURCES
     src/network_tuner.cpp
     src/pipewire_tuner.cpp
     src/latency_controller.cpp
+    src/pressure_monitor.cpp
+    src/adaptive_controller.cpp
+    src/local_learner.cpp
+    src/sched_ext_tuner.cpp
 )
 
 add_library(zenith_core STATIC ${ZENITH_SOURCES})
@@ -129,5 +133,10 @@ add_test(NAME GameDetectorTest COMMAND test_game_detector)
 add_executable(test_latency_subsystems tests/test_latency_subsystems.cpp)
 target_link_libraries(test_latency_subsystems PRIVATE zenith_core)
 add_test(NAME LatencySubsystemsTest COMMAND test_latency_subsystems)
+
+add_executable(test_adaptive_controller tests/test_adaptive_controller.cpp)
+target_link_libraries(test_adaptive_controller PRIVATE zenith_core)
+add_test(NAME AdaptiveControllerTest COMMAND test_adaptive_controller)
+
 
 

@@ -91,6 +91,8 @@ bool ZenithEngine::initialize() {
     ZENITH_LOG_INFO("Housekeeping Cores: " + topology_.to_cpuset_string(topology_.get_background_cores()));
 
     gpu_.detect_gpus();
+    adaptive_controller_.set_battery_mode(topology_.is_on_battery());
+    adaptive_controller_.set_handheld_mode(topology_.form_factor() == FormFactor::Handheld);
     initialized_ = true;
     return true;
 }

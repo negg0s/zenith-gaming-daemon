@@ -178,3 +178,34 @@ Adopt **Option 3: Modular Subsystems with Safety Guardrails & Dynamic NVML Loadi
 
 ### Status
 Accepted and implemented for Stage 6.
+
+---
+
+## ADR-0009: Adaptive State Machine, PSI Pressure Monitoring, and Offline Local Learning
+
+### Context
+Static system tuning is inherently fragile: applying aggressive sysctl tweaks, uclamp allocations, or locked clocks on thermally constrained hardware or memory-starved systems can cause latency spikes, severe thrashing, and thermal throttling. Furthermore, blindly forcing aggressive settings regardless of whether a game benefits from them can degrade performance.
+
+### Options Considered
+1. **Static Blind Tuning**: Apply configured profile once and never adapt during runtime. Fails under dynamic workload spikes, thermal buildup, or memory exhaustion.
+2. **Cloud Telemetry / Remote Optimization Profiles**: Collect user frametimes and upload them to a remote server for profile generation. Violates user privacy and adds remote network dependencies.
+3. **Local Closed-Loop Adaptive Controller & Offline Learning Engine**:
+   - **Pressure Stall Information (PSI)**: Continuously sample `/proc/pressure/{cpu,memory,io}` (`some` and `full` avg10/avg60/avg300) along with CPU/GPU hwmon temperatures and hardware throttle counts (`core_throttle_count`).
+   - **Adaptive Degradation & Hysteresis**:
+     - When thresholds are breached (e.g. `memory.some.avg10 > 25%`, `io.some.avg10 > 30%`, $T \ge 85^\circ\text{C}$, or thermal throttling events increment), automatically degrade profile: `Aggressive` $\to$ `Balanced` $\to$ `Safe`, logging the exact metric breach.
+     - Recovery requires remaining healthy for $N=5$ consecutive sampling cycles and exceeding a cooldown window (10s) to guarantee zero oscillation.
+   - **Offline Local Learning (`zenithctl suggest`)**:
+     - Parses local MangoHud CSV frametime logs (`avg_fps`, `1%_low`, `0.1%_low`, `frametime_variance`).
+     - Recommends the optimal profile per game based on historical variance and thermal headroom.
+     - 100% offline: all profiles stored in local JSON (`/var/lib/zenith/learning_db.json`), zero external telemetry.
+   - **Sched_ext Extensibility**:
+     - Probe Linux 6.12+ `/sys/kernel/sched_ext/state`.
+     - Support optional user-configured BPF schedulers (`scx_lavd`, `scx_rusty`, `scx_bpfland`) with non-destructive lifecycle management and rollback.
+   - **Platform Clamps**:
+     - Automatically enforce battery and handheld ceilings (clamping profile to Balanced or Safe).
+
+### Decision
+Adopt **Option 3: Local Closed-Loop Adaptive Controller & Offline Learning Engine**.
+
+### Status
+Accepted and implemented for Stage 7.
