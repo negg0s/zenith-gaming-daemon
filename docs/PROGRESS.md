@@ -931,4 +931,123 @@ Total Test time (real) = 32.25 sec
 - Stage 9 completed and verified.
 - Master checklist in `docs/PLAN.md` updated.
 - ADR-0011 recorded in `docs/DECISIONS.md`.
+
+---
+
+## Stage 10: UX, CLI Tooling, Socket API, Doctor & Steam Integration (Completed & Verified)
+
+### Objectives Implemented
+1. **`zenithctl` Unified Control CLI (`src/zenithctl/main_ctl.cpp`)**:
+   - Comprehensive command-line utility with rich ASCII art banner and subcommands:
+     - `status [--watch, -w] [--json]`: Live ASCII/ANSI dashboard or machine-readable JSON status from `/run/zenith/zenith.sock`.
+     - `doctor [--json]`: 8-point system diagnostic health audit with formatted `[✅ PASS]`, `[⚠️ WARN]`, `[❌ FAIL]`, and copy-paste remediation commands.
+     - `enable` / `disable`: Dynamic gaming optimization toggle.
+     - `profile list` / `profile set <safe|balanced|aggressive>`: Live profile switching over UNIX domain socket.
+     - `game list` / `game add <target> [profile]`: Per-game override management.
+     - `dry-run [profile]`: Safe preview of sysfs/sysctl/cgroup mutations without applying changes.
+     - `explain`: Kernel mechanism documentation and risk analysis.
+     - `rollback`: Direct or daemon-mediated emergency rollback.
+     - `suggest [game]`: Local machine learning recommendation based on historical variance.
+     - `logs [-f]`: Systemd/journald log streaming.
+     - `report`: Anonymized markdown diagnostic report generator redacting usernames, home directories, and IP addresses for GitHub issues.
+     - `completions <bash|zsh|fish>`: Dynamic shell autocompletion script generators.
+     - `version`: Version and build information display.
+2. **Versioned UNIX Domain Socket Protocol (`include/zenith/socket_client.hpp`, `src/socket_client.cpp`, `src/engine.cpp`)**:
+   - Communication over `/run/zenith/zenith.sock` with payload protocol versioning (`"version": 1`).
+   - Non-blocking I/O with `::poll` timeout protection (default 2000 ms) preventing client hangs.
+   - Handled commands: `STATUS`, `GET_PROFILES`, `SET_PROFILE <p>`, `ROLLBACK`, `PING`.
+3. **`zenithctl doctor` System Diagnostics (`include/zenith/doctor.hpp`, `src/doctor.cpp`)**:
+   - 8 automated diagnostic probes:
+     1. `cgroups_v2`: Unified hierarchy verification and controller subtree delegation (`cpu`, `cpuset`).
+     2. `kernel_version`: Linux kernel release evaluation (minimum 5.15 LTS, optimal 6.12+ for sched_ext / 6.13+ for amd_x3d_vcache).
+     3. `privileges`: Root execution and wheel/gamemode group membership.
+     4. `conflicting_services`: Proactive detection of competing daemons (`gamemode`, `ananicy`, `tuned`, `power-profiles-daemon`, `irqbalance`, `scx`).
+     5. `amd_x3d_vcache`: Kernel driver availability and sysfs interface verification.
+     6. `pressure_stall_information`: Kernel PSI support in `/proc/pressure/cpu`.
+     7. `gpu_driver`: Hardware driver detection (AMD Radeon DPM, NVIDIA NVML, DRM).
+     8. `pipewire_audio`: Sub-millisecond PipeWire runtime socket verification.
+4. **`zenithctl status --watch` Live TUI Dashboard (`include/zenith/tui.hpp`, `src/tui.cpp`)**:
+   - ANSI/ASCII terminal interface displaying active game PID, runtime type, CPU core allocation (Gaming CCD vs Housekeeping cores), real-time PSI pressure bars, CPU/GPU temperatures, active tweak count, and recent events log.
+5. **Steam Integration Wrapper (`src/zenith-run/main_run.cpp`)**:
+   - Drop-in launcher for Steam launch options: `zenith-run %command%`.
+   - `gamescope` pass-through awareness (e.g. `gamescope -W 2560 -H 1440 -r 144 -- zenith-run %command%`).
+   - D-Bus desktop notification integration via `notify-send` for game activation and deactivation.
+   - Desktop tray companion specification documented in `docs/DESKTOP_GUI.md`.
+6. **Bilingual Localization & Error Catalog (`include/zenith/i18n.hpp`, `src/i18n.cpp`, `docs/ERRORS.md`)**:
+   - Russian (`ru`) and English (`en`) bilingual translations.
+   - Standardized error codes `[ZENITH-EXXX]` linking directly to remediation instructions in `docs/ERRORS.md`.
+7. **Issue Report Sanitizer (`include/zenith/report.hpp`, `src/report.cpp`)**:
+   - Generates markdown issue templates containing kernel version, CPU topology, and doctor checks.
+   - Regex-based redaction of usernames, `/home/$USER`, and IPv4 addresses (preserving `127.0.0.1`).
+8. **Shell Autocompletions (`include/zenith/completions.hpp`, `src/completions.cpp`)**:
+   - Generated native autocompletion scripts for `bash`, `zsh`, and `fish`.
+9. **ADR-0012 Recorded (`docs/DECISIONS.md`)**:
+   - Architectural decision record documenting UX, CLI tooling, Unix socket protocol, and diagnostics.
+
+### Verified CI Command Output (GitHub Actions Run 39483922594)
+```text
+✓ build-and-test (gcc) in 2m 32s (ID 118839319261)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (GCC with ASan/UBSan & Coverage)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Fault Injection Matrix (17/17 tests passed, 0 failures)
+  ✓ Execute Benchmark Suite Verification (Quick run complete, charts rendered)
+  ✓ Generate Code Coverage Report (GCC)
+  ✓ Complete job
+
+✓ build-and-test (clang) in 2m 33s (ID 118839319405)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Verify Code Formatting
+  ✓ Configure CMake (Clang with ASan/UBSan)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Fault Injection Matrix (17/17 tests passed, 0 failures)
+  ✓ Complete job
+
+✓ build-and-test (clang-tsan) in 2m 38s (ID 118839318872)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (Clang with ThreadSanitizer)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Fault Injection Matrix (17/17 tests passed, 0 data races)
+  ✓ Complete job
+
+Test Suite Execution Details (17 / 17 Targets Green):
+ 1/17 Test  #1: CpuTopologyTest ..................   Passed    0.42 sec
+ 2/17 Test  #2: ConfigTest .......................   Passed    0.01 sec
+ 3/17 Test  #3: SysctlTest .......................   Passed    0.01 sec
+ 4/17 Test  #4: EngineTest .......................   Passed    0.05 sec
+ 5/17 Test  #5: JournalTest ......................   Passed    0.02 sec
+ 6/17 Test  #6: FlockTest ........................   Passed    0.01 sec
+ 7/17 Test  #7: SafeModeTest .....................   Passed    0.01 sec
+ 8/17 Test  #8: FaultInjectionMatrixTest .........   Passed    0.27 sec
+ 9/17 Test  #9: SecurityTest .....................   Passed    0.01 sec
+10/17 Test #10: FuzzCorpusTest ...................   Passed    0.03 sec
+11/17 Test #11: TweaksTest .......................   Passed    0.06 sec
+12/17 Test #12: GameDetectorTest .................   Passed   46.11 sec
+13/17 Test #13: LatencySubsystemsTest ............   Passed    0.02 sec
+14/17 Test #14: AdaptiveControllerTest ...........   Passed    0.02 sec
+15/17 Test #15: Cpp20ArchitectureTest ............   Passed    0.02 sec
+16/17 Test #16: BenchmarksTest ...................   Passed    0.02 sec
+17/17 Test #17: UxTest ...........................   Passed    0.09 sec
+       17: [PASS] test_i18n_and_errors
+       17: [PASS] test_doctor_engine (8 checks verified)
+       17: [PASS] test_tui_dashboard_rendering
+       17: [PASS] test_shell_completions (bash, zsh, fish)
+       17: [PASS] test_report_sanitizer
+       17: ALL STAGE 10 UX TESTS PASSED!
+
+100% tests passed, 0 tests failed out of 17.
+Clean under AddressSanitizer, UndefinedBehaviorSanitizer, and ThreadSanitizer.
+Total Test time (real) = 47.16 sec
+```
+
+### Active State
+- Stage 10 completed and verified.
+- Master checklist in `docs/PLAN.md` updated.
+- ADR-0012 recorded in `docs/DECISIONS.md`.
 - Next up: Stage 11 (End-to-End Stress Testing & Quality Gate Audit / Release Preparation).
