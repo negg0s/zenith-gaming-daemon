@@ -124,13 +124,13 @@ void TuiRenderer::run_watch_loop(int interval_ms, int max_iterations) {
     int iteration = 0;
 
     while (max_iterations <= 0 || iteration < max_iterations) {
-        // Sample PSI
-        auto psi = monitor.read_metrics();
-        snapshot.cpu_pressure_avg10 = psi.cpu_some.avg10;
-        snapshot.mem_pressure_avg10 = psi.memory_some.avg10;
-        snapshot.io_pressure_avg10 = psi.io_some.avg10;
-        snapshot.cpu_temp_c = monitor.read_cpu_temperature();
-        snapshot.gpu_temp_c = monitor.read_gpu_temperature();
+        // Sample PSI and thermals
+        auto sp = monitor.sample();
+        snapshot.cpu_pressure_avg10 = sp.cpu_some.avg10;
+        snapshot.mem_pressure_avg10 = sp.memory_some.avg10;
+        snapshot.io_pressure_avg10 = sp.io_some.avg10;
+        snapshot.cpu_temp_c = sp.cpu_max_temp_c;
+        snapshot.gpu_temp_c = sp.gpu_max_temp_c;
 
         std::string frame = render_dashboard(snapshot);
         std::cout << frame << std::flush;

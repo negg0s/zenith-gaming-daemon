@@ -278,15 +278,13 @@ void ZenithEngine::print_status() const {
 }
 
 std::string ZenithEngine::build_status_json() const {
-    auto psi = const_cast<PressureMonitor&>(pressure_monitor_).read_metrics();
-    double cpu_temp = const_cast<PressureMonitor&>(pressure_monitor_).read_cpu_temperature();
-    double gpu_temp = const_cast<PressureMonitor&>(pressure_monitor_).read_gpu_temperature();
+    auto sp = const_cast<PressureMonitor&>(pressure_monitor_).sample();
 
     std::ostringstream ss;
     ss << "{\n"
        << "  \"version\": 1,\n"
        << "  \"status\": \"ok\",\n"
-       << "  \"profile\": \"" << profile_to_string(config_.profile) << "\",\n"
+       << "  \"profile\": \"" << profile_to_string(config_.active_profile) << "\",\n"
        << "  \"safe_mode\": " << (safe_mode_.is_safe_mode_active() ? "true" : "false") << ",\n"
        << "  \"is_game_active\": " << (active_game_.has_value() ? "true" : "false") << ",\n"
        << "  \"game_name\": \"" << (active_game_.has_value() ? active_game_->name : "None") << "\",\n"
@@ -295,13 +293,13 @@ std::string ZenithEngine::build_status_json() const {
        << "  \"gaming_cores\": \"" << topology_.to_cpuset_string(topology_.get_gaming_cores()) << "\",\n"
        << "  \"housekeeping_cores\": \"" << topology_.to_cpuset_string(topology_.get_background_cores()) << "\",\n"
        << "  \"pressure\": {\n"
-       << "    \"cpu_avg10\": " << psi.cpu_some.avg10 << ",\n"
-       << "    \"mem_avg10\": " << psi.memory_some.avg10 << ",\n"
-       << "    \"io_avg10\": " << psi.io_some.avg10 << "\n"
+       << "    \"cpu_avg10\": " << sp.cpu_some.avg10 << ",\n"
+       << "    \"mem_avg10\": " << sp.memory_some.avg10 << ",\n"
+       << "    \"io_avg10\": " << sp.io_some.avg10 << "\n"
        << "  },\n"
        << "  \"thermals\": {\n"
-       << "    \"cpu_temp_c\": " << cpu_temp << ",\n"
-       << "    \"gpu_temp_c\": " << gpu_temp << "\n"
+       << "    \"cpu_temp_c\": " << sp.cpu_max_temp_c << ",\n"
+       << "    \"gpu_temp_c\": " << sp.gpu_max_temp_c << "\n"
        << "  },\n"
        << "  \"journal_entries\": " << journal_.get_entries().size() << "\n"
        << "}";
@@ -316,18 +314,18 @@ std::string ZenithEngine::handle_socket_command(const std::string& cmd, const Cl
     if (cmd == "GET_PROFILES" || cmd.find("\"command\":\"GET_PROFILES\"") != std::string::npos ||
         cmd.find("\"command\": \"GET_PROFILES\"") != std::string::npos) {
         return "{\"version\":1,\"status\":\"ok\",\"profiles\":[\"safe\",\"balanced\",\"aggressive\"],\"active\":\"" +
-               profile_to_string(config_.profile) + "\"}";
+               profile_to_string(config_.active_profile) + "\"}";
     }
     if (cmd.find("SET_PROFILE") != std::string::npos) {
         if (cmd.find("aggressive") != std::string::npos) {
-            config_.profile = Profile::Aggressive;
+            config_.active_profile = Profile::Aggressive;
         } else if (cmd.find("safe") != std::string::npos) {
-            config_.profile = Profile::Safe;
+            config_.active_profile = Profile::Safe;
         } else {
-            config_.profile = Profile::Balanced;
+            config_.active_profile = Profile::Balanced;
         }
         return "{\"version\":1,\"status\":\"ok\",\"message\":\"Profile switched to " +
-               profile_to_string(config_.profile) + "\"}";
+               profile_to_string(config_.active_profile) + "\"}";
     }
     if (cmd == "ROLLBACK" || cmd.find("\"command\":\"ROLLBACK\"") != std::string::npos ||
         cmd.find("\"command\": \"ROLLBACK\"") != std::string::npos) {
