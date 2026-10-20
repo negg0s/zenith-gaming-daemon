@@ -45,9 +45,12 @@ std::pair<fs::path, std::string> SecureIo::split_trusted_path(const fs::path& ab
         "/run/zenith"
     };
 
-    std::string abs_str = absolute_path.lexically_normal().string();
+    std::string raw_str = absolute_path.string();
+    if (raw_str.find("..") != std::string::npos) {
+        return { "", "" };
+    }
 
-    // Prevent path traversal
+    std::string abs_str = absolute_path.lexically_normal().string();
     if (abs_str.find("..") != std::string::npos) {
         return { "", "" };
     }
