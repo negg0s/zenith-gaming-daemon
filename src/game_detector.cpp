@@ -171,7 +171,21 @@ bool GameDetector::is_wine_or_proton_game(int pid, std::string_view comm, std::s
         }
     }
 
-    (void)pid;
+    // Windows executable executing on Linux
+    if (lower_cmd.find(".exe") != std::string::npos || lower_comm.find(".exe") != std::string::npos) {
+        return true;
+    }
+
+    // Check environ for Proton / Wine environment variables
+    auto env = fs_->read_file("/proc/" + std::to_string(pid) + "/environ");
+    if (env) {
+        if (env->find("STEAM_COMPAT_DATA_PATH") != std::string::npos ||
+            env->find("WINEPREFIX") != std::string::npos ||
+            env->find("PROTON_") != std::string::npos) {
+            return true;
+        }
+    }
+
     return false;
 }
 
