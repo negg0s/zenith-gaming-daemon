@@ -99,4 +99,85 @@ Matrix Result: 21 / 21 scenarios PASSED (100% green)
 ### Active State
 - Stage 1 completed and verified.
 - Master checklist in `docs/PLAN.md` updated.
-- Awaiting Stage 2 instructions.
+
+---
+
+## [2026-10-20] - Stage 2: Security & Hardening Architecture
+
+### Context
+Execution of Stage 2 according to the Autonomous Senior Engineer protocol. Zenith runs as root / privileged daemon with capabilities (`CAP_SYS_ADMIN`, `CAP_SYS_NICE`, `CAP_SYS_RESOURCE`), mutating kernel parameters, cgroups, and GPU clock domains. The primary objective is defense-in-depth security: eliminating shell command injections, sandboxing virtual filesystem access against symlink traversal, strictly validating configuration inputs, enforcing kernel `SO_PEERCRED` socket authorization, dropping unneeded capabilities, hardening systemd services, applying toolchain hardening flags, and constructing a comprehensive fuzzing regression suite.
+
+### Actions Completed
+1. **Threat Model Created (`docs/THREAT_MODEL.md`)**:
+   - Comprehensive STRIDE threat model detailing assets (kernel stability, CPU fairness, GPU thermals, state journal).
+   - Trust boundaries established between untrusted user processes, unprivileged client CLI, privileged daemon, and kernel virtual filesystems.
+   - Attack vectors analyzed and counteracted: spoofing, tampering, information disclosure, privilege escalation.
+2. **Zero Shell Policy Enforced (`src/secure_process.cpp`, `include/zenith/secure_process.hpp`)**:
+   - Completely eliminated all `std::system()`, `popen()`, and shell string concatenations across `src/gpu_controller.cpp` and `src/audio_network.cpp`.
+   - Implemented `SecureProcess::execute`: executes only pre-approved whitelisted binaries (`/usr/bin/nvidia-smi`, `/usr/bin/pw-metadata`) via direct `fork()` + `execve()` with sanitized environment (`PATH=/usr/bin:/bin`, `LC_ALL=C`).
+3. **Virtual Filesystem Sandboxing (`src/secure_io.cpp`, `include/zenith/secure_io.hpp`)**:
+   - Implemented `openat2` sandbox with `RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS | RESOLVE_NO_MAGICLINKS` relative to trusted base dirfds (`/sys/fs/cgroup`, `/proc/sys/vm`, `/sys/class/drm`, `/run/zenith`).
+   - Anti-traversal guard in `split_trusted_path` rejects paths with `..` before and after lexical normalization.
+4. **Strict Configuration Validation (`src/config.cpp`, `include/zenith/config.hpp`)**:
+   - Max file size capped at 64 KB (`MAX_CONFIG_SIZE = 64 * 1024`).
+   - Rejection of unknown keys with informative parse error and line numbers.
+   - Strict boolean validation (`true`, `false`, `1`, `0` only) and integer boundary checks with trailing character detection.
+5. **Control Socket Hardening (`src/socket_server.cpp`, `include/zenith/socket_server.hpp`)**:
+   - UNIX domain socket at `/run/zenith/zenith.sock` with `0660` permissions.
+   - Group ownership set to `wheel` / `gamemode`.
+   - Kernel-enforced `SO_PEERCRED` queries peer UID/GID and checks primary/supplementary groups before accepting requests.
+   - Strict 4 KB message payload limit.
+6. **Capability Dropping & Systemd Hardening (`src/capability_guard.cpp`, `systemd/zenith.service`)**:
+   - Enforced `prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)` upon daemon startup to prevent child processes from obtaining elevated capabilities.
+   - Hardened `systemd/zenith.service`: `NoNewPrivileges=yes`, `ProtectSystem=strict`, `ProtectHome=yes`, `PrivateTmp=yes`, `ProtectKernelModules=yes`, `RestrictAddressFamilies=AF_UNIX AF_NETLINK`, `SystemCallFilter=@system-service`, minimal `ReadWritePaths`.
+7. **Toolchain Hardening Flags (`CMakeLists.txt`)**:
+   - Compiler options: `-fstack-protector-strong`, `-fstack-clash-protection`, `-fcf-protection=full`, `-D_FORTIFY_SOURCE=3`.
+   - Linker options: `-Wl,-z,relro`, `-Wl,-z,now`, `-Wl,-z,noexecstack`.
+8. **Fuzzing and Adversarial Regression Suite (`fuzz/`, `tests/test_fuzz_corpus.cpp`, `tests/test_security.cpp`)**:
+   - Fuzz targets implemented in `fuzz/fuzz_targets.hpp`: `fuzz_one_config`, `fuzz_one_sysfs`, `fuzz_one_socket`, `fuzz_one_proc`.
+   - Seed corpus checked into repository (`fuzz/corpus/config/`, `fuzz/corpus/sysfs/`, `fuzz/corpus/socket/`, `fuzz/corpus/proc/`).
+   - Adversarial regression tests covering empty buffers, byte mutations, format strings, mismatched parentheses in `/proc/<pid>/stat`, and 128 KB payloads.
+9. **Responsible Disclosure Policy (`SECURITY.md`)**:
+   - Documented reporting workflow, vulnerability scope, contact channel, and 48-hour response SLA.
+
+### Verified CI Command Output (GitHub Actions Run 39465558916)
+```text
+✓ build-and-test (clang) in 45s (ID 118775899863)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (Clang with ASan/UBSan)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Fault Injection Matrix (100% tests passed, 0 failures)
+  ✓ Complete job
+
+✓ build-and-test (gcc) in 53s (ID 118775899580)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (GCC with ASan/UBSan)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Fault Injection Matrix (100% tests passed, 0 failures)
+  ✓ Complete job
+
+Test Suite Execution Details:
+ 1/10 Test  #1: CpuTopologyTest ..................   Passed    0.01 sec
+ 2/10 Test  #2: ConfigTest .......................   Passed    0.01 sec
+ 3/10 Test  #3: SysctlTest .......................   Passed    0.01 sec
+ 4/10 Test  #4: EngineTest .......................   Passed    0.01 sec
+ 5/10 Test  #5: JournalTest ......................   Passed    0.01 sec
+ 6/10 Test  #6: FlockTest ........................   Passed    0.01 sec
+ 7/10 Test  #7: SafeModeTest .....................   Passed    0.01 sec
+ 8/10 Test  #8: FaultInjectionMatrixTest .........   Passed    0.19 sec
+ 9/10 Test  #9: SecurityTest .....................   Passed    0.01 sec
+10/10 Test #10: FuzzCorpusTest ...................   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 10. Clean under ASan & UBSan.
+Total Test time (real) = 0.55 sec
+```
+
+### Active State
+- Stage 2 completed and verified.
+- Master checklist in `docs/PLAN.md` updated.
+- ADR-0004 recorded in `docs/DECISIONS.md`.
+- Ready for Stage 3 instructions.
