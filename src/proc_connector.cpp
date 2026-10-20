@@ -82,6 +82,10 @@ void ProcConnector::stop() {
         return;
     }
 
+    if (listener_thread_.joinable()) {
+        listener_thread_.join();
+    }
+
 #ifdef __linux__
     if (socket_fd_ >= 0) {
         // Standard Netlink unsubscribe packet
@@ -108,9 +112,6 @@ void ProcConnector::stop() {
     }
 #endif
 
-    if (listener_thread_.joinable()) {
-        listener_thread_.join();
-    }
     netlink_available_ = false;
 }
 
