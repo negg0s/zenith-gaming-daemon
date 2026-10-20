@@ -18,6 +18,7 @@
 #include "zenith/journal.hpp"
 #include "zenith/lock_guard.hpp"
 #include "zenith/safe_mode.hpp"
+#include "zenith/socket_server.hpp"
 
 namespace zenith {
 
@@ -68,9 +69,13 @@ private:
     LocalLearner local_learner_;
     SchedExtTuner sched_ext_;
     GameDetector detector_;
+    SocketServer socket_server_;
 
     std::optional<DetectedGame> active_game_;
     bool initialized_ = false;
+
+    std::string build_status_json() const;
+    std::string handle_socket_command(const std::string& cmd, const ClientCredentials& creds);
 
     static void setup_signals();
     static ZenithEngine*& active_instance();

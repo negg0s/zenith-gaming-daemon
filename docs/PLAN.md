@@ -224,6 +224,32 @@
   - `test_benchmarks.cpp`: unit tests for statistical formulas, timing mechanisms, and RSS probes;
   - Registered as 16th test target in CMake.
 
+### [x] Stage 10: User Experience, CLI Tooling & Steam Integration (P0)
+- [x] 10.1 Unified User CLI (`zenithctl`):
+  - Commands: `status`, `doctor`, `enable`, `disable`, `profile list/set`, `game list/add`, `dry-run`, `explain`, `rollback`, `suggest`, `logs`, `report`, `version`, `completions`.
+- [x] 10.2 Versioned UNIX Domain Socket API:
+  - JSON protocol (`/run/zenith/zenith.sock`): `STATUS`, `GET_PROFILES`, `SET_PROFILE`, `ROLLBACK`, `PING`.
+  - Client helper library (`SocketClient`).
+- [x] 10.3 Comprehensive System Doctor (`zenithctl doctor`):
+  - Verifies cgroups v2, kernel version, privileges, competing services, AMD X3D driver, Intel hybrid cores, PSI, GPU drivers, PipeWire.
+  - Formatted output with colored `[✅]`, `[⚠️]`, `[❌]` and exact actionable fix command.
+- [x] 10.4 Live Terminal TUI Dashboard (`zenithctl status --watch`):
+  - Real-time ASCII/ANSI dashboard: active game, core topology map (CCD0/CCD1 or P/E), PSI pressure gauges, temperatures, recent event log.
+- [x] 10.5 Steam & Desktop Integration (`zenith-run`):
+  - Transparent wrapper executable for Steam Launch Options (`zenith-run %command%`);
+  - Gamescope detection and pass-through;
+  - D-Bus desktop notifications (`notify-send`) upon game start and exit;
+  - Desktop companion GUI specification (`docs/DESKTOP_GUI.md`).
+- [x] 10.6 Localization & Actionable Diagnostics:
+  - Multilingual support (`en` and `ru`) via `zenith::i18n`;
+  - Standardized error codes catalog in `docs/ERRORS.md` (`ZENITH-E101` to `E108`) with clickable links.
+- [x] 10.7 Anonymized Diagnostics Bundle (`zenithctl report`):
+  - Collects doctor results, sanitized config, system topology, and redacts usernames, home paths, and IP addresses for GitHub issues.
+- [x] 10.8 Shell Autocompletions:
+  - Full autocompletion generators for `bash`, `zsh`, and `fish`.
+- [x] 10.9 Quality Gates & Test Suite:
+  - `tests/test_ux.cpp` covering i18n, doctor checks, TUI rendering, completions, and report sanitization (17th test target in CMake).
+
 ### [ ] Stage 11: End-to-End Stress Testing & Quality Gate Audit (P0)
 - [ ] Comprehensive integration test suite simulating full game session lifecycle
 - [ ] Memory leak audit under Valgrind / ASan during prolonged daemon execution

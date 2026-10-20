@@ -74,6 +74,12 @@ set(ZENITH_SOURCES
     src/sched_ext_tuner.cpp
     src/structured_logger.cpp
     src/event_loop.cpp
+    src/i18n.cpp
+    src/doctor.cpp
+    src/tui.cpp
+    src/report.cpp
+    src/completions.cpp
+    src/socket_client.cpp
 )
 
 add_library(zenith_core STATIC ${ZENITH_SOURCES})
@@ -82,9 +88,15 @@ target_link_libraries(zenith_core PUBLIC ${CMAKE_DL_LIBS})
 add_executable(zenith src/main.cpp)
 target_link_libraries(zenith PRIVATE zenith_core)
 
+add_executable(zenithctl src/zenithctl/main_ctl.cpp)
+target_link_libraries(zenithctl PRIVATE zenith_core)
+
+add_executable(zenith-run src/zenith-run/main_run.cpp)
+target_link_libraries(zenith-run PRIVATE zenith_core)
+
 # Installation targets
 include(GNUInstallDirs)
-install(TARGETS zenith DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS zenith zenithctl zenith-run DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES configs/zenith.conf configs/profiles.conf DESTINATION /etc/zenith)
 install(FILES systemd/zenith.service DESTINATION ${CMAKE_INSTALL_LIBDIR}/systemd/system)
 
@@ -157,6 +169,11 @@ target_link_libraries(zenith_bench_daemon PRIVATE zenith_core)
 add_executable(test_benchmarks tests/test_benchmarks.cpp)
 target_link_libraries(test_benchmarks PRIVATE zenith_core)
 add_test(NAME BenchmarksTest COMMAND test_benchmarks)
+
+add_executable(test_ux tests/test_ux.cpp)
+target_link_libraries(test_ux PRIVATE zenith_core)
+add_test(NAME UxTest COMMAND test_ux)
+
 
 
 

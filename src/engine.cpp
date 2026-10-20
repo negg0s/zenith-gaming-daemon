@@ -39,7 +39,8 @@ ZenithEngine::ZenithEngine(Config config, fs::path run_dir)
       lock_(run_dir_ / "zenith.lock"),
       safe_mode_(run_dir_ / "crash_history.json"),
       sysctl_(&journal_),
-      detector_(config_.custom_game_patterns) {
+      detector_(config_.custom_game_patterns),
+      socket_server_(run_dir_ / "zenith.sock") {
     active_instance() = this;
     setup_signals();
 }
@@ -93,6 +94,13 @@ bool ZenithEngine::initialize() {
     gpu_.detect_gpus();
     adaptive_controller_.set_battery_mode(topology_.is_on_battery());
     adaptive_controller_.set_handheld_mode(topology_.form_factor() == FormFactor::Handheld);
+
+    // 5. Start UNIX Control Socket Server
+    socket_server_.set_command_handler([this](const std::string& cmd, const ClientCredentials& creds) {
+        return handle_socket_command(cmd, creds);
+    });
+    socket_server_.start();
+
     initialized_ = true;
     return true;
 }
@@ -267,6 +275,70 @@ void ZenithEngine::print_status() const {
     std::cout << "Active Game       : " << (active_game_.has_value() ? active_game_->name + " (PID " + std::to_string(active_game_->pid) + ")" : "None (Idle)") << "\n";
     std::cout << "Journal Entries   : " << journal_.get_entries().size() << "\n";
     std::cout << "==========================================================\n\n";
+}
+
+std::string ZenithEngine::build_status_json() const {
+    auto psi = const_cast<PressureMonitor&>(pressure_monitor_).read_metrics();
+    double cpu_temp = const_cast<PressureMonitor&>(pressure_monitor_).read_cpu_temperature();
+    double gpu_temp = const_cast<PressureMonitor&>(pressure_monitor_).read_gpu_temperature();
+
+    std::ostringstream ss;
+    ss << "{\n"
+       << "  \"version\": 1,\n"
+       << "  \"status\": \"ok\",\n"
+       << "  \"profile\": \"" << profile_to_string(config_.profile) << "\",\n"
+       << "  \"safe_mode\": " << (safe_mode_.is_safe_mode_active() ? "true" : "false") << ",\n"
+       << "  \"is_game_active\": " << (active_game_.has_value() ? "true" : "false") << ",\n"
+       << "  \"game_name\": \"" << (active_game_.has_value() ? active_game_->name : "None") << "\",\n"
+       << "  \"game_pid\": " << (active_game_.has_value() ? active_game_->pid : 0) << ",\n"
+       << "  \"total_cores\": " << topology_.total_cores() << ",\n"
+       << "  \"gaming_cores\": \"" << topology_.to_cpuset_string(topology_.get_gaming_cores()) << "\",\n"
+       << "  \"housekeeping_cores\": \"" << topology_.to_cpuset_string(topology_.get_background_cores()) << "\",\n"
+       << "  \"pressure\": {\n"
+       << "    \"cpu_avg10\": " << psi.cpu_some.avg10 << ",\n"
+       << "    \"mem_avg10\": " << psi.memory_some.avg10 << ",\n"
+       << "    \"io_avg10\": " << psi.io_some.avg10 << "\n"
+       << "  },\n"
+       << "  \"thermals\": {\n"
+       << "    \"cpu_temp_c\": " << cpu_temp << ",\n"
+       << "    \"gpu_temp_c\": " << gpu_temp << "\n"
+       << "  },\n"
+       << "  \"journal_entries\": " << journal_.get_entries().size() << "\n"
+       << "}";
+    return ss.str();
+}
+
+std::string ZenithEngine::handle_socket_command(const std::string& cmd, const ClientCredentials&) {
+    if (cmd == "STATUS" || cmd.find("\"command\":\"STATUS\"") != std::string::npos ||
+        cmd.find("\"command\": \"STATUS\"") != std::string::npos) {
+        return build_status_json();
+    }
+    if (cmd == "GET_PROFILES" || cmd.find("\"command\":\"GET_PROFILES\"") != std::string::npos ||
+        cmd.find("\"command\": \"GET_PROFILES\"") != std::string::npos) {
+        return "{\"version\":1,\"status\":\"ok\",\"profiles\":[\"safe\",\"balanced\",\"aggressive\"],\"active\":\"" +
+               profile_to_string(config_.profile) + "\"}";
+    }
+    if (cmd.find("SET_PROFILE") != std::string::npos) {
+        if (cmd.find("aggressive") != std::string::npos) {
+            config_.profile = Profile::Aggressive;
+        } else if (cmd.find("safe") != std::string::npos) {
+            config_.profile = Profile::Safe;
+        } else {
+            config_.profile = Profile::Balanced;
+        }
+        return "{\"version\":1,\"status\":\"ok\",\"message\":\"Profile switched to " +
+               profile_to_string(config_.profile) + "\"}";
+    }
+    if (cmd == "ROLLBACK" || cmd.find("\"command\":\"ROLLBACK\"") != std::string::npos ||
+        cmd.find("\"command\": \"ROLLBACK\"") != std::string::npos) {
+        deactivate();
+        perform_emergency_rollback(run_dir_);
+        return "{\"version\":1,\"status\":\"ok\",\"message\":\"Emergency rollback executed\"}";
+    }
+    if (cmd == "PING" || cmd.find("\"command\":\"PING\"") != std::string::npos) {
+        return "{\"version\":1,\"status\":\"ok\",\"message\":\"PONG\"}";
+    }
+    return "{\"version\":1,\"status\":\"ok\",\"message\":\"Command acknowledged\"}";
 }
 
 } // namespace zenith

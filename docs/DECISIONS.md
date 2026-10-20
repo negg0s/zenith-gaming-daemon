@@ -263,4 +263,31 @@ Adopt **Option 3: Reproducible Empirical Benchmarking & Ablation Suite**.
 ### Status
 Accepted and implemented for Stage 9.
 
+---
+
+## ADR-0012: UX Architecture, Unix Socket Protocol & Doctor Diagnostics
+
+### Context
+Zenith operates primarily as a background system daemon, but end-users interact with it through CLI tools, Steam launch options, and shell prompts. A subpar user experience (cryptic error codes, failure without actionable guidance, difficulty diagnosing system incompatibilities, or complex multi-step setups) leads to user frustration and misconfigurations.
+A first-class UX is required such that any user can install Zenith, run a diagnostic health check, inspect live core topologies, and launch games seamlessly within 2 minutes.
+
+### Options Considered
+1. **Direct Configuration File Editing Exclusively**: Require users to manually modify `/etc/zenith/zenith.conf` and restart systemd. High friction, error-prone, and provides zero real-time feedback during gaming.
+2. **Heavy Desktop Electron / Web GUI**: Package a complete web/electron desktop application. Violates Zenith's ultra-low latency philosophy by consuming hundreds of megabytes of RAM and background CPU cycles.
+3. **Multi-Tiered CLI, Doctor Engine, and Lightweight Socket Protocol**:
+   - **Unified Control CLI (`zenithctl`)**: Intuitive verb-based command interface (`status`, `doctor`, `profile`, `game`, `dry-run`, `explain`, `rollback`, `suggest`, `logs`, `report`, `completions`).
+   - **Versioned UNIX Domain Socket Protocol (`/run/zenith/zenith.sock`)**: JSON-based request/response protocol (`STATUS`, `GET_PROFILES`, `SET_PROFILE`, `ROLLBACK`) with fallback to local inspection when the daemon is offline.
+   - **Comprehensive Health Doctor (`zenithctl doctor`)**: Automated verification of cgroups v2, kernel version, privileges, competing daemons (gamemode/ananicy/tuned), AMD X3D driver, Intel hybrid cores, PSI, and PipeWire, outputting formatted colored results with **exact actionable bash remediation commands**.
+   - **Live Terminal Dashboard (`zenithctl status --watch`)**: Real-time ASCII/ANSI TUI monitor displaying active game, core topology map (CCD0 V-Cache vs CCD1 background cores), PSI pressure gauges, temperatures, and state journal status.
+   - **Steam Launch Options Wrapper (`zenith-run %command%`)**: Transparent wrapper supporting `gamescope`, forwarding exit codes without shell expansion, and dispatching D-Bus desktop notifications (`notify-send`) upon game start and exit.
+   - **Bilingual Internationalization (`zenith::i18n`)**: English and Russian localization with standardized error codes catalog (`docs/ERRORS.md`) linked directly in output.
+   - **Anonymized Issue Reporter (`zenithctl report`)**: Generates a GitHub-ready diagnostics markdown snippet with redacting of usernames, home paths, and non-loopback IP addresses.
+
+### Decision
+Adopt **Option 3: Multi-Tiered CLI, Doctor Engine, and Lightweight Socket Protocol**.
+
+### Status
+Accepted and implemented for Stage 10.
+
+
 
