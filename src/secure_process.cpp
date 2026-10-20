@@ -1,4 +1,5 @@
 #include "zenith/secure_process.hpp"
+#include <thread>
 
 #ifdef __linux__
 #include <unistd.h>
