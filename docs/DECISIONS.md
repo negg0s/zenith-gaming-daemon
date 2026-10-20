@@ -100,3 +100,27 @@ Adopt **Option 3: Modular Subsystems with Three-Tier Profiles**.
 
 ### Status
 Accepted and implemented for Stage 3.
+
+---
+
+## ADR-0006: Hardware Topology Engine with amd_x3d_vcache Integration and Multi-Architecture Fixtures
+
+### Context
+Modern gaming systems feature diverse hardware topologies: AMD asymmetric dual-CCD 3D V-Cache CPUs (7950X3D, 9950X3D), single-CCD V-Cache (7800X3D, 5800X3D), Intel Hybrid architectures (12th-14th Gen P/E cores, Core Ultra P/E/LP-E cores), multi-socket NUMA servers, virtual machines, and handheld APUs (Steam Deck). Statically assuming core capabilities or attempting thread pinning without knowing cache topology leads to performance regressions.
+
+### Options Considered
+1. **Frequency-Only Heuristic**: Guess P vs E cores by comparing max frequencies. Fails on architectures where E-cores clock high or when thermal throttling occurs. Fails on AMD 3D V-Cache where core types are identical except for L3 cache attachment.
+2. **Hardcoded CPU Model Tables**: Maintain a hardcoded database of CPU models by name string. Fragile, requires constant updates, breaks on unreleased or custom CPUs.
+3. **Hardware Discovery via Kernel Virtual Filesystem & Driver Abstraction**:
+   - `amd_x3d_vcache` Driver (Linux 6.13+): Primary driver probe via `/sys/devices/platform/amd_x3d_vcache/amd_x3d_mode` (`cache`, `frequency`, `none`). Fallback to L3 cache asymmetry if driver not present.
+   - Cache Parsing: Parse `cache/index3/size` and `cache/index3/shared_cpu_list` to identify distinct L3 clusters.
+   - Intel Core Types: Parse `topology/core_type` (`0x20` P-core, `0x40` E-core, `0x10` LP-E core) and `cpu_capacity`.
+   - Core Selection Modes: `cache` (prioritize V-Cache), `frequency` (prioritize high clock CCD), `auto`.
+   - Virtualization & Platform Awareness: Detect VMs (`QEMU`, `KVM`, `VMware`), Handhelds (Steam Deck, ROG Ally), and laptops on battery via `chassis_type` and `power_supply`.
+   - FileSystem Abstraction (`ITopologyFs`): Decouple topology detection from the live host filesystem, enabling full unit test validation across 11 synthetic architecture fixtures.
+
+### Decision
+Adopt **Option 3: Hardware Discovery via Kernel Virtual Filesystem & Driver Abstraction**.
+
+### Status
+Accepted and implemented for Stage 4.

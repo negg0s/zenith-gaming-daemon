@@ -83,6 +83,8 @@ bool ZenithEngine::initialize() {
     std::string topo_info = "Topology: " + std::to_string(topology_.total_cores()) + " cores";
     if (topology_.has_vcache()) topo_info += " (AMD 3D V-Cache detected!)";
     if (topology_.has_hybrid()) topo_info += " (Intel Hybrid P/E cores detected!)";
+    if (topology_.has_amd_x3d_driver()) topo_info += " [amd_x3d_vcache kernel driver active]";
+    if (topology_.is_energy_conscious()) topo_info += " [Energy-Conscious Mode: Handheld/Battery]";
     ZENITH_LOG_INFO(topo_info);
 
     ZENITH_LOG_INFO("Gaming Cores: " + topology_.to_cpuset_string(topology_.get_gaming_cores()));
