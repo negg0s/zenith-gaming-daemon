@@ -121,12 +121,12 @@ int main(int argc, char* argv[]) {
             } else {
                 std::cout << "\033[33m[NOTICE] Zenith background daemon is offline or unreachable.\033[0m\n"
                           << "Displaying static hardware status:\n";
-                zenith::CpuTopology topo;
-                if (topo.probe()) {
-                    std::cout << "  CPU Model:         " << topo.get_cpu_model() << "\n"
-                              << "  Total Cores:       " << topo.get_total_cores() << "\n"
+                zenith::CpuTopology topo = zenith::CpuTopology::detect();
+                if (topo.total_cores() > 0) {
+                    std::cout << "  Architecture:      " << (topo.has_vcache() ? "AMD 3D V-Cache" : (topo.has_hybrid() ? "Intel Hybrid (P/E)" : "Standard SMP")) << "\n"
+                              << "  Total Cores:       " << topo.total_cores() << "\n"
                               << "  Gaming Cores:      " << topo.to_cpuset_string(topo.get_gaming_cores()) << "\n"
-                              << "  Housekeeping:      " << topo.to_cpuset_string(topo.get_housekeeping_cores()) << "\n";
+                              << "  Housekeeping:      " << topo.to_cpuset_string(topo.get_background_cores()) << "\n";
                 }
                 std::cout << "\nStart daemon with: \033[32msudo systemctl start zenith.service\033[0m\n";
             }
@@ -172,12 +172,11 @@ int main(int argc, char* argv[]) {
         }
         std::string sub = argv[2];
         if (sub == "list") {
-            zenith::PerGameProfileManager mgr;
-            mgr.load_from_file("/etc/zenith/profiles.conf");
+            auto mgr = zenith::PerGameProfileManager::load_from_file("/etc/zenith/profiles.conf");
             std::cout << "Configured Per-Game Overrides:\n";
-            for (const auto& g : mgr.get_all_configs()) {
-                std::cout << "  • " << g.game_name << " (AppID " << g.appid << ") -> Profile: "
-                          << zenith::profile_to_string(g.profile) << "\n";
+            for (const auto& r : mgr.get_rules()) {
+                std::string prof_str = r.profile_override.has_value() ? zenith::profile_to_string(*r.profile_override) : "inherited";
+                std::cout << "  • " << r.identifier << " -> Profile: " << prof_str << "\n";
             }
             return 0;
         } else if (sub == "add") {
@@ -228,10 +227,10 @@ int main(int argc, char* argv[]) {
     if (cmd == "suggest") {
         std::string game = (argc >= 3) ? argv[2] : "Active Game";
         zenith::LocalLearner learner;
-        auto prof = learner.suggest_profile_for_game(game);
+        auto rec = learner.suggest_profile(game);
         std::cout << "Local Learning Suggestion for '" << game << "':\n"
-                  << "  Recommended Profile: \033[1;32m" << zenith::profile_to_string(prof) << "\033[0m\n"
-                  << "  Reason: Profile evaluated from historical variance and frametimes.\n";
+                  << "  Recommended Profile: \033[1;32m" << zenith::profile_to_string(rec.suggested_profile) << "\033[0m\n"
+                  << "  Reason: " << rec.explanation << "\n";
         return 0;
     }
 
