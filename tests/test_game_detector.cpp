@@ -333,8 +333,8 @@ void test_fake_proc_stress_and_false_positives() {
     g2.open_fds = {"/dev/dri/renderD128"};
     mock_fs.add_process(g2);
 
-    // Add 900 background processes (simulating desktop load: browser workers, etc.)
-    for (int i = 0; i < 900; ++i) {
+    // Add 1000 background processes (simulating heavy desktop load: browser workers, node apps, etc.)
+    for (int i = 0; i < 1000; ++i) {
         MockProcFs::MockProcess bg_proc;
         bg_proc.pid = pid++;
         bg_proc.comm = (i % 2 == 0) ? "chrome" : "node";
