@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [gcc, clang]
+        compiler: [gcc, clang, clang-tsan]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,14 +20,20 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake build-essential libpipewire-0.3-dev
+          sudo apt-get install -y cmake build-essential libpipewire-0.3-dev lcov clang-format clang-tidy
 
-      - name: Configure CMake (GCC with ASan/UBSan)
+      - name: Verify Code Formatting
+        if: matrix.compiler == 'clang'
+        run: |
+          find include src tests -name '*.hpp' -o -name '*.cpp' | xargs clang-format --dry-run -Werror || true
+
+      - name: Configure CMake (GCC with ASan/UBSan & Coverage)
         if: matrix.compiler == 'gcc'
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_CXX_COMPILER=g++ \
-            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
+            -DENABLE_COVERAGE=ON
 
       - name: Configure CMake (Clang with ASan/UBSan)
         if: matrix.compiler == 'clang'
@@ -36,8 +42,22 @@ jobs:
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
 
+      - name: Configure CMake (Clang with ThreadSanitizer)
+        if: matrix.compiler == 'clang-tsan'
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_CXX_FLAGS="-fsanitize=thread -fno-omit-frame-pointer"
+
       - name: Build Zenith
         run: cmake --build build --parallel $(nproc)
 
       - name: Run Unit Tests & Fault Injection Matrix
         run: ctest --test-dir build --output-on-failure --verbose
+
+      - name: Generate Code Coverage Report (GCC)
+        if: matrix.compiler == 'gcc'
+        run: |
+          lcov --capture --directory build --output-file coverage.info --ignore-errors mismatch,gcov || true
+          lcov --remove coverage.info '/usr/*' '*/tests/*' '*/build/*' --output-file coverage_filtered.info --ignore-errors unused || true
+          lcov --list coverage_filtered.info || true

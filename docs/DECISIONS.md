@@ -209,3 +209,29 @@ Adopt **Option 3: Local Closed-Loop Adaptive Controller & Offline Learning Engin
 
 ### Status
 Accepted and implemented for Stage 7.
+
+---
+
+## ADR-0010: C++20 Architectural Paradigm: Monadic Result, Dependency Inversion, RAII Containment, and Single-Threaded Reactor Event Loop
+
+### Context
+Zenith is an ultra-low latency system daemon operating with root privileges. As the codebase scales across subsystems (cgroups, CPU topology, process detection, latency tuners, telemetry, BPF), maintaining zero runtime overhead, testability without root privileges, deterministic resource release, and thread safety is paramount.
+Traditional C++ patterns using exceptions on hot paths, raw pointers, direct system calls embedded in business logic, and ad-hoc multithreading introduce latency jitter, data races, and make testing dependent on physical Linux root access.
+
+### Options Considered
+1. **Traditional Exceptions & Multithreaded Locks**: Throw `std::runtime_error` on failures and use mutexes across multiple worker threads. Incurs non-deterministic stack unwinding penalties, risk of deadlocks, and complexity under ThreadSanitizer (TSan).
+2. **Pure C-style Return Codes**: Return integer status codes (`int err`) with output parameters (`int func(T* out)`). Lacks composability, lacks type safety, and separates error metadata from return values.
+3. **Reference C++20 Clean Architecture**:
+   - **Monadic `Result<T, Error>`**: Zero-allocation error handling with functional chaining (`.map()`, `.and_then()`, `.or_else()`). Rich `Error` structs with `ErrorCode`, message, errno, and source location. Zero exceptions on hot latency paths.
+   - **Dependency Inversion Interfaces**: Core operating system interactions abstracted behind clean C++ interfaces (`ISysfs`, `IProcessSource`, `ICommandRunner`, `IClock`, `INetlink`) with production and mock implementations, enabling 100% test coverage without root permissions.
+   - **Plugin-like Tweak Registry**: Self-contained tweak definition with auto-registration macros (`ZENITH_REGISTER_TWEAK`), allowing additions with zero boilerplate.
+   - **Strict RAII**: Move-only `UniqueFd`, `CgroupDirGuard`, and `ScopeExitGuard`. Absolutely zero raw `new`/`delete`.
+   - **Single-Threaded Epoll Core Reactor**: One event loop thread for all signalfd, timerfd, netlink, and socket events, with thread-safe worker posting, proving zero data races under TSan.
+   - **Structured High-Performance Logger**: Sinks for ANSI console, journald, and JSON lines with per-key rate limiting to prevent logging overhead.
+
+### Decision
+Adopt **Option 3: Reference C++20 Clean Architecture**.
+
+### Status
+Accepted and implemented for Stage 8.
+

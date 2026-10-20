@@ -65,6 +65,8 @@ set(ZENITH_SOURCES
     src/adaptive_controller.cpp
     src/local_learner.cpp
     src/sched_ext_tuner.cpp
+    src/structured_logger.cpp
+    src/event_loop.cpp
 )
 
 add_library(zenith_core STATIC ${ZENITH_SOURCES})
@@ -137,6 +139,18 @@ add_test(NAME LatencySubsystemsTest COMMAND test_latency_subsystems)
 add_executable(test_adaptive_controller tests/test_adaptive_controller.cpp)
 target_link_libraries(test_adaptive_controller PRIVATE zenith_core)
 add_test(NAME AdaptiveControllerTest COMMAND test_adaptive_controller)
+
+add_executable(test_cpp20_architecture tests/test_cpp20_architecture.cpp)
+target_link_libraries(test_cpp20_architecture PRIVATE zenith_core)
+add_test(NAME Cpp20ArchitectureTest COMMAND test_cpp20_architecture)
+
+# Optional Coverage Target
+option(ENABLE_COVERAGE "Enable lcov/gcov code coverage" OFF)
+if(ENABLE_COVERAGE AND NOT MSVC)
+    add_compile_options(--coverage -fprofile-arcs -ftest-coverage)
+    add_link_options(--coverage)
+endif()
+
 
 
 

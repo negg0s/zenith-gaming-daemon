@@ -1,0 +1,22 @@
+---
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  performance-*,
+  modernize-*,
+  -modernize-use-trailing-return-type,
+  cert-*,
+  -cert-err58-cpp,
+  readability-redundant-smartptr-get,
+  readability-redundant-string-cstr,
+  readability-redundant-control-flow
+
+WarningsAsErrors: ''
+HeaderFilterRegex: 'include/zenith/.*'
+FormatStyle: file
+CheckOptions:
+  - key: performance-move-const-arg.CheckTriviallyCopyableMove
+    value: true
+...

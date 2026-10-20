@@ -45,4 +45,18 @@ private:
     std::vector<std::shared_ptr<ITweak>> applied_tweaks_;
 };
 
+// Plugin-like auto-registration helper
+template <typename TweakType>
+class TweakRegistrar {
+public:
+    TweakRegistrar() {
+        TweakRegistry::instance().register_tweak(std::make_shared<TweakType>());
+    }
+};
+
+#define ZENITH_REGISTER_TWEAK(TweakClass) \
+    namespace { \
+        static const ::zenith::TweakRegistrar<TweakClass> _registrar_##TweakClass; \
+    }
+
 } // namespace zenith
