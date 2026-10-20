@@ -84,8 +84,8 @@ void GpuController::rollback_amd_gpu(GpuDevice& gpu) {
 
 void GpuController::rollback_nvidia_gpu(GpuDevice& gpu) {
     if (gpu.clock_locked) {
-        std::system("nvidia-smi -rgc >/dev/null 2>&1");
-        std::system("nvidia-smi -pm 0 >/dev/null 2>&1");
+        (void)std::system("nvidia-smi -rgc >/dev/null 2>&1");
+        (void)std::system("nvidia-smi -pm 0 >/dev/null 2>&1");
         ZENITH_LOG_DEBUG("Reset NVIDIA GPU clocks.");
         gpu.clock_locked = false;
     }

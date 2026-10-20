@@ -1,30 +1,28 @@
 #include "zenith/engine.hpp"
 #include <iostream>
 
+namespace fs = std::filesystem;
+
 void print_help() {
-    std::cout << R"(
-  ______           _ _   _     
- |___  /          (_) | | |    
-    / / ___ _ __   _| |_| |__  
-   / / / _ \ '_ \ | | __| '_ \ 
-  / /_|  __/ | | || | |_| | | |
- /_____\___|_| |_||_|\__|_| |_| Gaming Daemon (v1.0.0)
-
-Ultra-low latency Linux gaming optimizer daemon for Arch / CachyOS & SteamOS
-
-Usage:
-  zenith daemon                     Run as a background daemon (systemd service)
-  zenith run <command> [args...]    Launch a game under Zenith wrapper (Steam %command%)
-  zenith tune                       Manually apply gaming optimizations immediately
-  zenith revert                     Manually restore original system settings
-  zenith status                     Display CPU topology, cgroups, and current mode
-  zenith --help, -h                 Show this help menu
-
-Examples:
-  zenith daemon
-  zenith run steam -applaunch 730
-  zenith run ./my_game
-)";
+    std::cout <<
+"  ______           _ _   _     \n"
+" |___  /          (_) | | |    \n"
+"    / / ___ _ __   _| |_| |__  \n"
+"   / / / _ \\ '_ \\ | | __| '_ \\ \n"
+"  / /_|  __/ | | || | |_| | | |\n"
+" /_____\\___|_| |_||_|\\__|_| |_| Gaming Daemon (v1.0.0)\n\n"
+"Ultra-low latency Linux gaming optimizer daemon for Arch / CachyOS & SteamOS\n\n"
+"Usage:\n"
+"  zenith daemon                     Run as a background daemon (systemd service)\n"
+"  zenith run <command> [args...]    Launch a game under Zenith wrapper (Steam %command%)\n"
+"  zenith tune                       Manually apply gaming optimizations immediately\n"
+"  zenith revert                     Manually restore original system settings\n"
+"  zenith status                     Display CPU topology, cgroups, and current mode\n"
+"  zenith --help, -h                 Show this help menu\n\n"
+"Examples:\n"
+"  zenith daemon\n"
+"  zenith run steam -applaunch 730\n"
+"  zenith run ./my_game\n";
 }
 
 int main(int argc, char* argv[]) {
