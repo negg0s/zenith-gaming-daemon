@@ -9,6 +9,13 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(MSVC)
     add_compile_options(/W4 /permissive-)
 else()
+    # Optional Coverage Target
+    option(ENABLE_COVERAGE "Enable lcov/gcov code coverage" OFF)
+    if(ENABLE_COVERAGE)
+        add_compile_options(--coverage -fprofile-arcs -ftest-coverage)
+        add_link_options(--coverage)
+    endif()
+
     # Security Hardening Flags
     add_compile_options(
         -Wall -Wextra -Wpedantic -Wno-unused-parameter
@@ -143,13 +150,6 @@ add_test(NAME AdaptiveControllerTest COMMAND test_adaptive_controller)
 add_executable(test_cpp20_architecture tests/test_cpp20_architecture.cpp)
 target_link_libraries(test_cpp20_architecture PRIVATE zenith_core)
 add_test(NAME Cpp20ArchitectureTest COMMAND test_cpp20_architecture)
-
-# Optional Coverage Target
-option(ENABLE_COVERAGE "Enable lcov/gcov code coverage" OFF)
-if(ENABLE_COVERAGE AND NOT MSVC)
-    add_compile_options(--coverage -fprofile-arcs -ftest-coverage)
-    add_link_options(--coverage)
-endif()
 
 
 

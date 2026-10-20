@@ -174,24 +174,24 @@
   - Simulated PSI spikes (CPU, Memory, IO) and thermal throttling transitions
   - Verification of degradation, recovery hysteresis, anti-oscillation, and local profile suggestions
 
-### [ ] Stage 8: Reference C++20 Architecture & Code Excellence (P0)
-- [ ] 8.1 System Architecture Documentation (`docs/ARCHITECTURE.md`):
+### [x] Stage 8: Reference C++20 Architecture & Code Excellence (P0)
+- [x] 8.1 System Architecture Documentation (`docs/ARCHITECTURE.md`):
   - Complete Mermaid diagrams: Subsystem Topology, Reactive Event Data Flows, Game Lifecycle State Machine, Privilege Boundaries.
-- [ ] 8.2 Monadic Error Handling (`Result<T, Error>`):
+- [x] 8.2 Monadic Error Handling (`Result<T, Error>`):
   - Zero-exception hot path; monadic chaining (`and_then`, `or_else`, `map`); rich `Error` context with `ErrorCode`, message, errno, and source location.
-- [ ] 8.3 Core Dependency Interfaces (`include/zenith/interfaces/`):
+- [x] 8.3 Core Dependency Interfaces (`include/zenith/interfaces/`):
   - `ISysfs`, `IProcessSource`, `ICommandRunner`, `IClock`, `INetlink` with Production and Fake implementations (root-free testing).
-- [ ] 8.4 Plugin-like Self-Registering Tweak Subsystem:
+- [x] 8.4 Plugin-like Self-Registering Tweak Subsystem:
   - Single-file tweak additions with declarative metadata and registration (`ZENITH_REGISTER_TWEAK`).
-- [ ] 8.5 Strict RAII Resource Management:
+- [x] 8.5 Strict RAII Resource Management:
   - Zero raw `new`/`delete`; `UniqueFd`, `CgroupDirGuard`, `TweakMutationGuard`.
-- [ ] 8.6 Structured Logging Engine:
+- [x] 8.6 Structured Logging Engine:
   - Levels (TRACE, DEBUG, INFO, WARN, ERROR), Journald integration, JSON streaming format, token-bucket rate limiter.
-- [ ] 8.7 Single-Threaded Epoll Core Event Loop:
+- [x] 8.7 Single-Threaded Epoll Core Event Loop:
   - Epoll/io_uring-compatible reactor (`IPoller`, `EpollPoller`, `MockPoller`), signalfd, timerfd, socket events; TSan verified.
-- [ ] 8.8 Tooling & Strict Compiler Quality Gates:
+- [x] 8.8 Tooling & Strict Compiler Quality Gates:
   - `.clang-format`, `.clang-tidy` (bugprone, performance, modernize, cert), `-Wall -Wextra -Wconversion -Wshadow -Werror`.
-- [ ] 8.9 Coverage & Validation Suite:
+- [x] 8.9 Coverage & Validation Suite:
   - Comprehensive tests in `tests/test_cpp20_architecture.cpp`; lcov coverage target ($\ge 85\%$).
 
 ### [ ] Stage 11: End-to-End Stress Testing & Quality Gate Audit (P0)

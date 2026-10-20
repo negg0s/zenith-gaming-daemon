@@ -58,6 +58,6 @@ jobs:
       - name: Generate Code Coverage Report (GCC)
         if: matrix.compiler == 'gcc'
         run: |
-          lcov --capture --directory build --output-file coverage.info --ignore-errors mismatch,gcov || true
-          lcov --remove coverage.info '/usr/*' '*/tests/*' '*/build/*' --output-file coverage_filtered.info --ignore-errors unused || true
-          lcov --list coverage_filtered.info || true
+          lcov --capture --directory build --output-file coverage.info --ignore-errors mismatch,gcov,empty || true
+          lcov --remove coverage.info '/usr/*' '*/tests/*' '*/build/*' --output-file coverage_filtered.info --ignore-errors unused,empty || true
+          lcov --list coverage_filtered.info --ignore-errors empty || true
