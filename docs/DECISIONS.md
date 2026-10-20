@@ -124,3 +124,28 @@ Adopt **Option 3: Hardware Discovery via Kernel Virtual Filesystem & Driver Abst
 
 ### Status
 Accepted and implemented for Stage 4.
+
+---
+
+## ADR-0007: Event-Driven Game Detection, Thread Classification, and Non-Invasive Anti-Cheat Compatibility
+
+### Context
+Detecting game launches and process lifecycles via high-frequency `/proc` polling consumes unnecessary CPU cycles and incurs 500-1000ms latency. At the same time, aggressive or naive process manipulation can trigger game anti-cheat bans (Easy Anti-Cheat, BattlEye, VAC) if tools attach debuggers (`ptrace`), inspect memory, inject dynamic libraries, or modify anti-cheat service threads. Furthermore, naive background killing or hard CPU pinning disrupts user workflows (compositors, browsers, audio daemons).
+
+### Options Considered
+1. **Periodic High-Frequency Polling**: Poll `/proc` every 50ms, reading cmdline and stat for all PIDs. Inefficient, causes constant cache line thrashing and energy drain, especially on handhelds/laptops.
+2. **Ptrace / In-Memory Inspection / DLL Injection**: Attach to game processes with `ptrace`, hook Vulkan/OpenGL symbols with `LD_PRELOAD`. Strictly prohibited: triggers immediate anti-cheat bans, causes game crashes, and violates zero-overhead design.
+3. **Event-Driven Kernel Connector + Non-Invasive OS-Standard Tuning**:
+   - **Netlink Process Connector (`AF_NETLINK`, `NETLINK_CONNECTOR`, `CN_IDX_PROC`)**: Kernel sends instant asynchronous events (`PROC_EVENT_EXEC`, `PROC_EVENT_EXIT`, `PROC_EVENT_FORK`) directly to Zenith with sub-millisecond delivery and zero CPU polling overhead. Graceful fallback to timer-based polling if unprivileged or unsupported.
+   - **Deep Recognition & False Positive Immunity**: Detect Steam (`SteamAppId` in environ/cmdline, reaper), Proton/Wine prefixes and `.exe` binaries, Lutris, Heroic, Bottles, Gamescope, native games, and emulators (RPCS3, Yuzu, etc.). Specifically filter out `steamwebhelper`, launchers (Epic, Battle.net), and idle `wineserver`.
+   - **Real Game Verification & Hysteresis**: Inspect open file descriptors for GPU render nodes (`/dev/dri/renderD128`, `/dev/nvidia*`) and mapped graphics drivers (`libvulkan`, `libGL`). 100ms debounce on launch and 500ms hysteresis on exit prevent fluttering.
+   - **Background Soft Throttling (Never Kill)**: Whitelist essential system services (compositor, PipeWire, audio, network, security, agent terminal). Blacklist heavy apps (browsers, Discord, torrents) and throttle them non-destructively via cgroup v2 soft weights (`cpu.weight=50`, `cpu.idle=1`, `io.weight=50`).
+   - **Selective Thread-Level Tuning**: Scan `/proc/<pid>/task/*/comm` to classify threads: Main and Render threads receive performance core pinning and `uclamp.min`; Audio threads receive low-latency scheduling; Shader compilation runs on throughput cores. Anticheat and third-party overlay threads are explicitly excluded from priority elevation.
+   - **Anti-Cheat Safety Contract**: 100% non-invasive. Zero `ptrace`, zero memory reading (`/proc/<pid>/mem`), zero code injection. Tuning strictly employs POSIX standard OS scheduler calls (`sched_setaffinity`, `setpriority`, `sched_setscheduler`) and cgroups. Explicit documentation in `docs/ANTI_CHEAT.md` with transparent VAC/anti-cheat limitations.
+   - **Filesystem Abstraction (`IProcFs`)**: Decouple procfs operations for unit and stress testing (1000-process fork/exit races, crash injection, zero fd leaks).
+
+### Decision
+Adopt **Option 3: Event-Driven Kernel Connector + Non-Invasive OS-Standard Tuning**.
+
+### Status
+Accepted and implemented for Stage 5.

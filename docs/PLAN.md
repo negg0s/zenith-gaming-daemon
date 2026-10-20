@@ -99,46 +99,63 @@
   - All 11 fixtures pass validation tests;
   - Clean build under GCC and Clang with ASan/UBSan.
 
-### [ ] Stage 5: GPU Power & Clock Domain Controller (P1)
+### [x] Stage 5: Game Detector & Process Tuner Engine (P0)
+- [x] Netlink process connector (`PROC_EVENT_EXEC`/`EXIT`/`FORK`) with polling fallback (<50 ms reaction time)
+- [x] Deep Game Recognition:
+  - Steam (`SteamAppId` in environ/cmdline, reaper, `steamapps/common`)
+  - Proton/Wine (`wine64-preloader`, wineserver filtering, Wine prefixes)
+  - Lutris, Heroic Games Launcher, Bottles, Gamescope, Native games, Emulators (RPCS3, Yuzu, Ryujinx, Dolphin, PCSX2)
+  - Exclusion filter: `steamwebhelper`, launchers (Epic, Battle.net, Origin, EA), idle `wineserver`, system services
+- [x] Real Game Heuristics:
+  - Open Vulkan/GL/DRM/NVIDIA render context inspection (`/dev/dri/renderD128`, `/dev/nvidia*`, memory maps)
+  - Debounce (100ms) and Hysteresis (500ms) against spurious process flips
+- [x] Multi-Game & Lifecycle Management:
+  - Concurrent games tracking, game restart handling, pre-existing games discovery on daemon startup
+- [x] Background Process Classifier & cgroup Manager:
+  - Whitelist "Never Touch": Compositor, PipeWire, audio, network, security, agent terminal
+  - Blacklist "Always Background": Web browsers, chat clients, torrents, file indexers
+  - Move to `/sys/fs/cgroup/zenith_background` with soft limits (`cpu.weight=50`, `cpu.idle=1`, `io.weight=50`), never kill
+- [x] Fine-Grained Thread Classification & Priority:
+  - Classify `/proc/<pid>/task/*/comm` into Main, Render, Audio, ShaderCompile, IoWorker, AnticheatOrOverlay
+  - Selective priority: Main/Render $\to$ perf cores/uclamp, Audio $\to$ nice -11, ShaderCompile $\to$ throughput cores
+  - Anticheat & Overlay protection: NEVER touch or elevate anticheat/overlay threads
+- [x] Anti-Cheat Compatibility Architecture:
+  - Non-invasive design: zero `ptrace`, zero memory reading, zero DLL injection
+  - `docs/ANTI_CHEAT.md`: Detailed anti-cheat compatibility notice (EAC, BattlEye, VAC disclaimer)
+- [x] Fake `/proc` Test Suite & Stress Harness:
+  - Decoupled `IProcFs` abstraction with `MockProcFs`
+  - 1000 processes fork-storm & exit race tests
+  - Zero false positives test across 100 system daemons
+  - Zero file descriptor leaks and zero zombie process verification
+
+### [ ] Stage 6: GPU Power & Clock Domain Controller (P1)
 - [ ] AMD Radeon sysfs DPM performance level controller (`power_dpm_force_performance_level`)
 - [ ] NVIDIA GeForce persistent clocks & boost control abstraction
 - [ ] Intel Xe / Arc sysfs frequency lock probe
 - [ ] Hardware mock tests for AMD sysfs and NVIDIA CLI interfaces
 
-### [ ] Stage 6: Audio & Real-time PipeWire Tuning (P1)
+### [ ] Stage 7: Audio & Real-time PipeWire Tuning (P1)
 - [ ] PipeWire metadata quantum controller (`pw-metadata` / libpipewire interface)
 - [ ] Environment variable propagator for child game processes (`PIPEWIRE_LATENCY`)
 - [ ] Verification tests for quantum calculations and environment export
 
-### [ ] Stage 7: Network QoS & Bufferbloat Mitigation (P1)
+### [ ] Stage 8: Network QoS & Bufferbloat Mitigation (P1)
 - [ ] Queueing discipline tuner (`cake` / `fq_codel` via sysctl and `tc`)
 - [ ] TCP buffer optimization probes
 - [ ] Non-root fallback and status reporting
 
-### [ ] Stage 8: Game Detection & Process Lifecycle Watcher (P0)
-- [ ] `/proc` monitor with configurable polling and netlink process connector
-- [ ] Steam (`reaper`, `steamapps/common`), Proton/Wine (`wineserver`), Lutris, Heroic, Bottles detection
-- [ ] Filtering of non-game binaries (e.g., `steamwebhelper`, overlay injectors)
-- [ ] Simulated game launch / exit lifecycle test fixtures
-
-### [ ] Stage 9: Process Scheduling & Priority Elevator (P0)
-- [ ] CPU core affinity assignment via `sched_setaffinity`
-- [ ] Real-time scheduling policy elevation (`SCHED_RR` / `SCHED_FIFO` with priority clamp)
-- [ ] Dynamic thread discovery (`/proc/<pid>/task`) for child render/audio threads
-- [ ] I/O priority tuning (`ioprio_set` Realtime class)
-
-### [ ] Stage 10: Client-Server IPC & CLI Interface (P1)
+### [ ] Stage 9: Client-Server IPC & CLI Interface (P1)
 - [ ] UNIX domain socket IPC between CLI client (`zenith`) and background daemon
 - [ ] CLI commands: `daemon`, `run`, `tune`, `revert`, `status`, `profile`
 - [ ] Formatted status output with human-readable hardware and active game telemetry
 - [ ] Integration test for IPC communication and command dispatch
 
-### [ ] Stage 11: Systemd Service & Arch/CachyOS Packaging (P1)
+### [ ] Stage 10: Systemd Service & Arch/CachyOS Packaging (P1)
 - [ ] Hardened systemd unit file with fine-grained capabilities (`CAP_SYS_NICE`, `CAP_SYS_ADMIN`, `CAP_SYS_RESOURCE`)
 - [ ] Production PKGBUILD for Arch Linux / CachyOS with validation
 - [ ] Desktop integration / polkit rules for unprivileged client control
 
-### [ ] Stage 12: End-to-End Stress Testing & Quality Gate Audit (P0)
+### [ ] Stage 11: End-to-End Stress Testing & Quality Gate Audit (P0)
 - [ ] Comprehensive integration test suite simulating full game session lifecycle
 - [ ] Memory leak audit under Valgrind / ASan during prolonged daemon execution
 - [ ] Clang-tidy static analysis audit

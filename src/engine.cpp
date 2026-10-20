@@ -133,8 +133,12 @@ bool ZenithEngine::activate(const DetectedGame& game) {
         gpu_.lock_clocks();
     }
 
-    // 4. Game Process & Thread Affinity Tuning
-    ProcessTuner::tune_entire_process_tree(game.pid, topology_.get_gaming_cores(), config_.realtime_process_priority);
+    // 4. Game Process & Thread Affinity Tuning (Fine-grained per-thread scheduling)
+    std::vector<int> all_cores;
+    for (const auto& c : topology_.get_cores()) {
+        if (c.is_online) all_cores.push_back(c.id);
+    }
+    ProcessTuner::tune_process_fine_grained(game.pid, topology_.get_gaming_cores(), all_cores);
 
     // 5. Audio & Network low-latency
     if (config_.pipewire_quantum_tuning) {

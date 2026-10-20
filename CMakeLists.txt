@@ -55,6 +55,8 @@ set(ZENITH_SOURCES
     src/tweaks/tweak_registry.cpp
     src/conflict_detector.cpp
     src/per_game_profile.cpp
+    src/proc_connector.cpp
+    src/background_manager.cpp
 )
 
 add_library(zenith_core STATIC ${ZENITH_SOURCES})
@@ -114,3 +116,8 @@ add_test(NAME FuzzCorpusTest COMMAND test_fuzz_corpus)
 add_executable(test_tweaks tests/test_tweaks.cpp)
 target_link_libraries(test_tweaks PRIVATE zenith_core)
 add_test(NAME TweaksTest COMMAND test_tweaks)
+
+add_executable(test_game_detector tests/test_game_detector.cpp)
+target_link_libraries(test_game_detector PRIVATE zenith_core)
+add_test(NAME GameDetectorTest COMMAND test_game_detector)
+
