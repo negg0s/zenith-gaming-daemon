@@ -41,9 +41,9 @@
 - [x] Fuzzing and adversarial regression suite: `fuzz_one_config`, `fuzz_one_sysfs`, `fuzz_one_socket`, `fuzz_one_proc` with seed corpus in `fuzz/corpus/` tested via `test_fuzz_corpus`.
 - [x] `SECURITY.md`: Responsible disclosure policy with encrypted contact and response SLAs.
 
-### [ ] Stage 3: Tweaks Justification, Profiles & Conflict Detection (P0)
-- [ ] `docs/TWEAKS.md`: Exhaustive registry of every tweak (mechanism, kernel path, min kernel version, pros, risks, harm analysis, default, source, and "[Эффект не измерен]" tag).
-- [ ] Review & Refactor Controversial Tweaks:
+### [x] Stage 3: Tweaks Justification, Profiles & Conflict Detection (P0)
+- [x] `docs/TWEAKS.md`: Exhaustive registry of every tweak (mechanism, kernel path, min kernel version, pros, risks, harm analysis, default, source, and "[Эффект не измерен]" tag).
+- [x] Review & Refactor Controversial Tweaks:
   - `split_lock_mitigate`: default off, only in aggressive;
   - THP mode: `madvise` vs `always`, defrag evaluation;
   - `compaction_proactiveness` & VMM watermark knobs;
@@ -52,10 +52,10 @@
   - PipeWire quantum: 128 (safe) / 64 (balanced) / 32 (aggressive);
   - RT Scheduling (`SCHED_RR`): strict watchdog, priority ceiling ($\le 50$), runtime throttling protection (`sched_rt_runtime_us`);
   - cgroup isolation: soft throttling (`cpu.weight`, `cpu.idle`, `io.weight`) instead of hard single-core pinning.
-- [ ] Profiles Architecture (`safe`, `balanced` [default], `aggressive`):
+- [x] Profiles Architecture (`safe`, `balanced` [default], `aggressive`):
   - Each tweak declares its supported profile mask;
   - Configurable in `zenith.conf` (`profile = balanced`).
-- [ ] Modular Tweak Subsystems (Probe/Apply/Revert/Describe/Explain):
+- [x] Modular Tweak Subsystems (Probe/Apply/Revert/Describe/Explain):
   - CPU Governor & EPP Tuner (`scaling_governor`, `energy_performance_preference` for `amd_pstate` / `intel_pstate`);
   - cgroup v2 Soft Weights Tuner (`cpu.idle`, `cpu.weight`, `io.weight`, `memory.high`);
   - Scheduler Attributes & uclamp (`uclamp.min` for games, `SCHED_BATCH`/`SCHED_IDLE` for heavy background);
@@ -63,16 +63,16 @@
   - NVMe I/O Scheduler (`none`) and readahead optimization;
   - USB Gaming Device Autosuspend Inhibitor (`power/control -> on`);
   - zram & Swap Tuner (`vm.watermark_boost_factor = 0`, `page-cluster = 0`).
-- [ ] CLI Introspection:
+- [x] CLI Introspection:
   - `--dry-run`: ANSI-colored diff of "Before $\to$ After" without system mutation;
   - `--explain`: Detailed plain-language breakdown of all tweaks, mechanisms, and risks.
-- [ ] Per-Game Configuration & Profiles:
+- [x] Per-Game Configuration & Profiles:
   - Match by Steam AppID or executable name;
   - Profile overrides and tweak blacklist support.
-- [ ] Ecosystem Conflict Detector:
+- [x] Ecosystem Conflict Detector:
   - Probe active services: `gamemode`, `ananicy`, `tuned`, `power-profiles-daemon`, `irqbalance`, `scx_*`;
   - Coordination notices and non-destructive coexistence.
-- [ ] Quality Gates:
+- [x] Quality Gates:
   - 100% unit tests pass;
   - Clean build under GCC + Clang with ASan/UBSan;
   - Progress and ADR recorded.

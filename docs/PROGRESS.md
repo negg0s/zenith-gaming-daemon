@@ -180,4 +180,86 @@ Total Test time (real) = 0.55 sec
 - Stage 2 completed and verified.
 - Master checklist in `docs/PLAN.md` updated.
 - ADR-0004 recorded in `docs/DECISIONS.md`.
-- Ready for Stage 3 instructions.
+
+---
+
+## [2026-10-20] - Stage 3: Tweak Justification, Modular Subsystems, Profiles & Conflict Detection
+
+### Context
+Execution of Stage 3 according to the Autonomous Senior Engineer protocol. Every tweak must be technically justified, mapped to kernel documentation, guarded by probes, and organized into operational profiles (`safe`, `balanced`, `aggressive`). Controversial tweaks were revised to prevent instability. Added non-destructive CLI inspection (`--dry-run`, `--explain`, `--conflicts`), per-game profile overrides, and ecosystem conflict detection (`gamemode`, `ananicy`, `tuned`, `power-profiles-daemon`, `irqbalance`, `scx`).
+
+### Actions Completed
+1. **Exhaustive Tweaks Registry (`docs/TWEAKS.md`)**:
+   - Detailed specification cards for 16 kernel/subsystem tweaks detailing mechanism, kernel path, min kernel version, pros, risks, harm analysis, default setting, profile scope, documentation source, and mandatory tag `[Эффект не измерен]` until Stage 9 benchmarking.
+2. **Controversial Tweaks Revised**:
+   - `split_lock_mitigate`: default untouched (`1`), only disabled (`0`) in `aggressive` profile.
+   - `THP`: `madvise` in `safe`/`balanced`, `always` only in `aggressive`; defrag `defer+madvise`.
+   - `compaction_proactiveness`: set to 0 in `balanced`/`aggressive` to eliminate kcompactd background frame jitter.
+   - `swappiness` and `page-cluster`: detects zram presence; sets `page-cluster = 0` for zram to stop sequential decompression overhead; `swappiness = 10` for disk swap.
+   - MGLRU: dynamically probed at `/sys/kernel/mm/lru_gen/enabled`.
+   - cgroups: soft resource weighting (`cpu.weight = 50`, `cpu.idle = 1`, `io.weight = 50`) implemented instead of hard single-core pinning, preventing audio crackle and IPC deadlocks.
+3. **Modular Subsystems Implemented (`include/zenith/tweaks/`, `src/tweaks/`)**:
+   - `CpuGovernorTweak`: Governor and EPP hints (`scaling_governor`, `energy_performance_preference`).
+   - `CgroupWeightTweak`: cgroup v2 soft weights (`cpu.weight`, `cpu.idle`, `io.weight`).
+   - `UclampTweak`: utilization clamping (`uclamp.min = 512` in balanced, `1024` in aggressive).
+   - `TimerSlackTweak`: thread timer slack reduction (50ns) and safe sysctl latency probes.
+   - `NvmeTweak`: NVMe blk-mq queue scheduler bypass (`none`) and readahead optimization.
+   - `UsbAutosuspendTweak`: USB gaming device power autosuspend inhibitor (`power/control -> on`).
+   - `ZramSwapTweak`: zram and swap tuning (`page-cluster = 0`, `watermark_boost_factor = 0`).
+   - `SysctlTweak`: Unified memory and split-lock tuning.
+   - `TweakRegistry`: Singleton registry orchestrating probe, apply, revert, dry-run, and explain.
+4. **CLI Introspection (`src/main.cpp`)**:
+   - `zenith --dry-run [profile]`: ANSI-colored diff of "Before $\to$ After" values across all tweaks without modifying the system.
+   - `zenith --explain`: Human-readable technical breakdown of all tweaks, mechanisms, and risks.
+   - `zenith --conflicts`: Proactive audit of competing daemons.
+5. **Per-Game Profiles (`include/zenith/per_game_profile.hpp`, `src/per_game_profile.cpp`, `configs/profiles.conf`)**:
+   - Matches by Steam AppID (e.g. `[730]`) or executable substring.
+   - Supports profile overrides, custom parameters, and tweak blacklists.
+6. **Conflict Detector (`include/zenith/conflict_detector.hpp`, `src/conflict_detector.cpp`)**:
+   - Probes running processes and kernel states for `gamemode`, `ananicy`, `tuned`, `power-profiles-daemon`, `irqbalance`, `scx`.
+   - Generates non-destructive coordination warnings.
+7. **Architectural Records (`docs/DECISIONS.md`, ADR-0005)**:
+   - Formally documented decision for modular subsystem architecture and three-tier profiles.
+
+### Verified CI Command Output (GitHub Actions Run 39467097372)
+```text
+✓ build-and-test (clang) in 54s (ID 118781213297)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (Clang with ASan/UBSan)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Fault Injection Matrix (100% tests passed, 0 failures)
+  ✓ Complete job
+
+✓ build-and-test (gcc) in 51s (ID 118781214004)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (GCC with ASan/UBSan)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Fault Injection Matrix (100% tests passed, 0 failures)
+  ✓ Complete job
+
+Test Suite Execution Details:
+ 1/11 Test  #1: CpuTopologyTest ..................   Passed    0.01 sec
+ 2/11 Test  #2: ConfigTest .......................   Passed    0.01 sec
+ 3/11 Test  #3: SysctlTest .......................   Passed    0.01 sec
+ 4/11 Test  #4: EngineTest .......................   Passed    0.01 sec
+ 5/11 Test  #5: JournalTest ......................   Passed    0.01 sec
+ 6/11 Test  #6: FlockTest ........................   Passed    0.01 sec
+ 7/11 Test  #7: SafeModeTest .....................   Passed    0.01 sec
+ 8/11 Test  #8: FaultInjectionMatrixTest .........   Passed    0.20 sec
+ 9/11 Test  #9: SecurityTest .....................   Passed    0.01 sec
+10/11 Test #10: FuzzCorpusTest ...................   Passed    0.03 sec
+11/11 Test #11: TweaksTest .......................   Passed    0.09 sec
+
+100% tests passed, 0 tests failed out of 11. Clean under ASan & UBSan.
+Total Test time (real) = 0.90 sec
+```
+
+### Active State
+- Stage 3 completed and verified.
+- Master checklist in `docs/PLAN.md` updated.
+- ADR-0005 recorded in `docs/DECISIONS.md`.
+- Ready for Stage 4 instructions.
