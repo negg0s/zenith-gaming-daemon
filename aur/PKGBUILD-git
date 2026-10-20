@@ -1,0 +1,48 @@
+# Maintainer: Emir (NEGG0) <rokmit599@gmail.com>
+pkgname=zenith-gaming-daemon-git
+pkgver=1.0.0.r0.g1234567
+pkgrel=1
+pkgdesc="Ultra-low latency Linux gaming optimizer daemon (VCS / Development branch) (C++20)"
+arch=('x86_64')
+url="https://github.com/NEGG0/zenith-gaming-daemon"
+license=('MIT')
+depends=('glibc' 'gcc-libs')
+optdepends=(
+    'pipewire: For sub-millisecond audio quantum control'
+    'libnotify: For desktop gaming notifications'
+    'gamescope: Micro-compositor gaming sandbox integration'
+)
+makedepends=('git' 'cmake' 'gcc')
+provides=('zenith-gaming-daemon')
+conflicts=('zenith-gaming-daemon')
+backup=('etc/zenith/zenith.conf' 'etc/zenith/profiles.conf')
+install="zenith.install"
+source=("git+https://github.com/NEGG0/zenith-gaming-daemon.git")
+sha256sums=('SKIP')
+
+pkgver() {
+    cd "$srcdir/zenith-gaming-daemon"
+    git describe --long --tags 2>/dev/null | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g' || \
+        printf "1.0.0.r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+    cd "$srcdir/zenith-gaming-daemon"
+    cmake -B build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_INSTALL_SYSCONFDIR=/etc
+    cmake --build build -j$(nproc)
+}
+
+check() {
+    cd "$srcdir/zenith-gaming-daemon"
+    ctest --test-dir build --output-on-failure
+}
+
+package() {
+    cd "$srcdir/zenith-gaming-daemon"
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

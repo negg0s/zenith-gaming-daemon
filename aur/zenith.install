@@ -1,0 +1,24 @@
+post_install() {
+    systemctl daemon-reload 2>/dev/null || true
+    echo ":: Run 'zenithctl doctor' to verify hardware topology and kernel capabilities."
+    echo ":: Enable the daemon via: sudo systemctl enable --now zenith.service"
+}
+
+pre_remove() {
+    # Stop daemon
+    systemctl stop zenith.service 2>/dev/null || true
+    systemctl disable zenith.service 2>/dev/null || true
+
+    # Guaranteed emergency rollback before removing binaries
+    if [ -x /usr/bin/zenithctl ]; then
+        /usr/bin/zenithctl rollback 2>/dev/null || true
+    elif [ -x /usr/bin/zenith ]; then
+        /usr/bin/zenith --rollback 2>/dev/null || true
+    fi
+
+    rm -rf /run/zenith 2>/dev/null || true
+}
+
+post_remove() {
+    systemctl daemon-reload 2>/dev/null || true
+}

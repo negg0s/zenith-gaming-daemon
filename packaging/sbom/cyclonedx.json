@@ -1,0 +1,67 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-10-20T20:00:00Z",
+    "tools": [
+      {
+        "vendor": "CycloneDX",
+        "name": "cmake-cyclonedx",
+        "version": "1.0.0"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "name": "zenith-gaming-daemon",
+      "version": "1.0.0",
+      "description": "Ultra-low latency Linux gaming optimizer daemon (C++20)",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+          }
+        }
+      ],
+      "purl": "pkg:github/NEGG0/zenith-gaming-daemon@v1.0.0"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "glibc",
+      "version": "2.35",
+      "description": "GNU C Library",
+      "scope": "required",
+      "purl": "pkg:generic/glibc@2.35"
+    },
+    {
+      "type": "library",
+      "name": "libpipewire",
+      "version": "0.3",
+      "description": "PipeWire multimedia graph server client library",
+      "scope": "optional",
+      "purl": "pkg:generic/libpipewire@0.3"
+    },
+    {
+      "type": "application",
+      "name": "zenithctl",
+      "version": "1.0.0",
+      "description": "Zenith Control CLI tool",
+      "scope": "required",
+      "purl": "pkg:github/NEGG0/zenithctl@v1.0.0"
+    },
+    {
+      "type": "application",
+      "name": "zenith-run",
+      "version": "1.0.0",
+      "description": "Steam %command% launcher wrapper",
+      "scope": "required",
+      "purl": "pkg:github/NEGG0/zenith-run@v1.0.0"
+    }
+  ]
+}

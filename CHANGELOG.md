@@ -1,0 +1,53 @@
+# Changelog
+
+All notable changes to the **Zenith Gaming Daemon** project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [1.0.0] - 2026-10-20
+
+### Added
+- **Core Engine & Architecture (C++20)**:
+  - Single-threaded non-blocking event loop (`epoll_wait` on Linux) with structured signal handling (`SIGINT`, `SIGTERM`, `SIGHUP`).
+  - Strict RAII wrappers (`ScopedFd`, `ProcConnector`, `CapabilityGuard`, `FlockLock`).
+  - Unified monadic error handling via `zenith::Result<T, Error>` without exceptions on the hot execution path.
+  - Zero-drift Write-Ahead state journal (`/run/zenith/journal.json`) ensuring crash-only resilience and emergency state rollback.
+- **CPU Topology & Hardware Pinning**:
+  - AMD 3D V-Cache native driver probe (`amd_x3d_vcache` and `amd_x3d_mode` sysfs interface).
+  - Intel Hybrid P-core vs E-core vs LP E-core classification via `core_type` / `cpu_capacity`.
+  - Cache topology parsing via `/sys/devices/system/cpu/cpu*/cache/index3/size` and `shared_cpu_list`.
+  - Hotplug dynamic recomputation.
+- **Security & Privilege Hardening**:
+  - Linux `cap_set_proc` capability bounding (`CAP_SYS_NICE`, `CAP_SYS_RESOURCE`, `CAP_SYS_PTRACE`, `CAP_NET_ADMIN`).
+  - Path-traversal proof filesystem operations with `openat2` (`RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS`).
+  - Safe subprocess execution via `execve` using strict binary whitelists and zero shell invocation.
+  - SO_PEERCRED authentication and GID verification on UNIX domain sockets.
+- **Process Detection & Tuning**:
+  - Sub-50ms event-driven process monitoring via Netlink Proc Connector (`PROC_EVENT_EXEC` / `EXIT`).
+  - Identification heuristics for Steam AppID, Proton/DXVK, Wine, Lutris, Heroic, Bottles, and native binaries.
+  - cgroups v2 background isolation slice with soft resource limits (`cpu.weight = 50`, `io.weight = 50`, `cpu.idle = 1`).
+  - Real-time priority tuning (`SCHED_RR`, `nice -10`, timer slack reduction).
+- **Hardware & Latency Subsystems**:
+  - IRQ CPU affinity migration transferring NVMe, network, and USB interrupts to background cores while isolating GPU interrupts.
+  - CAKE and FQ-CoDel network qdisc bufferbloat elimination.
+  - PipeWire sub-millisecond quantum latency tuning via `pw-metadata`.
+  - GPU clock stabilization and power management for AMD Radeon DPM and NVIDIA NVML.
+- **Adaptive Controller & Machine Learning**:
+  - Real-time PSI (`/proc/pressure/{cpu,memory,io}`) monitoring and thermal throttle prevention.
+  - Closed-loop hysteresis state machine with automatic fallback (`Aggressive` $\to$ `Balanced` $\to$ `Safe`).
+  - Local MangoHud frametime log parser and session variance learner.
+- **UX & Control CLI (`zenithctl`)**:
+  - Interactive ASCII/ANSI TUI watch monitor (`zenithctl status --watch`).
+  - 8-point system diagnostic doctor (`zenithctl doctor`) with actionable fix commands.
+  - Steam integration wrapper (`zenith-run %command%`) with gamescope support and D-Bus desktop notifications.
+  - Bilingual localization (`ru` / `en`) and standardized error catalog (`docs/ERRORS.md`).
+  - Anonymized diagnostic report generator (`zenithctl report`) for GitHub issues.
+  - Autocompletions for Bash, Zsh, and Fish.
+- **Packaging & Distribution**:
+  - Arch Linux AUR package (`PKGBUILD`) and development variant (`PKGBUILD-git`).
+  - Native Debian (`.deb`) and RPM (`.rpm`) packages with uninstall rollback guarantees.
+  - Nix flake (`flake.nix`) and NixOS service module.
+  - CycloneDX 1.5 Software Bill of Materials (SBOM) and reproducible build tooling.

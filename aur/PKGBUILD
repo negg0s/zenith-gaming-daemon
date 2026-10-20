@@ -6,15 +6,31 @@ pkgdesc="Ultra-low latency Linux gaming optimizer daemon for Arch / CachyOS & St
 arch=('x86_64')
 url="https://github.com/NEGG0/zenith-gaming-daemon"
 license=('MIT')
-depends=('glibc' 'pipewire')
+depends=('glibc' 'gcc-libs')
+optdepends=(
+    'pipewire: For sub-millisecond audio quantum control'
+    'libnotify: For desktop gaming notifications'
+    'gamescope: Micro-compositor gaming sandbox integration'
+)
 makedepends=('cmake' 'gcc')
+backup=('etc/zenith/zenith.conf' 'etc/zenith/profiles.conf')
+install="$pkgname.install"
 source=("$pkgname-$pkgver.tar.gz::https://github.com/NEGG0/$pkgname/archive/v$pkgver.tar.gz")
 sha256sums=('SKIP')
 
 build() {
     cd "$srcdir/$pkgname-$pkgver"
-    cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+    cmake -B build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_INSTALL_SYSCONFDIR=/etc
     cmake --build build -j$(nproc)
+}
+
+check() {
+    cd "$srcdir/$pkgname-$pkgver"
+    ctest --test-dir build --output-on-failure
 }
 
 package() {

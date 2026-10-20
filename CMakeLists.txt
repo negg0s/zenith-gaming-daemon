@@ -80,6 +80,7 @@ set(ZENITH_SOURCES
     src/report.cpp
     src/completions.cpp
     src/socket_client.cpp
+    src/config_migration.cpp
 )
 
 add_library(zenith_core STATIC ${ZENITH_SOURCES})
@@ -173,6 +174,42 @@ add_test(NAME BenchmarksTest COMMAND test_benchmarks)
 add_executable(test_ux tests/test_ux.cpp)
 target_link_libraries(test_ux PRIVATE zenith_core)
 add_test(NAME UxTest COMMAND test_ux)
+
+add_executable(test_config_migration tests/test_config_migration.cpp)
+target_link_libraries(test_config_migration PRIVATE zenith_core)
+add_test(NAME ConfigMigrationTest COMMAND test_config_migration)
+
+# ==============================================================================
+# Packaging (CPack: .deb, .rpm, .tar.gz)
+# ==============================================================================
+set(CPACK_PACKAGE_NAME "zenith-gaming-daemon")
+set(CPACK_PACKAGE_VENDOR "Zenith Project")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ultra-low latency Linux gaming optimizer daemon (C++20)")
+set(CPACK_PACKAGE_VERSION_MAJOR 1)
+set(CPACK_PACKAGE_VERSION_MINOR 0)
+set(CPACK_PACKAGE_VERSION_PATCH 0)
+set(CPACK_PACKAGE_VERSION "1.0.0")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+
+# Debian (.deb) configuration
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Emir (NEGG0) <rokmit599@gmail.com>")
+set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.35), libstdc++6 (>= 12)")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA 
+    "${CMAKE_CURRENT_SOURCE_DIR}/packaging/deb/postinst;${CMAKE_CURRENT_SOURCE_DIR}/packaging/deb/prerm;${CMAKE_CURRENT_SOURCE_DIR}/packaging/deb/postrm")
+
+# RPM (.rpm) configuration
+set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+set(CPACK_RPM_PACKAGE_GROUP "System Environment/Daemons")
+set(CPACK_RPM_PACKAGE_AUTOREQ "yes")
+set(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/rpm/prerm.sh")
+set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/rpm/postinst.sh")
+
+# Generators
+set(CPACK_GENERATOR "TGZ;DEB;RPM")
+include(CPack)
+
 
 
 

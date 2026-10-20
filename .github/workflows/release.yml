@@ -1,0 +1,66 @@
+name: Release Packages & Supply Chain Artifacts
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Publish Release Packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Install build and packaging dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential libpipewire-0.3-dev rpm
+
+      - name: Build Reproducible Packages (.deb, .rpm, .tar.gz)
+        run: |
+          chmod +x packaging/build_reproducible.sh
+          ./packaging/build_reproducible.sh
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@c95fe1489396fe8a9ec87453c663f53757279370 # v2.2.1
+        with:
+          name: "Release ${{ github.ref_name }}"
+          body: |
+            ## Zenith Gaming Daemon ${{ github.ref_name }}
+            
+            Ultra-low latency Linux gaming optimization daemon engineered in modern C++20.
+            
+            ### Package Assets & Verification
+            - Native Debian package (`.deb`)
+            - Native RPM package (`.rpm`)
+            - Standalone Release tarball (`.tar.gz`)
+            - CycloneDX 1.5 Software Bill of Materials (`.sbom.json`)
+            - Cryptographic `SHA256SUMS` manifest
+            
+            ### Installation
+            ```bash
+            # Arch Linux / CachyOS (AUR)
+            paru -S zenith-gaming-daemon
+            
+            # Debian / Ubuntu
+            sudo dpkg -i zenith-gaming-daemon-*.deb
+            
+            # Fedora / RHEL
+            sudo rpm -ivh zenith-gaming-daemon-*.rpm
+            ```
+          files: |
+            dist/*.deb
+            dist/*.rpm
+            dist/*.tar.gz
+            dist/*.sbom.json
+            dist/SHA256SUMS
+          draft: false
+          prerelease: false

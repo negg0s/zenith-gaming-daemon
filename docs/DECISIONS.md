@@ -289,5 +289,45 @@ Adopt **Option 3: Multi-Tiered CLI, Doctor Engine, and Lightweight Socket Protoc
 ### Status
 Accepted and implemented for Stage 10.
 
+---
+
+## ADR-0013: Distribution, Packaging, Supply Chain Security & Config Migrations
+
+### Context
+Zenith is deployed across diverse Linux distributions (Arch Linux, CachyOS, SteamOS, Debian, Ubuntu, Fedora, NixOS) and must guarantee safe installation, upgrades, and removal. A system-tuning package running with root privileges presents distinct supply chain and lifecycle risks:
+1. Uninstalling the package while optimizations are active could orphan mutated sysctl/cgroup values indefinitely.
+2. Upgrading between major/minor releases must not corrupt user configuration or wipe out custom gaming overrides.
+3. Distribution pipelines must ensure binary reproducibility and defend against supply-chain tampering.
+
+### Options Considered
+1. **Source Tarballs Only**: Provide only source archives and rely on users to build manually. Unacceptable UX for gamers; fails to provide system integration or uninstall guarantees.
+2. **Distribution-Agnostic Binaries (Flatpak / Snap)**: Run Zenith inside a desktop sandbox. Impossible due to sandboxing boundaries; Zenith requires access to kernel `/proc/sys`, `/sys/fs/cgroup`, and Netlink sockets.
+3. **Multi-Format Native Packaging with Guaranteed Rollback, Reproducible Builds & Hardened Supply Chain**:
+   - **Native Multi-Platform Packages**:
+     - Arch Linux: `PKGBUILD` (namcap verified) + `zenith-gaming-daemon-git` + `zenith.install` hooks.
+     - Debian / Ubuntu: CPack `.deb` generation with custom `postinst`, `prerm`, and `postrm`.
+     - Fedora / RHEL: CPack `.rpm` generation and standalone `zenith.spec`.
+     - NixOS / Nix: `flake.nix` with package, devShell, and declarative systemd service module.
+   - **Guaranteed Rollback on Removal (`prerm`)**:
+     - Pre-removal scripts strictly execute `zenithctl rollback || zenith --rollback` before binaries are unlinked, guaranteeing that all sysctl, sysfs, and cgroups alterations are reverted to their baseline snapshot.
+   - **Zero-Downtime Configuration Migration Engine (`ConfigMigrator`)**:
+     - Versioned configuration schemas with automatic detection, schema upgrading, legacy key preservation, and validation before persisting.
+   - **End-to-End Privileged & Rollback Integration Suite (`test_e2e_privileged.sh`)**:
+     - Takes baseline snapshot $\to$ applies Aggressive profile mutations $\to$ asserts target parameter state $\to$ triggers rollback $\to$ asserts zero-drift comparison with baseline.
+   - **Supply Chain Hardening & Release Reproducibility**:
+     - Pinning all GitHub Actions to exact immutable commit SHAs.
+     - Weekly Dependabot automated workflow updates.
+     - GitHub CodeQL advanced static security scanning.
+     - OpenSSF Scorecard supply chain integrity verification.
+     - Deterministic release compilation using `SOURCE_DATE_EPOCH` and `-ffile-prefix-map`.
+     - CycloneDX 1.5 Software Bill of Materials (`cyclonedx.json`) and cryptographic `SHA256SUMS` manifests attached to GitHub Releases.
+
+### Decision
+Adopt **Option 3: Multi-Format Native Packaging with Guaranteed Rollback, Reproducible Builds & Hardened Supply Chain**.
+
+### Status
+Accepted and implemented for Stage 11.
+
+
 
 

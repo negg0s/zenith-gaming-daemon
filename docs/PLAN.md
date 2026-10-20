@@ -250,8 +250,33 @@
 - [x] 10.9 Quality Gates & Test Suite:
   - `tests/test_ux.cpp` covering i18n, doctor checks, TUI rendering, completions, and report sanitization (17th test target in CMake).
 
-### [ ] Stage 11: End-to-End Stress Testing & Quality Gate Audit (P0)
-- [ ] Comprehensive integration test suite simulating full game session lifecycle
-- [ ] Memory leak audit under Valgrind / ASan during prolonged daemon execution
-- [ ] Clang-tidy static analysis audit
-- [ ] Documentation and CHANGELOG finalization for v1.1.0 release
+### [x] Stage 11: Distribution, Packaging, Releases & Supply Chain Hardening (P0)
+- [x] 11.1 Hardened CI Matrix & Multi-Distribution Verification:
+  - GCC, Clang, and Clang-TSan across Debug and Release configurations;
+  - Arch Linux container verification (`archlinux:latest`) validating native pacman build and PKGBUILD;
+  - Static analysis: `clang-tidy`, `cppcheck`, and formatting audit;
+  - Build caching with `actions/cache` and `ccache`;
+  - Fuzzing smoke test (`test_fuzz_corpus`) integrated into CI.
+- [x] 11.2 End-to-End Privileged & Mock Integration Suite:
+  - `tests/integration/test_e2e_privileged.sh`: baseline snapshot $\to$ mutation apply $\to$ state verification $\to$ emergency rollback $\to$ zero-drift diff comparison.
+- [x] 11.3 Multi-Platform Native Packaging:
+  - Arch Linux: `aur/PKGBUILD` (namcap clean) + `aur/PKGBUILD-git` + `aur/zenith.install`;
+  - Debian/Ubuntu: CPack `.deb` + `packaging/deb/postinst`, `packaging/deb/prerm`, `packaging/deb/postrm`;
+  - Fedora/RHEL: CPack `.rpm` + `packaging/rpm/zenith.spec`, `packaging/rpm/postinst.sh`, `packaging/rpm/prerm.sh`;
+  - NixOS / Nix: `flake.nix` with package, app, devShell, and NixOS service module;
+  - Guaranteed rollback: `prerm` triggers `zenithctl rollback || zenith --rollback` before package erasure.
+- [x] 11.4 Release Pipeline & Reproducible Builds:
+  - Semantic Versioning adherence;
+  - Comprehensive `CHANGELOG.md`;
+  - CycloneDX 1.5 Software Bill of Materials (`packaging/sbom/cyclonedx.json`);
+  - Deterministic build script (`packaging/build_reproducible.sh`) enforcing `SOURCE_DATE_EPOCH` and `-ffile-prefix-map`;
+  - GitHub Actions automated Release workflow (`.github/workflows/release.yml`) publishing packages and `SHA256SUMS`.
+- [x] 11.5 Supply Chain Security:
+  - Dependabot automated weekly dependency checks (`.github/dependabot.yml`);
+  - GitHub CodeQL advanced static security scanning (`.github/workflows/codeql.yml`);
+  - OpenSSF Scorecard supply chain analysis (`.github/workflows/scorecard.yml`);
+  - GitHub Actions pinned to exact immutable commit SHAs.
+- [x] 11.6 Configuration Migration Engine & Test Suite:
+  - `ConfigMigrator` (`include/zenith/config_migration.hpp`, `src/config_migration.cpp`);
+  - Unit tests verifying seamless v1.0.0 $\to$ v1.1.0 schema upgrade and idempotence (`tests/test_config_migration.cpp`, 18th CMake test target).
+

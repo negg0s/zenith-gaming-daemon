@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "purge" ]; then
+    rm -rf /etc/zenith /run/zenith /var/log/zenith 2>/dev/null || true
+fi
+
+if [ -d /run/systemd/system ]; then
+    systemctl daemon-reload 2>/dev/null || true
+fi
+
+exit 0
