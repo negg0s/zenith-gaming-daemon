@@ -575,4 +575,107 @@ Total Test time (real) = 50.60 sec
 - Stage 6 completed and verified.
 - Master checklist in `docs/PLAN.md` updated.
 - ADR-0008 recorded in `docs/DECISIONS.md`.
-- Ready for Stage 7 instructions.
+
+---
+
+## 2026-10-20 — Stage 7: Intelligent Adaptive Controller, PSI Telemetry & Local Self-Learning
+
+### Tasks Executed
+1. **Pressure Stall Information (PSI) Monitor (`PressureMonitor`)**:
+   - Implemented real-time parser for `/proc/pressure/cpu`, `/proc/pressure/memory`, and `/proc/pressure/io`.
+   - Tracks metrics: `some` (avg10, avg60, avg300, total $\mu s$) and `full` (avg10, avg60, avg300, total $\mu s$).
+   - Collects CPU frequency from `/sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq`, CPU package/core temperatures via sysfs `hwmon`, and hardware throttle event counters (`thermal_throttle/package_throttle_count` or `core_throttle_count`).
+   - Clean decoupled virtual interface `IPressureFs` (`RealPressureFs`, `MockPressureFs`) for deterministic unit and host testing.
+2. **Closed-Loop Adaptive Profile Controller (`AdaptiveController`)**:
+   - Continuously monitors system health against configured safety thresholds (`max_cpu_temp_c = 85.0`, `max_memory_some_avg10 = 25.0`, `max_io_some_avg10 = 20.0`, `max_cpu_some_avg10 = 40.0`).
+   - Fast Degradation: Instantly downgrades profile on threshold breach or thermal event (`Aggressive` $\to$ `Balanced` $\to$ `Safe`) with human-readable reason tracking.
+   - Guarded Recovery & Anti-Oscillation: Requires consecutive healthy cycles (default: 5 checks) AND an elapsed cooldown window (default: 10s) before promoting back (`Safe` $\to$ `Balanced` $\to$ `Aggressive`), preventing hunting/fluttering.
+   - Form-Factor & Power Clamping: Automatically clamps profiles to `Balanced` on battery discharge or on handheld devices (Steam Deck, ROG Ally, Legion Go).
+3. **Offline Local Learning Engine (`LocalLearner`)**:
+   - Parses local MangoHud benchmark CSV logs: calculates average FPS, 1% low, 0.1% low, frametime variance, and severe stutter count ($\ge 33.3\text{ms}$).
+   - Suggestion Engine: Computes stutter percentage and 1% low stability to recommend optimal tuning profiles per game (`zenithctl suggest`).
+   - Zero External Telemetry: Strictly local JSON database stored in `/var/lib/zenith/learning_db.json`. No external network requests or analytics.
+4. **Sched_ext (scx) BPF Extensibility Scheduler Controller (`SchedExtTuner`)**:
+   - Probes Linux 6.12+ extensible scheduler support via `/sys/kernel/sched_ext/state`.
+   - Locates scheduler binaries (`scx_lavd`, `scx_rusty`, `scx_bpfland`) with whitelist verification.
+   - Disabled by default; non-destructive execution, process supervisor, and clean termination/rollback on game exit.
+5. **Comprehensive Unit & Simulation Test Suite (`tests/test_adaptive_controller.cpp`)**:
+   - 8 comprehensive test scenarios:
+     1. `test_pressure_monitor_psi_parsing`: verifies accurate extraction of CPU, memory, IO PSI and hardware thermals.
+     2. `test_adaptive_degradation_from_pressure`: validates two-stage degradation on sustained memory/IO pressure spikes.
+     3. `test_adaptive_thermal_throttling_degradation`: validates instant downgrade upon reaching $89^\circ\text{C}$ overheat.
+     4. `test_adaptive_recovery_hysteresis_and_anti_oscillation`: proves multi-cycle stability requirement before profile promotion.
+     5. `test_platform_clamping`: ensures profile ceilings are enforced under battery discharge and on handhelds.
+     6. `test_mangohud_csv_parsing`: tests parsing of frametime CSV logs, statistical percentiles, and stutter detection.
+     7. `test_local_learner_profile_suggestion`: validates profile recommendations based on stability and stutter thresholds.
+     8. `test_sched_ext_probing_and_lifecycle`: validates BPF scheduler probing, startup, and clean shutdown lifecycle.
+6. **Architectural Decisions (`docs/DECISIONS.md`, ADR-0009)**:
+   - Recorded ADR-0009: Closed-Loop PSI Adaptive Controller, Anti-Oscillation Hysteresis, and Zero-Telemetry Local Learning.
+
+### Verified CI Command Output (GitHub Actions Run 39473449956)
+```text
+✓ build-and-test (gcc) in 1m 50s (ID 118803209857)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (GCC with ASan/UBSan)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Stress Suite (100% tests passed, 0 failures)
+  ✓ Complete job
+
+✓ build-and-test (clang) in 2m 6s (ID 118803209982)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (Clang with ASan/UBSan)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Stress Suite (100% tests passed, 0 failures)
+  ✓ Complete job
+
+Test Suite Execution Details (14 / 14 Targets Green):
+ 1/14 Test  #1: CpuTopologyTest ..................   Passed    0.28 sec
+ 2/14 Test  #2: ConfigTest .......................   Passed    0.01 sec
+ 3/14 Test  #3: SysctlTest .......................   Passed    0.01 sec
+ 4/14 Test  #4: EngineTest .......................   Passed    0.01 sec
+ 5/14 Test  #5: JournalTest ......................   Passed    0.01 sec
+ 6/14 Test  #6: FlockTest ........................   Passed    0.01 sec
+ 7/14 Test  #7: SafeModeTest .....................   Passed    0.01 sec
+ 8/14 Test  #8: FaultInjectionMatrixTest .........   Passed    0.21 sec
+ 9/14 Test  #9: SecurityTest .....................   Passed    0.01 sec
+10/14 Test #10: FuzzCorpusTest ...................   Passed    0.04 sec
+11/14 Test #11: TweaksTest .......................   Passed    0.10 sec
+12/14 Test #12: GameDetectorTest .................   Passed   49.80 sec
+13/14 Test #13: LatencySubsystemsTest ............   Passed    0.03 sec
+14/14 Test #14: AdaptiveControllerTest ...........   Passed    0.02 sec
+       14: Starting Stage 7 Adaptive Controller & Learner Tests...
+       14: [PASS] test_pressure_monitor_psi_parsing
+       14: [WARN]  [zenith] Adaptive Profile Change: [aggressive] -> [balanced] | Reason: Memory pressure avg10 (28.500000%) exceeded threshold
+       14: [WARN]  [zenith] Adaptive Profile Change: [balanced] -> [safe] | Reason: Severe system pressure / thermal spike sustained on Balanced
+       14: [PASS] test_adaptive_degradation_from_pressure
+       14: [WARN]  [zenith] Adaptive Profile Change: [aggressive] -> [balanced] | Reason: CPU temperature (89C) exceeded safety limit (85C)
+       14: [PASS] test_adaptive_thermal_throttling_degradation
+       14: [WARN]  [zenith] Adaptive Profile Change: [aggressive] -> [balanced] | Reason: Memory pressure avg10 (40.000000%) exceeded threshold
+       14: [WARN]  [zenith] Adaptive Profile Change: [balanced] -> [safe] | Reason: Severe system pressure / thermal spike sustained on Balanced
+       14: [WARN]  [zenith] Adaptive Profile Change: [safe] -> [balanced] | Reason: Metrics normalized over 3 hysteresis cycles (0s cooldown elapsed)
+       14: [WARN]  [zenith] Adaptive Profile Change: [balanced] -> [aggressive] | Reason: Metrics normalized over 3 hysteresis cycles (0s cooldown elapsed)
+       14: [PASS] test_adaptive_recovery_hysteresis_and_anti_oscillation
+       14: [WARN]  [zenith] Adaptive Profile Change: [aggressive] -> [balanced] | Reason: Battery mode engaged: clamped to Balanced
+       14: [WARN]  [zenith] Adaptive Profile Change: [balanced] -> [aggressive] | Reason: Metrics normalized over 1 hysteresis cycles (0s cooldown elapsed)
+       14: [WARN]  [zenith] Adaptive Profile Change: [aggressive] -> [balanced] | Reason: Handheld form factor: clamped to Balanced
+       14: [PASS] test_platform_clamping
+       14: [PASS] test_mangohud_csv_parsing
+       14: [PASS] test_local_learner_profile_suggestion
+       14: [INFO]  [zenith] Started sched_ext BPF scheduler: scx_lavd
+       14: [INFO]  [zenith] Stopped sched_ext BPF scheduler: scx_lavd
+       14: [PASS] test_sched_ext_probing_and_lifecycle
+       14: ALL 8 STAGE 7 ADAPTIVE CONTROLLER & LEARNER TESTS PASSED!
+
+100% tests passed, 0 tests failed out of 14. Clean under ASan & UBSan.
+Total Test time (real) = 49.39 sec
+```
+
+### Active State
+- Stage 7 completed and verified.
+- Master checklist in `docs/PLAN.md` updated.
+- ADR-0009 recorded in `docs/DECISIONS.md`.
+- Next up: Stage 8 / Stage 11 (End-to-End Stress Testing & Quality Gate Audit / Release Preparation).
