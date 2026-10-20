@@ -262,4 +262,102 @@ Total Test time (real) = 0.90 sec
 - Stage 3 completed and verified.
 - Master checklist in `docs/PLAN.md` updated.
 - ADR-0005 recorded in `docs/DECISIONS.md`.
-- Ready for Stage 4 instructions.
+
+---
+
+## [2026-10-20] - Stage 4: Advanced CPU Topology Engine, amd_x3d_vcache & 11 Fixtures
+
+### Context
+Execution of Stage 4 according to the Autonomous Senior Engineer protocol. Zenith requires comprehensive hardware topology awareness across heterogeneous modern architectures: AMD 3D V-Cache dual-CCDs (7950X3D, 9950X3D), single-CCD V-Cache (7800X3D, 5800X3D), uniform 6-core (5600), Intel Hybrid (13900K, 12700K) with P-cores and E-cores, Intel Core Ultra 9 with LP-E cores, multi-socket NUMA servers (EPYC), virtual machines (QEMU/KVM), and handheld APUs (Steam Deck).
+
+### Actions Completed
+1. **Linux 6.13+ `amd_x3d_vcache` Kernel Driver Integration**:
+   - Probe `/sys/bus/platform/drivers/amd_x3d_vcache` and `/sys/devices/platform/amd_x3d_vcache/amd_x3d_mode`.
+   - Driver mode (`cache`, `frequency`, `none`) utilized as primary selector when available; custom L3 cache pinning serves as resilient fallback.
+2. **Precision Cache & Core Architecture Classification**:
+   - Parsed `cache/index3/size` and `cache/index3/shared_cpu_list` to identify distinct L3 cache clusters and asymmetric CCDs.
+   - Intel Hybrid core classification: hardware `topology/core_type` (`0x20` P-core, `0x40` E-core, `0x10` LP-E core) and `cpu_capacity`.
+   - Detected SMT status (`/sys/devices/system/cpu/smt/control`), NUMA node count (`/sys/devices/system/node/`), multi-socket count, isolated cores (`/sys/devices/system/cpu/isolated`), and VM hypervisor detection (`sys_vendor` / `product_name`).
+3. **Core Selection Modes (`CacheSelectionMode`)**:
+   - `Cache`: Prioritizes 3D V-Cache CCD cores (e.g. 7950X3D CCD0).
+   - `Frequency`: Prioritizes higher-clock CCD cores (e.g. 7950X3D CCD1) for clock-sensitive titles.
+   - `Auto`: Resolves based on per-game profile rules and heuristics.
+4. **FileSystem Abstraction (`include/zenith/topology_fs.hpp`)**:
+   - `ITopologyFs`, `RealTopologyFs`, and `MockTopologyFs` decouple sysfs traversal from physical disk locations.
+   - Synthetic fixture generation tool in `tests/fixture_generator.hpp`.
+5. **11 Architecture Fixtures Verified in `tests/test_cpu_topology.cpp`**:
+   - `ryzen_7950x3d`: 16 cores / 32 threads, 96M V-Cache CCD0 (0-7,16-23) vs 32M CCD1 (8-15,24-31).
+   - `ryzen_9950x3d`: Zen 5 dual-CCD V-Cache asymmetry.
+   - `ryzen_7800x3d`: Single CCD 8 cores / 16 threads (all 96M V-Cache).
+   - `ryzen_5800x3d`: Zen 3 single CCD 8 cores / 16 threads (96M V-Cache).
+   - `ryzen_5600`: Uniform 6 cores / 12 threads (32M L3).
+   - `intel_13900k`: 8 P-cores (16 threads: 0-15) + 16 E-cores (16 threads: 16-31).
+   - `intel_12700k`: 8 P-cores (16 threads: 0-15) + 4 E-cores (4 threads: 16-19).
+   - `intel_core_ultra_9`: P-cores (`0x20`), E-cores (`0x40`), LP-E cores (`0x10`).
+   - `epyc_2x_numa`: 2 sockets, 2 NUMA nodes.
+   - `vm_4vcpu`: QEMU/KVM virtual machine detection.
+   - `steam_deck`: Van Gogh / Aerith APU, handheld chassis (`31`), battery detection, energy-conscious mode.
+6. **CPU Hotplug Dynamic Recomputation**:
+   - `recompute_hotplug()` updates online core masks and filters offlined cores from gaming allocations.
+7. **Form-Factor & Battery Awareness**:
+   - Identifies Handheld and Laptop form factors via `chassis_type`; checks `power_supply` discharging status to engage battery-aware tuning.
+8. **Architectural Decisions (`docs/DECISIONS.md`, ADR-0006)**:
+   - Formally documented decision for Virtual Filesystem and Driver-First Topology Architecture.
+
+### Verified CI Command Output (GitHub Actions Run 39468290521)
+```text
+✓ build-and-test (clang) in 53s (ID 118785356445)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (Clang with ASan/UBSan)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Fault Injection Matrix (100% tests passed, 0 failures)
+  ✓ Complete job
+
+✓ build-and-test (gcc) in 45s (ID 118785356771)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (GCC with ASan/UBSan)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Fault Injection Matrix (100% tests passed, 0 failures)
+  ✓ Complete job
+
+Test Suite Execution Details:
+ 1/11 Test  #1: CpuTopologyTest ..................   Passed    0.28 sec
+        1: Running Stage 4 CPU Topology & Fixtures Verification Tests...
+        1: [PASS] test_cpu_list_parsing
+        1:   [PASS] fixture: ryzen_7950x3d
+        1:   [PASS] fixture: ryzen_9950x3d
+        1:   [PASS] fixture: ryzen_7800x3d
+        1:   [PASS] fixture: ryzen_5800x3d
+        1:   [PASS] fixture: ryzen_5600
+        1:   [PASS] fixture: intel_13900k
+        1:   [PASS] fixture: intel_12700k
+        1:   [PASS] fixture: intel_core_ultra_9
+        1:   [PASS] fixture: epyc_2x_numa
+        1:   [PASS] fixture: vm_4vcpu
+        1:   [PASS] fixture: steam_deck
+        1: [PASS] test_hotplug
+        1: All Stage 4 CPU Topology Tests Passed Successfully!
+ 2/11 Test  #2: ConfigTest .......................   Passed    0.01 sec
+ 3/11 Test  #3: SysctlTest .......................   Passed    0.01 sec
+ 4/11 Test  #4: EngineTest .......................   Passed    0.01 sec
+ 5/11 Test  #5: JournalTest ......................   Passed    0.01 sec
+ 6/11 Test  #6: FlockTest ........................   Passed    0.01 sec
+ 7/11 Test  #7: SafeModeTest .....................   Passed    0.01 sec
+ 8/11 Test  #8: FaultInjectionMatrixTest .........   Passed    0.20 sec
+ 9/11 Test  #9: SecurityTest .....................   Passed    0.01 sec
+10/11 Test #10: FuzzCorpusTest ...................   Passed    0.03 sec
+11/11 Test #11: TweaksTest .......................   Passed    0.11 sec
+
+100% tests passed, 0 tests failed out of 11. Clean under ASan & UBSan.
+Total Test time (real) = 0.86 sec
+```
+
+### Active State
+- Stage 4 completed and verified.
+- Master checklist in `docs/PLAN.md` updated.
+- ADR-0006 recorded in `docs/DECISIONS.md`.
+- Ready for Stage 5 instructions.

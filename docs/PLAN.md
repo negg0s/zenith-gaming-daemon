@@ -77,25 +77,25 @@
   - Clean build under GCC + Clang with ASan/UBSan;
   - Progress and ADR recorded.
 
-### [ ] Stage 4: Hardware Discovery & Advanced CPU Topology Engine (P0)
-- [ ] Kernel 6.13+ `amd_x3d_vcache` driver integration:
+### [x] Stage 4: Hardware Discovery & Advanced CPU Topology Engine (P0)
+- [x] Kernel 6.13+ `amd_x3d_vcache` driver integration:
   - Probe `/sys/bus/platform/drivers/amd_x3d_vcache` and `/sys/devices/platform/amd_x3d_vcache/amd_x3d_mode`;
   - Use kernel driver mode (`cache`, `frequency`, `none`) as primary selector when present; fallback to custom L3 affinity pinning.
-- [ ] Precision Cache & Core Architecture Parsing:
+- [x] Precision Cache & Core Architecture Parsing:
   - Parse `cache/index3/size` + `shared_cpu_list` to isolate distinct L3 clusters and asymmetric 3D V-Cache CCDs;
   - Intel Hybrid identification: parse `core_type` (0x20 Core/P-core, 0x40 Atom/E-core, 0x10 LP-E core) and `cpu_capacity`;
   - System architecture features: SMT status (`/sys/devices/system/cpu/smt/control`), NUMA nodes (`/sys/devices/system/node/`), Multi-socket (`physical_package_id`), Isolated cores (`/sys/devices/system/cpu/isolated`), and VM detection (`/sys/class/dmi/id/product_name`).
-- [ ] Core Selection Modes (`cache`, `frequency`, `auto`):
+- [x] Core Selection Modes (`cache`, `frequency`, `auto`):
   - Game-aware selection: allow choosing V-Cache CCD or high-clock CCD depending on title requirements.
-- [ ] FileSystem Abstraction & Fixtures Suite (`tests/fixtures/`):
+- [x] FileSystem Abstraction & Fixtures Suite (`tests/fixtures/`):
   - `ITopologyFs` interface decoupled from real disk root;
   - 11 comprehensive fixtures: Ryzen 7950X3D, 9950X3D, 7800X3D, 5800X3D, 5600, Core i9-13900K, i7-12700K, Core Ultra 9, Epyc 2xNUMA, VM 4 vCPU, Steam Deck APU.
-- [ ] CPU Hotplug Monitoring:
+- [x] CPU Hotplug Monitoring:
   - Monitor `/sys/devices/system/cpu/online` / `offline` and dynamically recompute core sets.
-- [ ] Form-Factor Awareness (Handheld & Laptop):
+- [x] Form-Factor Awareness (Handheld & Laptop):
   - Probe chassis type (`/sys/class/dmi/id/chassis_type`) and power supply status (`/sys/class/power_supply/`);
   - Automatically engage energy-conscious profile when on battery or handheld device (Steam Deck, ROG Ally, Legion Go).
-- [ ] Quality Gates:
+- [x] Quality Gates:
   - All 11 fixtures pass validation tests;
   - Clean build under GCC and Clang with ASan/UBSan.
 
