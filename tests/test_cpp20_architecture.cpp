@@ -167,7 +167,7 @@ void test_raii_guards() {
         assert(!fd2.is_valid());
         assert(fd2.get() == -1);
 
-        fd3.release();
+        (void)fd3.release();
         assert(!fd3.is_valid());
     }
 

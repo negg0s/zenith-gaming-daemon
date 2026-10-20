@@ -71,7 +71,7 @@ public:
     }
 
 private:
-    std::mutex mutex_;
+    mutable std::mutex mutex_;
     bool connected_{false};
     std::queue<NetlinkProcessEvent> events_;
 };
