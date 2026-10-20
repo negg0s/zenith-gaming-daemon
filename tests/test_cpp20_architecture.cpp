@@ -89,7 +89,7 @@ void test_result_monadic_operations() {
     assert(void_err.is_err());
     assert(void_err.error().code == ErrorCode::PermissionDenied);
 
-    std::cout << "[PASS] test_result_monadic_operations\n";
+    std::cout << "[PASS] test_result_monadic_operations" << std::endl;
 }
 
 void test_interfaces_and_fakes() {
@@ -146,7 +146,7 @@ void test_interfaces_and_fakes() {
     assert(poll_res->type == NetlinkEventType::Exec);
     assert(poll_res->pid == 4321);
 
-    std::cout << "[PASS] test_interfaces_and_fakes\n";
+    std::cout << "[PASS] test_interfaces_and_fakes" << std::endl;
 }
 
 void test_raii_guards() {
@@ -187,7 +187,7 @@ void test_raii_guards() {
     }
     assert(!dismissed_executed);
 
-    std::cout << "[PASS] test_raii_guards\n";
+    std::cout << "[PASS] test_raii_guards" << std::endl;
 }
 
 void test_structured_logger_and_rate_limiter() {
@@ -235,7 +235,7 @@ void test_structured_logger_and_rate_limiter() {
     logger.set_custom_sink(nullptr);
     logger.set_format_mode(LogFormatMode::Text);
 
-    std::cout << "[PASS] test_structured_logger_and_rate_limiter\n";
+    std::cout << "[PASS] test_structured_logger_and_rate_limiter" << std::endl;
 }
 
 void test_event_loop_and_concurrency() {
@@ -275,7 +275,7 @@ void test_event_loop_and_concurrency() {
     loop.run_one();
     assert(callback_hits.load() == 1); // Unchanged because removed
 
-    std::cout << "[PASS] test_event_loop_and_concurrency\n";
+    std::cout << "[PASS] test_event_loop_and_concurrency" << std::endl;
 }
 
 void test_plugin_tweak_registration() {
@@ -288,7 +288,7 @@ void test_plugin_tweak_registration() {
         }
     }
     assert(found_dummy);
-    std::cout << "[PASS] test_plugin_tweak_registration\n";
+    std::cout << "[PASS] test_plugin_tweak_registration" << std::endl;
 }
 
 int main() {

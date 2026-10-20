@@ -116,13 +116,13 @@ public:
     using error_type = E;
 
     // Constructors
-    constexpr Result(const T& val) : storage_(val) {}
+    constexpr Result(const T& val) : storage_(std::in_place_type<T>, val) {}
     constexpr Result(T&& val) noexcept(std::is_nothrow_move_constructible_v<T>)
-        : storage_(std::move(val)) {}
+        : storage_(std::in_place_type<T>, std::move(val)) {}
 
-    constexpr Result(const E& err) : storage_(err) {}
+    constexpr Result(const E& err) : storage_(std::in_place_type<E>, err) {}
     constexpr Result(E&& err) noexcept(std::is_nothrow_move_constructible_v<E>)
-        : storage_(std::move(err)) {}
+        : storage_(std::in_place_type<E>, std::move(err)) {}
 
     static constexpr Result ok(T val) noexcept(std::is_nothrow_move_constructible_v<T>) {
         return Result(std::move(val));
