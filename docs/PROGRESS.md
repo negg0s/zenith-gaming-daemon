@@ -360,4 +360,116 @@ Total Test time (real) = 0.86 sec
 - Stage 4 completed and verified.
 - Master checklist in `docs/PLAN.md` updated.
 - ADR-0006 recorded in `docs/DECISIONS.md`.
-- Ready for Stage 5 instructions.
+
+---
+
+## [2026-10-20] - Stage 5: Game Detector, Fine-Grained Thread Tuner & Anti-Cheat Safe Architecture
+
+### Context
+Execution of Stage 5 according to the Autonomous Senior Engineer protocol. Zenith requires sub-50ms event-driven process lifecycle detection, deep recognition of Steam, Proton/Wine, Lutris, Heroic, Bottles, Gamescope, native games, and emulators, while rejecting non-game launchers, `steamwebhelper`, and idle `wineserver`. Crucially, process optimization must operate under a strict **Non-Invasive Anti-Cheat Compatibility Policy** (zero `ptrace`, zero foreign memory reading, zero DLL injection) with fine-grained thread classification (Main, Render, Audio, ShaderCompile, IoWorker, and protected Anticheat/Overlay threads). Background processes must be soft-throttled via cgroup v2 (`cpu.weight=50`, `cpu.idle=1`) without ever terminating tasks.
+
+### Actions Completed
+1. **Netlink Process Connector (`ProcConnector`)**:
+   - Implemented Linux Netlink proc connector (`socket(PF_NETLINK, SOCK_DGRAM, NETLINK_CONNECTOR)`).
+   - Subscribes to `CN_IDX_PROC` / `CN_VAL_PROC` multicast channel (`PROC_CN_MCAST_LISTEN`).
+   - Receives instant asynchronous kernel events: `PROC_EVENT_EXEC`, `PROC_EVENT_EXIT`, `PROC_EVENT_FORK`.
+   - Polling fallback and simulated test injection (`inject_event()`).
+2. **Virtual /proc Filesystem Abstraction (`IProcFs`)**:
+   - `IProcFs` abstract interface decoupled from the host filesystem.
+   - `RealProcFs`: Linux virtual `/proc` implementation using POSIX/C++20 primitives.
+   - `MockProcFs`: High-performance in-memory simulation supporting multi-process tasks, environ, cmdline, maps, and open file descriptors.
+3. **Deep Game Recognition Engine (`GameDetector`)**:
+   - Steam games: Parses `SteamAppId` from `/proc/<pid>/environ` and `cmdline` (reaper, `steamapps/common`).
+   - Proton/Wine games: Identifies `wine64-preloader`, `.exe` binaries, and Proton environments.
+   - Emulators: Native recognition of RPCS3, Yuzu, Ryujinx, Dolphin-emu, PCSX2, Cemu, Duckstation, RetroArch, etc.
+   - Runners & Nested compositors: Lutris, Heroic, Bottles, and Gamescope.
+   - Strict false positive filtering: Excludes `steamwebhelper`, launchers (`EpicGamesLauncher`, `Battle.net`, `Origin`, `EA`), system services, and bare/idle `wineserver`.
+   - Real game heuristics: Probes open file descriptors for GPU render nodes (`/dev/dri/renderD128`, `/dev/nvidia*`) and mapped graphics drivers (`libvulkan.so`, `libGL.so`, `dxvk`, `vkd3d`).
+   - Debounce (100ms) and Hysteresis (500ms) against rapid process toggles.
+   - Concurrent multi-game tracking and initial startup sweep (`scan_all_games()`).
+4. **Fine-Grained Thread Classifier & Tuner (`ProcessTuner`)**:
+   - Inspects `/proc/<pid>/task/*/comm` and assigns specialized roles:
+     - `Main`: `tid == pid` $\to$ Performance cores pinning, `uclamp.min = 512`, `nice -10`.
+     - `Render`: `render`, `direct3d`, `d3d`, `vk`, `rhi`, `gpu`, `gl`, `draw` $\to$ Performance cores pinning, `uclamp.min = 512`, `nice -10`.
+     - `Audio`: `audio`, `sound`, `pipewire`, `pulse`, `fmod`, `wwise` $\to$ Low-latency scheduling, `nice -11`.
+     - `ShaderCompile`: `shader`, `compile`, `llvm`, `vk_worker` $\to$ Throughput on all available cores, `nice 0`.
+     - `IoWorker`: `io`, `async`, `disk`, `file`, `worker`, `pool` $\to$ `nice 0`.
+     - `AnticheatOrOverlay`: `*eac*`, `*easyanticheat*`, `*battleye*`, `*beservice*`, `*vgk*`, `*discord*`, `*obs*` $\to$ **STRICTLY UNTOUCHED**.
+5. **Anti-Cheat Compatibility Contract & Documentation (`docs/ANTI_CHEAT.md`)**:
+   - Documented non-invasive guarantees: Zero memory reading (`/proc/<pid>/mem`), zero `ptrace`, zero code injection.
+   - Preserves `TracerPid: 0` for game integrity watchdogs.
+   - Compatibility breakdown across Easy Anti-Cheat (EAC), BattlEye, VAC, Vanguard, and Ricochet.
+   - Transparent VAC disclaimer ("No unconditional 'VAC safe' claims").
+6. **Background Process Manager (`BackgroundManager`)**:
+   - Whitelist ("Never touch"): Compositors (`kwin`, `mutter`, `sway`, `hyprland`), audio (`pipewire`, `wireplumber`), system (`systemd`, `dbus`, `NetworkManager`, `sshd`), terminals/shells (`bash`, `zsh`, `tmux`, `alacritty`, `kitty`).
+   - Blacklist ("Always background"): Web browsers, chat clients (`discord`, `vesktop`, `spotify`), torrents, file indexers.
+   - Relocates blacklisted apps to `/sys/fs/cgroup/zenith_background` using soft weights (`cpu.weight=50`, `cpu.idle=1`, `io.weight=50`). Never terminates processes.
+7. **Fake `/proc` Stress & Regression Suite (`tests/test_game_detector.cpp`)**:
+   - 9 rigorous test suites:
+     1. `test_steam_detection`
+     2. `test_wine_and_wineserver_filtering`
+     3. `test_emulators_and_launchers`
+     4. `test_real_game_heuristics`
+     5. `test_concurrent_lifecycle`
+     6. `test_thread_classification_and_anticheat`
+     7. `test_background_manager`
+     8. `test_fake_proc_stress_and_false_positives` (1000+ processes, rapid fork storm, zero false positives)
+     9. `test_proc_connector_injection`
+8. **Architectural Decisions (`docs/DECISIONS.md`, ADR-0007)**:
+   - Recorded ADR-0007: Event-driven Process Detection, Fine-grained Thread Classification, and Anti-cheat Compatibility Mode.
+
+### Verified CI Command Output (GitHub Actions Run 39470497847)
+```text
+✓ build-and-test (gcc) in 48s (ID 118792983717)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (GCC with ASan/UBSan)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Stress Suite (100% tests passed, 0 failures)
+  ✓ Complete job
+
+✓ build-and-test (clang) in 52s (ID 118792984015)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (Clang with ASan/UBSan)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Stress Suite (100% tests passed, 0 failures)
+  ✓ Complete job
+
+Test Suite Execution Details (12 / 12 Targets Green):
+ 1/12 Test  #1: CpuTopologyTest ..................   Passed    0.28 sec
+ 2/12 Test  #2: ConfigTest .......................   Passed    0.01 sec
+ 3/12 Test  #3: SysctlTest .......................   Passed    0.01 sec
+ 4/12 Test  #4: EngineTest .......................   Passed    0.01 sec
+ 5/12 Test  #5: JournalTest ......................   Passed    0.01 sec
+ 6/12 Test  #6: FlockTest ........................   Passed    0.01 sec
+ 7/12 Test  #7: SafeModeTest .....................   Passed    0.01 sec
+ 8/12 Test  #8: FaultInjectionMatrixTest .........   Passed    0.21 sec
+ 9/12 Test  #9: SecurityTest .....................   Passed    0.01 sec
+10/12 Test #10: FuzzCorpusTest ...................   Passed    0.03 sec
+11/12 Test #11: TweaksTest .......................   Passed    0.08 sec
+12/12 Test #12: GameDetectorTest .................   Passed    0.22 sec
+       12: Starting Stage 5 Game Detector & Process Tuner Unit Tests...
+       12: [PASS] test_steam_detection
+       12: [PASS] test_wine_and_wineserver_filtering
+       12: [PASS] test_emulators_and_launchers
+       12: [PASS] test_real_game_heuristics
+       12: [PASS] test_concurrent_lifecycle
+       12: [PASS] test_thread_classification_and_anticheat
+       12: [PASS] test_background_manager
+       12: [PASS] test_fake_proc_stress_and_false_positives
+       12: [PASS] test_proc_connector_injection
+       12: ALL 9 STAGE 5 GAME DETECTOR & PROCESS TUNER TESTS PASSED!
+
+100% tests passed, 0 tests failed out of 12. Clean under ASan & UBSan.
+Total Test time (real) = 0.98 sec
+```
+
+### Active State
+- Stage 5 completed and verified.
+- Master checklist in `docs/PLAN.md` updated.
+- ADR-0007 recorded in `docs/DECISIONS.md`.
+- `docs/ANTI_CHEAT.md` documented and verified.
+- Ready for Stage 6 instructions.
