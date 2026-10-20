@@ -151,6 +151,13 @@ add_executable(test_cpp20_architecture tests/test_cpp20_architecture.cpp)
 target_link_libraries(test_cpp20_architecture PRIVATE zenith_core)
 add_test(NAME Cpp20ArchitectureTest COMMAND test_cpp20_architecture)
 
+add_executable(zenith_bench_daemon bench/bench_daemon_metrics.cpp)
+target_link_libraries(zenith_bench_daemon PRIVATE zenith_core)
+
+add_executable(test_benchmarks tests/test_benchmarks.cpp)
+target_link_libraries(test_benchmarks PRIVATE zenith_core)
+add_test(NAME BenchmarksTest COMMAND test_benchmarks)
+
 
 
 

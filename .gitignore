@@ -13,3 +13,7 @@ compile_commands.json
 .vscode/
 .idea/
 *.log
+__pycache__/
+*.pyc
+bench/results/
+

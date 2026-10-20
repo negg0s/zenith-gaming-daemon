@@ -55,6 +55,12 @@ jobs:
       - name: Run Unit Tests & Fault Injection Matrix
         run: ctest --test-dir build --output-on-failure --verbose
 
+      - name: Execute Benchmark Suite Verification
+        if: matrix.compiler == 'gcc'
+        run: |
+          chmod +x bench/*.sh
+          ./bench/run_benchmarks.sh quick
+
       - name: Generate Code Coverage Report (GCC)
         if: matrix.compiler == 'gcc'
         run: |

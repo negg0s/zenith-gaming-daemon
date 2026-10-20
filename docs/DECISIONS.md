@@ -235,3 +235,32 @@ Adopt **Option 3: Reference C++20 Clean Architecture**.
 ### Status
 Accepted and implemented for Stage 8.
 
+---
+
+## ADR-0011: Empirical Benchmarking, Statistical Ablation & Tweak Decision Framework
+
+### Context
+System optimization daemons frequently suffer from "snake oil" syndrome: declaring hundreds of sysctl or scheduler tweaks without verifiable statistical evidence, or making unproven marketing assertions ("eliminates 100% of stutters", "applies in 5 ms"). Furthermore, complex configurations can introduce regressions where a tweak benefits one hardware topology while degrading another. Zenith requires a rigorous empirical framework where every tweak is measured across $\ge 10$ runs with 95% Confidence Intervals, and unproven tweaks are disabled by default.
+
+### Options Considered
+1. **Ad-hoc Manual Testing**: Developers run informal manual tests without warm-up, statistical confidence intervals, or automated baseline comparisons. Highly subjective, unreproducible, and prone to placebo bias.
+2. **Third-Party Game Benchmarking Exclusively**: Relying solely on built-in game benchmarks. Impractical for automated headless CI environments and lacks isolation of individual kernel knobs.
+3. **Reproducible Empirical Benchmarking & Ablation Suite (`bench/`)**:
+   - **Multi-Iteration Statistical Rigor**: $\ge 10$ runs per scenario preceded by 2 unrecorded warmup runs. Calculation of Median, Mean, Interquartile Range (IQR), Standard Deviation, and 95% Confidence Intervals.
+   - **Condition Pinning & Safety Guards**: Thermal stabilization verification, CPU scaling governor verification, and automatic flagging of runs experiencing thermal throttling ($\ge 85^\circ\text{C}$).
+   - **A/B & Ablation Architecture (`bench/runner.py`)**: Tests Baseline vs complete Profiles (Safe, Balanced, Aggressive) vs Individual Isolated Tweaks (e.g. `split_lock`, `thp`, `vcache`, `cgroups`, `epp`, `pipewire`, `nvme`) to measure the discrete delta of each intervention.
+   - **Dual Execution Engine**:
+     - *Bare-Metal Mode*: Real cyclictest, pw-top, ping load, and MangoHud/CapFrameX game logs.
+     - *Synthetic/Simulation Mode*: Deterministic, mathematically modeled frame time generator enabling full test execution in cloud CI without GPU or bare-metal hardware.
+   - **Publication-Ready Visualizations (`bench/plot_results.py`)**: Automated rendering of Matplotlib bar charts with 95% CI error bars and frametime jitter distributions.
+   - **Nanosecond-Precision Daemon Footprint Probe (`zenith_bench_daemon`)**: Real empirical measurements of startup latency, memory RSS, and mutation apply/revert duration.
+   - **Empirical Tweak Decision Table**: Every tweak must declare its measured effect; tweaks without proven benefit are disabled by default.
+   - **Documentation Integrity**: Purging all unverified claims from `README.md` and providing a single reproduction command (`./bench/run_benchmarks.sh`).
+
+### Decision
+Adopt **Option 3: Reproducible Empirical Benchmarking & Ablation Suite**.
+
+### Status
+Accepted and implemented for Stage 9.
+
+

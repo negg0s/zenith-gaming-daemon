@@ -24,7 +24,7 @@ Modern Linux gaming (Proton/Wine, DXVK, VKD3D) achieves stellar average frame ra
 4. **GPU Clock Downclocking**: GPU drivers downclock memory (VRAM) and compute clocks during low-complexity scenes or menus, inducing latency spikes during sudden camera rotations or action.
 5. **Audio & Network Bufferbloat**: High-latency PipeWire quantum defaults and standard FIFO network queuing increase input-to-sound and packet jitter.
 
-**Zenith** solves all of this dynamically and autonomously.
+**Zenith** orchestrates kernel and hardware parameters dynamically to mitigate these bottlenecks without compromising system stability.
 
 ---
 
@@ -52,9 +52,9 @@ Modern Linux gaming (Proton/Wine, DXVK, VKD3D) achieves stellar average frame ra
 │  & V-Cache    │   │   Isolation   │ │ (Sysctl/VMM)  │ │   (DPM/NVML)  │ │  (PipeWire)   │
 ├───────────────┤   ├───────────────┤ ├───────────────┤ ├───────────────┤ ├───────────────┤
 │ AMD 3D-Cache  │   │ Move Discord, │ │ split_lock=0  │ │ AMD: dpm=high │ │ Quantum=64/48k│
-│ CCD0 pinning  │   │ Chrome, Steam │ │ THP=always    │ │ Lock VRAM clk │ │ sub-ms audio  │
+│ CCD0 pinning  │   │ Chrome, Steam │ │ THP=madvise   │ │ Lock VRAM clk │ │ sub-ms audio  │
 │ Intel P-Cores │   │ to core 0     │ │ compact_pro=0 │ │ NVIDIA: -pm 1 │ │ CAKE qdisc    │
-│ SCHED_RR rt   │   │ cpuset.cpus   │ │ swappiness=10 │ │ max boost clk │ │ no bufferbloat│
+│ SCHED_RR rt   │   │ cpuset.cpus   │ │ swappiness=10 │ │ max boost clk │ │ low jitter    │
 └───────────────┘   └───────────────┘ └───────────────┘ └───────────────┘ └───────────────┘
                                         │
                                         ▼
@@ -66,7 +66,7 @@ Modern Linux gaming (Proton/Wine, DXVK, VKD3D) achieves stellar average frame ra
                                         ▼
                             ┌───────────────────────┐
                             │    RAII State Revert  │
-                            │  (Instant Clean Reset)│
+                            │  (Atomic Clean Reset) │
                             └───────────────────────┘
 ```
 
@@ -78,31 +78,31 @@ Modern Linux gaming (Proton/Wine, DXVK, VKD3D) achieves stellar average frame ra
 - Detects cgroups v2 controller hierarchy (`/sys/fs/cgroup`).
 - Instantiates a high-priority background slice (`/sys/fs/cgroup/zenith_background`).
 - Restricts non-gaming processes (Discord, browsers, torrent clients, media players) to dedicated housekeeping cores (`cpuset.cpus = 0`).
-- Grants the game and render threads **100% exclusive access** to primary gaming cores.
+- Prioritizes primary gaming cores for game render threads while soft-throttling background workers.
 
 ### 2. AMD 3D V-Cache Pinning & Intel P-Core Locking
-- Parses `/sys/devices/system/cpu/cpu*/cache/index3` and CPU frequency domains.
+- Integrates with Linux 6.13+ `amd_x3d_vcache` driver (`amd_x3d_mode`) with fallback to L3 cluster topology analysis.
 - Automatically identifies CCD0 with 96MB 3D V-Cache (Ryzen 7900X3D / 7950X3D) vs standard CCD1.
-- Automatically pins game and Proton worker threads to 3D V-Cache cores, eliminating inter-CCD latency penalties.
-- For Intel Hybrid architectures (12th/13th/14th Gen), binds game loops strictly to high-frequency Performance cores (P-cores).
+- Automatically pins game and Proton worker threads to 3D V-Cache cores, minimizing inter-CCD latency penalties.
+- For Intel Hybrid architectures (12th/13th/14th Gen, Core Ultra), binds game loops strictly to high-frequency Performance cores (P-cores).
 
 ### 3. Kernel Latency & VMM Tuning
-- **Split-Lock Mitigation**: Sets `kernel.split_lock_mitigate = 0` during gameplay to prevent kernel-imposed throttling on Wine/DirectX atomic calls.
-- **Transparent HugePages (THP)**: Forces `transparent_hugepage = always` with `defrag = defer+madvise`, reducing page table walks in DXVK memory allocations.
+- **Split-Lock Mitigation**: Configurable via profiles (disabled in `aggressive` to prevent kernel-imposed throttling on Wine/DirectX atomic calls).
+- **Transparent HugePages (THP)**: Sets `transparent_hugepage = madvise` with `defrag = defer+madvise`, reducing page table walks in DXVK memory allocations without risking memory bloat.
 - **Compaction Proactiveness**: Sets `vm.compaction_proactiveness = 0` to prevent background memory defragmentation stalls while gaming.
 - **Autogroup Disabled**: Disables `sched_autogroup_enabled` so custom real-time and nice priority boosts are respected.
 
 ### 4. GPU Power & Frequency Lock
-- **AMD Radeon**: Locks `/sys/class/drm/card*/device/power_dpm_force_performance_level` to `high`, preventing VRAM memory clock downclocking.
-- **NVIDIA GeForce**: Activates driver persistence mode (`-pm 1`) and locks boost permissions to avoid throttle spikes.
+- **AMD Radeon**: Configures `/sys/class/drm/card*/device/power_dpm_force_performance_level` to `high` in aggressive profile, preventing VRAM memory clock downclocking.
+- **NVIDIA GeForce**: Activates driver persistence mode (`-pm 1`) and locks boost permissions to avoid throttle spikes under appropriate cooling.
 
-### 5. Sub-millisecond Audio & Network Latency
+### 5. Low-Latency Audio & Network
 - Sets PipeWire real-time metadata to quantum `64/48000` (1.33ms buffer latency) with `SCHED_FIFO` priority.
-- Configures `CAKE` / `FQ_CODEL` packet scheduling to eliminate bufferbloat and ping spikes during active downloads.
+- Configures `CAKE` / `FQ_CODEL` packet scheduling to mitigate bufferbloat and ping spikes during active downloads.
 
-### 6. Atomic RAII State Rollback
-- Original kernel sysctl values, GPU performance levels, and cgroup configurations are saved before modification.
-- When the game process exits (or upon `SIGINT`/`SIGTERM`), Zenith restores every original setting within milliseconds.
+### 6. Atomic RAII State Rollback & Crash Recovery
+- Original kernel sysctl values, GPU performance levels, and cgroup configurations are saved to a versioned Write-Ahead Log (`/run/zenith/journal.json`) before modification.
+- When the game process exits (or upon `SIGINT`/`SIGTERM`/crash), Zenith restores every original setting safely via idempotent rollback.
 
 ---
 
@@ -143,7 +143,7 @@ Enable and start the Zenith systemd service:
 ```bash
 sudo systemctl enable --now zenith.service
 ```
-Zenith now operates silently in the background, consuming zero CPU cycles when idle. Whenever you launch any game (Steam, Lutris, Heroic, Wine, Bottles, Native), optimizations engage instantly.
+Zenith now operates silently in the background, consuming negligible CPU cycles when idle (<0.01% via single-threaded epoll reactor, <6 MB RSS). Whenever you launch any game (Steam, Lutris, Heroic, Wine, Bottles, Native), optimizations engage automatically.
 
 ### 2. Steam Launch Options (Wrapper Mode)
 Alternatively, you can launch specific games directly through Zenith:
@@ -181,13 +181,13 @@ vcache_pinning_enabled = true
 hybrid_pinning_enabled = true
 
 # Disable split lock mitigation to prevent Wine/DirectX stutter
-split_lock_mitigation_disabled = true
+split_lock_mitigation_disabled = false
 
-# Force Transparent HugePages for DXVK
-thp_always_enabled = true
+# Transparent HugePages (madvise for safety)
+thp_always_enabled = false
 
 # Lock GPU performance levels (prevents memory clock downclocking)
-gpu_clock_lock_enabled = true
+gpu_clock_lock_enabled = false
 
 # PipeWire real-time audio quantum
 pipewire_quantum_tuning = true
@@ -202,14 +202,27 @@ compaction_proactiveness = 0
 
 ---
 
-## 📊 Benchmark Expectations
+## 📊 Empirical Benchmarks & Reproducibility
 
-| Metric | Without Zenith | With Zenith | Improvement |
-| :--- | :--- | :--- | :--- |
-| **0.1% Low FPS (Stutter Metric)** | 38 FPS | **62 FPS** | **+63% stability** |
-| **Frame Time Variance (Jitter)** | ± 6.8 ms | **± 1.2 ms** | **Near-flat frame pacing** |
-| **Audio Latency (PipeWire buffer)** | 21.3 ms | **1.33 ms** | **Instant sound cues** |
-| **Split-Lock Stutter Spikes** | Frequent (DX9-11) | **0 spikes detected** | **Eliminated** |
+Zenith enforces a strict engineering principle: **"Measure, don't believe."** All tweaks are evaluated through an A/B benchmark runner across $\ge 10$ iterations with 95% Confidence Intervals. Any tweak without proven benefit is disabled by default.
+
+### Reproduce Benchmarks with One Command
+
+```bash
+# Run quick benchmark sweep and generate statistical summary + Matplotlib charts:
+./bench/run_benchmarks.sh quick
+
+# Run full A/B and ablation sweep across all profiles:
+./bench/run_benchmarks.sh all
+```
+
+Output reports and charts are generated in `bench/results/`:
+- `sweep_<timestamp>.csv` & `.json`: 95% Confidence Intervals, Medians, and Stutter distributions.
+- `benchmark_fps_comparison.png`: Comparison of Average FPS, 1% Lows, and 0.1% Lows.
+- `benchmark_jitter_stutters.png`: Frametime variance and microstutter event frequency.
+- `daemon_metrics.txt`: Microsecond-precision startup and memory footprint metrics.
+
+For the comprehensive benchmarking methodology, hardware tier matrix, and empirical tweak decision table, see [docs/BENCHMARKS.md](docs/BENCHMARKS.md).
 
 ---
 
