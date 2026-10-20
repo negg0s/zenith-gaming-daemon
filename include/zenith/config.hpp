@@ -11,6 +11,9 @@ struct ConfigResult {
 };
 
 struct Config {
+    // Schema version
+    std::string version = "1.1.0";
+
     // Active Profile: safe, balanced (default), aggressive
     Profile active_profile = Profile::Balanced;
 

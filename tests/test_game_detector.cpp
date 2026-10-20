@@ -420,6 +420,9 @@ void test_proc_connector_injection() {
                 if (ev.type == ProcEventType::Exit) has_exit = true;
             }
         }
+        (void)has_fork;
+        (void)has_exec;
+        (void)has_exit;
         assert(has_fork);
         assert(has_exec);
         assert(has_exit);

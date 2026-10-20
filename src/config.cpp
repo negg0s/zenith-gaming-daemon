@@ -54,7 +54,10 @@ std::pair<Config, ConfigResult> Config::parse_string(std::string_view content) {
     }
 
     static const std::unordered_set<std::string_view> KNOWN_KEYS = {
+        "version",
+        "config_version",
         "profile",
+        "active_profile",
         "cgroup_isolation_enabled",
         "vcache_pinning_enabled",
         "hybrid_pinning_enabled",
@@ -80,6 +83,18 @@ std::pair<Config, ConfigResult> Config::parse_string(std::string_view content) {
         std::string line = trim(raw_line);
         if (line.empty() || line.starts_with('#') || line.starts_with(';')) continue;
 
+        // Strip inline comments if present
+        auto comment_hash = line.find('#');
+        if (comment_hash != std::string::npos) {
+            line = line.substr(0, comment_hash);
+        }
+        auto comment_semi = line.find(';');
+        if (comment_semi != std::string::npos) {
+            line = line.substr(0, comment_semi);
+        }
+        line = trim(line);
+        if (line.empty()) continue;
+
         auto eq = line.find('=');
         if (eq == std::string::npos) {
             res.success = false;
@@ -97,7 +112,9 @@ std::pair<Config, ConfigResult> Config::parse_string(std::string_view content) {
         }
 
         std::string err;
-        if (key == "profile") {
+        if (key == "version" || key == "config_version") {
+            cfg.version = val;
+        } else if (key == "profile" || key == "active_profile") {
             auto prof = string_to_profile(val);
             if (!prof) {
                 res.success = false;

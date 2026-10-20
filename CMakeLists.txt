@@ -104,6 +104,12 @@ install(FILES systemd/zenith.service DESTINATION ${CMAKE_INSTALL_LIBDIR}/systemd
 # Unit testing
 enable_testing()
 
+# Ensure assertions in test suites are never compiled out in Release builds
+if(NOT MSVC)
+    string(REGEX REPLACE "(^| )(-DNDEBUG)( |$)" " " CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+    string(REGEX REPLACE "(^| )(-DNDEBUG)( |$)" " " CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+endif()
+
 add_executable(test_cpu_topology tests/test_cpu_topology.cpp)
 target_link_libraries(test_cpu_topology PRIVATE zenith_core)
 add_test(NAME CpuTopologyTest COMMAND test_cpu_topology)

@@ -137,7 +137,8 @@ void test_interfaces_and_fakes() {
     // 5. INetlink via MockNetlink
     MockNetlink mock_netlink;
     assert(!mock_netlink.is_connected());
-    assert(mock_netlink.open().is_ok());
+    auto open_res = mock_netlink.open();
+    assert(open_res.is_ok());
     assert(mock_netlink.is_connected());
 
     mock_netlink.inject_event({NetlinkEventType::Exec, 4321, 4321, 0});
@@ -225,11 +226,11 @@ void test_structured_logger_and_rate_limiter() {
     // 4. Test Rate Limiter
     RateLimiter limiter(3); // Max 3 per second
     uint64_t suppressed = 0;
-    assert(limiter.check("key1", suppressed)); // 1
-    assert(limiter.check("key1", suppressed)); // 2
-    assert(limiter.check("key1", suppressed)); // 3
-    assert(!limiter.check("key1", suppressed)); // 4 (suppressed!)
-    assert(!limiter.check("key1", suppressed)); // 5 (suppressed!)
+    bool c1 = limiter.check("key1", suppressed); assert(c1);
+    bool c2 = limiter.check("key1", suppressed); assert(c2);
+    bool c3 = limiter.check("key1", suppressed); assert(c3);
+    bool c4 = limiter.check("key1", suppressed); assert(!c4);
+    bool c5 = limiter.check("key1", suppressed); assert(!c5);
 
     // Reset sink to stdout
     logger.set_custom_sink(nullptr);
@@ -270,7 +271,8 @@ void test_event_loop_and_concurrency() {
     assert(callback_hits.load() == 1);
 
     // Verify remove
-    assert(loop.remove_fd(dummy_fd).is_ok());
+    auto rem_res = loop.remove_fd(dummy_fd);
+    assert(rem_res.is_ok());
     mock_poller->trigger_event(dummy_fd, PollEvent::Read);
     loop.run_one();
     assert(callback_hits.load() == 1); // Unchanged because removed
