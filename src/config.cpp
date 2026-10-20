@@ -54,6 +54,7 @@ std::pair<Config, ConfigResult> Config::parse_string(std::string_view content) {
     }
 
     static const std::unordered_set<std::string_view> KNOWN_KEYS = {
+        "profile",
         "cgroup_isolation_enabled",
         "vcache_pinning_enabled",
         "hybrid_pinning_enabled",
@@ -96,7 +97,15 @@ std::pair<Config, ConfigResult> Config::parse_string(std::string_view content) {
         }
 
         std::string err;
-        if (key == "cgroup_isolation_enabled") {
+        if (key == "profile") {
+            auto prof = string_to_profile(val);
+            if (!prof) {
+                res.success = false;
+                res.error_message = "Invalid profile: '" + val + "'. Expected 'safe', 'balanced', or 'aggressive'.";
+                return { cfg, res };
+            }
+            cfg.active_profile = *prof;
+        } else if (key == "cgroup_isolation_enabled") {
             if (!parse_bool_strict(val, cfg.cgroup_isolation_enabled, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
         } else if (key == "vcache_pinning_enabled") {
             if (!parse_bool_strict(val, cfg.vcache_pinning_enabled, err)) { res.success = false; res.error_message = err; return {cfg, res}; }

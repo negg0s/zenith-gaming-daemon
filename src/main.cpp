@@ -1,4 +1,7 @@
 #include "zenith/engine.hpp"
+#include "zenith/tweaks/tweak_registry.hpp"
+#include "zenith/conflict_detector.hpp"
+#include "zenith/per_game_profile.hpp"
 #include <iostream>
 
 namespace fs = std::filesystem;
@@ -20,6 +23,9 @@ void print_help() {
 "  zenith status                     Display CPU topology, cgroups, and current mode\n"
 "  zenith --rollback                 Emergency crash recovery from state journal\n"
 "  zenith --reset-safemode           Reset crash history and exit safe mode\n"
+"  zenith --dry-run [profile]        Simulate tweak application with colorized diff without mutations\n"
+"  zenith --explain                  Explain all kernel and subsystem tweaks in plain language\n"
+"  zenith --conflicts                Detect competing services (gamemode, ananicy, tuned, etc.)\n"
 "  zenith --help, -h                 Show this help menu\n\n"
 "Examples:\n"
 "  zenith daemon\n"
@@ -48,6 +54,29 @@ int main(int argc, char* argv[]) {
 
     if (action == "--reset-safemode") {
         return zenith::ZenithEngine::reset_safe_mode() ? 0 : 1;
+    }
+
+    if (action == "--explain") {
+        zenith::TweakRegistry::instance().register_defaults();
+        zenith::TweakRegistry::instance().print_explain();
+        return 0;
+    }
+
+    if (action == "--conflicts") {
+        auto conflicts = zenith::ConflictDetector::probe_system_conflicts();
+        zenith::ConflictDetector::print_conflict_report(conflicts);
+        return 0;
+    }
+
+    if (action == "--dry-run") {
+        zenith::Profile prof = zenith::Profile::Balanced;
+        if (argc >= 3) {
+            auto parsed = zenith::string_to_profile(argv[2]);
+            if (parsed) prof = *parsed;
+        }
+        zenith::TweakRegistry::instance().register_defaults();
+        zenith::TweakRegistry::instance().print_dry_run(prof);
+        return 0;
     }
 
     auto config = zenith::Config::default_config();

@@ -44,6 +44,17 @@ set(ZENITH_SOURCES
     src/secure_io.cpp
     src/socket_server.cpp
     src/capability_guard.cpp
+    src/tweaks/cpu_governor_tweak.cpp
+    src/tweaks/cgroup_weight_tweak.cpp
+    src/tweaks/uclamp_tweak.cpp
+    src/tweaks/timer_slack_tweak.cpp
+    src/tweaks/nvme_tweak.cpp
+    src/tweaks/usb_autosuspend_tweak.cpp
+    src/tweaks/zram_swap_tweak.cpp
+    src/tweaks/sysctl_tweak.cpp
+    src/tweaks/tweak_registry.cpp
+    src/conflict_detector.cpp
+    src/per_game_profile.cpp
 )
 
 add_library(zenith_core STATIC ${ZENITH_SOURCES})
@@ -54,7 +65,7 @@ target_link_libraries(zenith PRIVATE zenith_core)
 # Installation targets
 include(GNUInstallDirs)
 install(TARGETS zenith DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES configs/zenith.conf DESTINATION /etc/zenith)
+install(FILES configs/zenith.conf configs/profiles.conf DESTINATION /etc/zenith)
 install(FILES systemd/zenith.service DESTINATION ${CMAKE_INSTALL_LIBDIR}/systemd/system)
 
 # Unit testing
@@ -99,3 +110,7 @@ add_test(NAME SecurityTest COMMAND test_security)
 add_executable(test_fuzz_corpus tests/test_fuzz_corpus.cpp)
 target_link_libraries(test_fuzz_corpus PRIVATE zenith_core)
 add_test(NAME FuzzCorpusTest COMMAND test_fuzz_corpus)
+
+add_executable(test_tweaks tests/test_tweaks.cpp)
+target_link_libraries(test_tweaks PRIVATE zenith_core)
+add_test(NAME TweaksTest COMMAND test_tweaks)

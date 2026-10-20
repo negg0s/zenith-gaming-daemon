@@ -71,3 +71,32 @@ Adopt **Option 3: Defense-in-Depth Hardening**.
 
 ### Status
 Accepted and implemented for Stage 2.
+
+---
+
+## ADR-0005: Tweak Justification, Modular Subsystems, and Three-Tier Profiles Architecture
+
+### Context
+A gaming daemon that mutates system state without fine-grained scoping risks system instability, thermal throttling, battery drain on laptops, or audio/IPC stutter on non-game background processes. Each optimization must be technically justified, guarded by kernel compatibility probes, categorized into operational profiles, and audited against conflicting daemons in the Linux ecosystem.
+
+### Options Considered
+1. **Monolithic Global Switches**: All tweaks enabled simultaneously. Increases the risk of regressions on unstable hardware or battery-powered devices.
+2. **Ad-Hoc Manual Flags**: Every knob exposed independently with no profile grouping. Overwhelms users and complicates safe defaults.
+3. **Modular Subsystems with Three-Tier Profiles**:
+   - Universal `ITweak` Interface: Every tweak implements `probe()`, `apply(profile)`, `revert()`, `describe()`, `explain()`, `get_current_value()`, `get_target_value(profile)`.
+   - Three Operational Profiles:
+     - `safe`: Near-zero risk; no hardware clock overrides; soft cgroup prioritization; PipeWire quantum 128.
+     - `balanced` (Default): THP `madvise`, NVMe `none`, EPP `performance`, soft cgroups, `uclamp.min = 512`, USB autosuspend disabled.
+     - `aggressive`: Split-lock mitigation disabled (`0`), THP `always`, GPU clock lock, `SCHED_RR` priority with 3-second watchdog, PipeWire quantum 32.
+   - Non-Destructive CLI Introspection:
+     - `--dry-run`: Colorized diff of "Before $\to$ After" values without applying mutations.
+     - `--explain`: Human-readable technical breakdown of kernel mechanisms, pros, and risks.
+     - `--conflicts`: Proactive detection and coordination with `gamemode`, `ananicy`, `tuned`, `power-profiles-daemon`, `irqbalance`, and `scx`.
+   - Per-Game Profile Overrides: Match by Steam AppID (e.g. `[730]`) or executable pattern, with tweak blacklisting support.
+   - Empirical Rigor: All tweaks documented in `docs/TWEAKS.md` and explicitly labeled `[Эффект не измерен]` until empirical benchmark verification in Stage 9.
+
+### Decision
+Adopt **Option 3: Modular Subsystems with Three-Tier Profiles**.
+
+### Status
+Accepted and implemented for Stage 3.

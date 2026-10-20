@@ -1,6 +1,7 @@
 #pragma once
 
 #include "zenith/common.hpp"
+#include "zenith/tweaks/tweak_interface.hpp"
 
 namespace zenith {
 
@@ -10,6 +11,9 @@ struct ConfigResult {
 };
 
 struct Config {
+    // Active Profile: safe, balanced (default), aggressive
+    Profile active_profile = Profile::Balanced;
+
     // Core features
     bool cgroup_isolation_enabled = true;
     bool vcache_pinning_enabled = true;

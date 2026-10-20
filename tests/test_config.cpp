@@ -4,6 +4,7 @@
 
 void test_default_config() {
     auto cfg = zenith::Config::default_config();
+    assert(cfg.active_profile == zenith::Profile::Balanced);
     assert(cfg.cgroup_isolation_enabled == true);
     assert(cfg.split_lock_mitigation_disabled == true);
     assert(cfg.pipewire_latency_numerator == 64);
