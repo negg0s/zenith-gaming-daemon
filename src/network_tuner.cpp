@@ -130,7 +130,7 @@ bool NetworkTuner::revert() {
 
     if (!active_iface_.empty()) {
         // Restore original qdisc if we had recorded one
-        if (!original_qdisc_.empty() && original_qdisc_ != "cake" && original_qdisc_ != "fq_codel") {
+        if (!original_qdisc_.empty()) {
             run_cmd("/usr/bin/tc", {"qdisc", "replace", "dev", active_iface_, "root", original_qdisc_});
             ZENITH_LOG_DEBUG("Restored original qdisc (" + original_qdisc_ + ") on " + active_iface_);
         }
