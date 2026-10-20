@@ -109,8 +109,9 @@ void test_daemon_startup_measurement() {
         cfg.cgroup_isolation_enabled = true;
         cfg.vcache_pinning_enabled = true;
 
-        auto& registry = zenith::tweaks::TweakRegistry::instance();
-        (void)registry.get_all();
+        auto& registry = zenith::TweakRegistry::instance();
+        registry.register_defaults();
+        (void)registry.get_all_tweaks();
 
         auto t1 = std::chrono::steady_clock::now();
         double ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
@@ -137,17 +138,13 @@ void test_peak_rss_measurement() {
 }
 
 void test_tweak_apply_revert_timing() {
-    zenith::Config cfg;
-    cfg.cgroup_isolation_enabled = false;
-    cfg.gpu_clock_lock_enabled = false;
-    cfg.pipewire_quantum_tuning = false;
-
-    zenith::ZenithEngine engine(cfg);
+    auto& registry = zenith::TweakRegistry::instance();
+    registry.register_defaults();
 
     auto t0 = std::chrono::steady_clock::now();
-    engine.optimize_for_game(12345);
+    registry.apply_all(zenith::Profile::Balanced);
     auto t1 = std::chrono::steady_clock::now();
-    engine.revert();
+    registry.revert_all();
     auto t2 = std::chrono::steady_clock::now();
 
     double apply_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();

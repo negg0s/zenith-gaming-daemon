@@ -25,7 +25,6 @@
 #include "zenith/cpu_topology.hpp"
 #include "zenith/engine.hpp"
 #include "zenith/interfaces/isysfs.hpp"
-#include "zenith/structured_logger.hpp"
 #include "zenith/tweaks/tweak_registry.hpp"
 
 namespace zenith::bench {
@@ -126,8 +125,9 @@ int main(int argc, char* argv[]) {
         cfg.compaction_proactiveness = 0;
 
         // Auto-register tweaks into registry
-        auto& registry = zenith::tweaks::TweakRegistry::instance();
-        (void)registry.get_all();
+        auto& registry = zenith::TweakRegistry::instance();
+        registry.register_defaults();
+        (void)registry.get_all_tweaks();
 
         auto t1 = std::chrono::steady_clock::now();
         double elapsed_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
@@ -142,17 +142,13 @@ int main(int argc, char* argv[]) {
     apply_times_ms.reserve(mutation_iterations);
     revert_times_ms.reserve(mutation_iterations);
 
+    auto& tweak_reg = zenith::TweakRegistry::instance();
+    tweak_reg.register_defaults();
+
     for (int i = 0; i < mutation_iterations; ++i) {
-        zenith::Config cfg;
-        cfg.cgroup_isolation_enabled = false; // no real root cgroups needed in test
-        cfg.gpu_clock_lock_enabled = false;
-        cfg.pipewire_quantum_tuning = false;
-
-        zenith::ZenithEngine engine(cfg);
-
         // Apply mutations
         auto t_apply_start = std::chrono::steady_clock::now();
-        engine.optimize_for_game(99999);
+        tweak_reg.apply_all(zenith::Profile::Balanced);
         auto t_apply_end = std::chrono::steady_clock::now();
 
         double apply_ms = std::chrono::duration<double, std::milli>(t_apply_end - t_apply_start).count();
@@ -160,7 +156,7 @@ int main(int argc, char* argv[]) {
 
         // Revert mutations
         auto t_revert_start = std::chrono::steady_clock::now();
-        engine.revert();
+        tweak_reg.revert_all();
         auto t_revert_end = std::chrono::steady_clock::now();
 
         double revert_ms = std::chrono::duration<double, std::milli>(t_revert_end - t_revert_start).count();
