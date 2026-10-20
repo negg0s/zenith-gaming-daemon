@@ -1,0 +1,15 @@
+[Unit]
+Description=Zenith Gaming Daemon - Ultra-low Latency Game Optimizer
+Documentation=https://github.com/NEGG0/zenith-gaming-daemon
+After=multi-user.target pipewire.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/zenith daemon
+Restart=always
+RestartSec=3
+AmbientCapabilities=CAP_SYS_NICE CAP_SYS_ADMIN CAP_SYS_RESOURCE
+CapabilityBoundingSet=CAP_SYS_NICE CAP_SYS_ADMIN CAP_SYS_RESOURCE
+
+[Install]
+WantedBy=multi-user.target

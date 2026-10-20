@@ -1,0 +1,24 @@
+# Maintainer: Emir (NEGG0) <rokmit599@gmail.com>
+pkgname=zenith-gaming-daemon
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Ultra-low latency Linux gaming optimizer daemon for Arch / CachyOS & SteamOS (C++20)"
+arch=('x86_64')
+url="https://github.com/NEGG0/zenith-gaming-daemon"
+license=('MIT')
+depends=('glibc' 'pipewire')
+makedepends=('cmake' 'gcc')
+source=("$pkgname-$pkgver.tar.gz::https://github.com/NEGG0/$pkgname/archive/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cd "$srcdir/$pkgname-$pkgver"
+    cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+    cmake --build build -j$(nproc)
+}
+
+package() {
+    cd "$srcdir/$pkgname-$pkgver"
+    DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
