@@ -36,7 +36,7 @@ Result<std::string> SocketClient::send_command(const std::string& command, int t
 #if defined(__linux__)
     int fd = ::socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
     if (fd < 0) {
-        return Err(ErrorCode::SocketError, "Failed to create UNIX domain socket", errno);
+        return Err(Error(ErrorCode::SystemError, "Failed to create UNIX domain socket", errno));
     }
 
     struct sockaddr_un addr{};
@@ -46,9 +46,9 @@ Result<std::string> SocketClient::send_command(const std::string& command, int t
     if (::connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) != 0) {
         int err = errno;
         ::close(fd);
-        return Err(ErrorCode::SocketError,
-                   i18n::format_error("E101", "Could not connect to Zenith daemon at " + socket_path_.string()),
-                   err);
+        return Err(Error(ErrorCode::SystemError,
+                         i18n::format_error("E101", "Could not connect to Zenith daemon at " + socket_path_.string()),
+                         err));
     }
 
     std::string payload = command;
@@ -58,7 +58,7 @@ Result<std::string> SocketClient::send_command(const std::string& command, int t
     if (written < 0) {
         int err = errno;
         ::close(fd);
-        return Err(ErrorCode::SocketError, "Failed to write command to socket", err);
+        return Err(Error(ErrorCode::IoError, "Failed to write command to socket", err));
     }
 
     // Wait for response with poll
@@ -69,7 +69,7 @@ Result<std::string> SocketClient::send_command(const std::string& command, int t
     int poll_res = ::poll(&pfd, 1, timeout_ms);
     if (poll_res <= 0) {
         ::close(fd);
-        return Err(ErrorCode::Timeout, "Socket read timed out waiting for daemon response");
+        return Err(Error(ErrorCode::Timeout, "Socket read timed out waiting for daemon response"));
     }
 
     char buffer[4096];
@@ -77,7 +77,7 @@ Result<std::string> SocketClient::send_command(const std::string& command, int t
     ::close(fd);
 
     if (bytes_read < 0) {
-        return Err(ErrorCode::SocketError, "Failed to read response from socket", errno);
+        return Err(Error(ErrorCode::IoError, "Failed to read response from socket", errno));
     }
 
     buffer[bytes_read] = '\0';
@@ -85,7 +85,7 @@ Result<std::string> SocketClient::send_command(const std::string& command, int t
 #else
     (void)command;
     (void)timeout_ms;
-    return Err(ErrorCode::NotSupported, "UNIX domain sockets are native to Linux");
+    return Err(Error(ErrorCode::NotSupported, "UNIX domain sockets are native to Linux"));
 #endif
 }
 
