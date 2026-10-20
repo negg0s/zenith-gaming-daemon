@@ -195,7 +195,7 @@ int main() {
     std::cout << "Running Stage 4 CPU Topology & Fixtures Verification Tests...\n";
 
     fs::path fixtures_base = "tests/fixtures";
-    test::generate_all_fixtures(fixtures_base);
+    zenith::test::generate_all_fixtures(fixtures_base);
 
     test_cpu_list_parsing();
     test_all_eleven_fixtures(fixtures_base);

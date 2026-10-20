@@ -100,12 +100,10 @@ SubprocessResult SecureProcess::execute(const std::string& binary_path,
 
     auto start_time = std::chrono::steady_clock::now();
     int status = 0;
-    bool finished = false;
 
     while (true) {
         pid_t res = ::waitpid(pid, &status, WNOHANG);
         if (res == pid) {
-            finished = true;
             if (WIFEXITED(status)) {
                 result.exit_code = WEXITSTATUS(status);
             } else if (WIFSIGNALED(status)) {
