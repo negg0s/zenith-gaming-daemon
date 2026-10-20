@@ -98,8 +98,8 @@ target_link_libraries(zenith-run PRIVATE zenith_core)
 # Installation targets
 include(GNUInstallDirs)
 install(TARGETS zenith zenithctl zenith-run DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES configs/zenith.conf configs/profiles.conf DESTINATION /etc/zenith)
-install(FILES systemd/zenith.service DESTINATION ${CMAKE_INSTALL_LIBDIR}/systemd/system)
+install(FILES configs/zenith.conf configs/profiles.conf DESTINATION etc/zenith)
+install(FILES systemd/zenith.service DESTINATION lib/systemd/system)
 
 # Unit testing
 enable_testing()
@@ -188,13 +188,14 @@ add_test(NAME ConfigMigrationTest COMMAND test_config_migration)
 # ==============================================================================
 # Packaging (CPack: .deb, .rpm, .tar.gz)
 # ==============================================================================
+set(CPACK_SET_DESTDIR "ON")
 set(CPACK_PACKAGE_NAME "zenith-gaming-daemon")
 set(CPACK_PACKAGE_VENDOR "Zenith Project")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ultra-low latency Linux gaming optimizer daemon (C++20)")
 set(CPACK_PACKAGE_VERSION_MAJOR 1)
-set(CPACK_PACKAGE_VERSION_MINOR 0)
+set(CPACK_PACKAGE_VERSION_MINOR 1)
 set(CPACK_PACKAGE_VERSION_PATCH 0)
-set(CPACK_PACKAGE_VERSION "1.0.0")
+set(CPACK_PACKAGE_VERSION "1.1.0")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 
