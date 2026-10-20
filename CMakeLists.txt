@@ -22,6 +22,10 @@ set(ZENITH_SOURCES
     src/process_tuner.cpp
     src/audio_network.cpp
     src/game_detector.cpp
+    src/journal.cpp
+    src/lock_guard.cpp
+    src/safe_mode.cpp
+    src/mutation.cpp
     src/engine.cpp
 )
 
@@ -54,3 +58,19 @@ add_test(NAME SysctlTest COMMAND test_sysctl)
 add_executable(test_engine tests/test_engine.cpp)
 target_link_libraries(test_engine PRIVATE zenith_core)
 add_test(NAME EngineTest COMMAND test_engine)
+
+add_executable(test_journal tests/test_journal.cpp)
+target_link_libraries(test_journal PRIVATE zenith_core)
+add_test(NAME JournalTest COMMAND test_journal)
+
+add_executable(test_flock tests/test_flock.cpp)
+target_link_libraries(test_flock PRIVATE zenith_core)
+add_test(NAME FlockTest COMMAND test_flock)
+
+add_executable(test_safe_mode tests/test_safe_mode.cpp)
+target_link_libraries(test_safe_mode PRIVATE zenith_core)
+add_test(NAME SafeModeTest COMMAND test_safe_mode)
+
+add_executable(test_fault_injection tests/test_fault_injection.cpp)
+target_link_libraries(test_fault_injection PRIVATE zenith_core)
+add_test(NAME FaultInjectionMatrixTest COMMAND test_fault_injection)

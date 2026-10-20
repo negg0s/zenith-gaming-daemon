@@ -18,11 +18,13 @@ void print_help() {
 "  zenith tune                       Manually apply gaming optimizations immediately\n"
 "  zenith revert                     Manually restore original system settings\n"
 "  zenith status                     Display CPU topology, cgroups, and current mode\n"
+"  zenith --rollback                 Emergency crash recovery from state journal\n"
+"  zenith --reset-safemode           Reset crash history and exit safe mode\n"
 "  zenith --help, -h                 Show this help menu\n\n"
 "Examples:\n"
 "  zenith daemon\n"
 "  zenith run steam -applaunch 730\n"
-"  zenith run ./my_game\n";
+"  zenith --rollback\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -38,6 +40,14 @@ int main(int argc, char* argv[]) {
     if (action == "--help" || action == "-h" || action == "help") {
         print_help();
         return 0;
+    }
+
+    if (action == "--rollback") {
+        return zenith::ZenithEngine::perform_emergency_rollback() ? 0 : 1;
+    }
+
+    if (action == "--reset-safemode") {
+        return zenith::ZenithEngine::reset_safe_mode() ? 0 : 1;
     }
 
     auto config = zenith::Config::default_config();
@@ -62,18 +72,18 @@ int main(int argc, char* argv[]) {
         }
         return engine.run_wrapped_command(cmd_args) ? 0 : 1;
     } else if (action == "tune") {
-        engine.initialize();
+        if (!engine.initialize()) return 1;
         zenith::DetectedGame manual_game;
         manual_game.pid = 1;
         manual_game.name = "Manual Gaming Session";
         engine.activate(manual_game);
         std::cout << "Zenith optimizations applied. Run 'zenith revert' to restore.\n";
     } else if (action == "revert") {
-        engine.initialize();
+        if (!engine.initialize()) return 1;
         engine.deactivate();
         std::cout << "System settings restored to default.\n";
     } else if (action == "status") {
-        engine.initialize();
+        if (!engine.initialize()) return 1;
         engine.print_status();
     } else {
         std::cerr << "Unknown command: " << action << "\n";

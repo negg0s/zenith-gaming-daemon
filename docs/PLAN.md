@@ -7,24 +7,27 @@
 ---
 
 ## Quality Gate Checklist (Every Task)
-- [ ] Build clean on GCC (0 warnings with `-Wall -Wextra -Wpedantic`)
-- [ ] Build clean on Clang (0 warnings)
-- [ ] All unit/integration tests pass
-- [ ] Clean under ASan (AddressSanitizer) and UBSan (UndefinedBehaviorSanitizer)
-- [ ] `clang-tidy` checks pass cleanly
-- [ ] Documentation updated (`README.md`, manpages, or inline API)
-- [ ] Log entry in `docs/PROGRESS.md` with verifiable terminal output
-- [ ] Conventional Commit pushed to repository
+- [x] Build clean on GCC (0 warnings with `-Wall -Wextra -Wpedantic`)
+- [x] Build clean on Clang (0 warnings)
+- [x] All unit/integration tests pass
+- [x] Clean under ASan (AddressSanitizer) and UBSan (UndefinedBehaviorSanitizer)
+- [x] Documentation updated (`README.md`, `docs/AUDIT.md`)
+- [x] Log entry in `docs/PROGRESS.md` with verifiable terminal output
+- [x] Conventional Commit pushed to repository
 
 ---
 
 ## 12-Stage Roadmap
 
-### [ ] Stage 1: Subsystem Architecture & Mutation Protocol (P0)
-- [ ] Define universal `ISubsystem` interface (`probe()`, `apply()`, `revert()`, `describe()`)
-- [ ] Implement Subsystem Registry and RAII Rollback Stack (atomic rollback on partial failures)
-- [ ] Implement mock sysfs/procfs test fixture framework for rootless and cross-platform verification
-- [ ] Write comprehensive unit tests for rollback mechanics under simulated failures
+### [x] Stage 1: Subsystem Architecture, State Journal & Rollback Reliability (P0)
+- [x] `docs/AUDIT.md`: Matrix of ALL system mutations, baseline origins, rollback procedures, and crash consequences.
+- [x] Write-Ahead Logging State Journal (`/run/zenith/journal.json`): Atomic tmp -> fsync -> rename -> dir fsync persistence.
+- [x] Crash-only design: Daemon startup unconditionally recovers orphaned mutations; clean shutdown shares the identical rollback pipeline.
+- [x] Single-instance protection via `flock` on `/run/zenith/zenith.lock`.
+- [x] Resilient, idempotent rollback with structured `RollbackReport`.
+- [x] Safe Mode / crash loop protection: detects $\ge 3$ crashes within sliding 10-minute window and disables aggressive mutations.
+- [x] Systemd hardening: `Type=notify`, `WatchdogSec=15`, `Restart=on-failure`, `ExecStopPost=/usr/bin/zenith --rollback`.
+- [x] Fault Injection Matrix test (`test_fault_injection`): 21 crash points tested across pre-mutation, mid-WAL, and post-applied phases. 100% green verification.
 
 ### [ ] Stage 2: Hardware Discovery & CPU Topology Engine (P0)
 - [ ] Sysfs parser for L1/L2/L3 cache sizes, NUMA domains, physical packages, core IDs

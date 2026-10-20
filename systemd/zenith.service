@@ -6,10 +6,17 @@ After=multi-user.target pipewire.service
 [Service]
 Type=simple
 ExecStart=/usr/bin/zenith daemon
-Restart=always
+Restart=on-failure
 RestartSec=3
+WatchdogSec=15
+ExecStopPost=/usr/bin/zenith --rollback
 AmbientCapabilities=CAP_SYS_NICE CAP_SYS_ADMIN CAP_SYS_RESOURCE
 CapabilityBoundingSet=CAP_SYS_NICE CAP_SYS_ADMIN CAP_SYS_RESOURCE
+
+# Hardening
+ProtectSystem=full
+ProtectHome=read-only
+NoNewPrivileges=false
 
 [Install]
 WantedBy=multi-user.target

@@ -31,8 +31,13 @@ void ZenithEngine::setup_signals() {
 #endif
 }
 
-ZenithEngine::ZenithEngine(Config config)
-    : config_(std::move(config)),
+ZenithEngine::ZenithEngine(Config config, fs::path run_dir)
+    : run_dir_(std::move(run_dir)),
+      config_(std::move(config)),
+      journal_(run_dir_ / "journal.json"),
+      lock_(run_dir_ / "zenith.lock"),
+      safe_mode_(run_dir_ / "crash_history.json"),
+      sysctl_(&journal_),
       detector_(config_.custom_game_patterns) {
     active_instance() = this;
     setup_signals();
@@ -47,6 +52,28 @@ ZenithEngine::~ZenithEngine() {
 
 bool ZenithEngine::initialize() {
     ZENITH_LOG_INFO("Initializing Zenith Gaming Daemon...");
+
+    // 1. Single-Instance Protection (flock)
+    if (!lock_.acquire()) {
+        ZENITH_LOG_ERROR("Another Zenith instance is already running (locked by PID " +
+                         std::to_string(lock_.get_locked_pid()) + "). Exiting.");
+        return false;
+    }
+
+    // 2. Safe Mode Evaluation (Crash Loop Protection)
+    safe_mode_.evaluate_and_record_boot();
+    if (safe_mode_.is_safe_mode_active()) {
+        ZENITH_LOG_WARN("SAFE MODE ENGAGED: Aggressive mutations disabled due to recent crash loops.");
+    }
+
+    // 3. Crash-Only Recovery: Auto-heal any orphaned mutations from previous crash
+    auto report = journal_.recover_all();
+    if (report.total_entries > 0 && report.successfully_reverted > 0) {
+        ZENITH_LOG_INFO("Crash recovery executed: Reverted " +
+                        std::to_string(report.successfully_reverted) + " orphaned mutations.");
+    }
+
+    // 4. Discover CPU Topology and GPUs
     topology_ = CpuTopology::detect();
 
     std::string topo_info = "Topology: " + std::to_string(topology_.total_cores()) + " cores";
@@ -63,6 +90,11 @@ bool ZenithEngine::initialize() {
 }
 
 bool ZenithEngine::activate(const DetectedGame& game) {
+    if (safe_mode_.is_safe_mode_active()) {
+        ZENITH_LOG_WARN("Cannot activate optimizations: Safe Mode is currently active.");
+        return false;
+    }
+
     if (active_game_.has_value()) {
         if (active_game_->pid == game.pid) return true;
         deactivate();
@@ -118,13 +150,31 @@ void ZenithEngine::deactivate() {
     sysctl_.rollback();
     gpu_.rollback();
     isolator_.rollback();
+    journal_.recover_all();
     active_game_ = std::nullopt;
 
     ZENITH_LOG_INFO("All system states cleanly restored.");
 }
 
+bool ZenithEngine::perform_emergency_rollback(const fs::path& run_dir) {
+    ZENITH_LOG_INFO("Performing standalone emergency rollback from journal at " + run_dir.string());
+    StateJournal journal(run_dir / "journal.json");
+    auto report = journal.recover_all();
+    ZENITH_LOG_INFO("Emergency rollback finished: " + std::to_string(report.successfully_reverted) +
+                    " entries reverted, " + std::to_string(report.failed_reverts) + " failures.");
+    return report.is_clean();
+}
+
+bool ZenithEngine::reset_safe_mode(const fs::path& run_dir) {
+    SafeModeManager mgr(run_dir / "crash_history.json");
+    return mgr.reset();
+}
+
 void ZenithEngine::run_daemon() {
-    initialize();
+    if (!initialize()) {
+        return;
+    }
+
     ZENITH_LOG_INFO("Daemon running. Polling for games every " + std::to_string(config_.poll_interval_ms) + "ms...");
 
     while (true) {
@@ -144,7 +194,7 @@ void ZenithEngine::run_daemon() {
 
 bool ZenithEngine::run_wrapped_command(const std::vector<std::string>& cmd_args) {
     if (cmd_args.empty()) return false;
-    initialize();
+    if (!initialize()) return false;
 
     AudioNetworkTuner::export_environment_hints(config_.pipewire_latency_numerator, config_.pipewire_latency_denominator);
 
@@ -185,6 +235,9 @@ bool ZenithEngine::run_wrapped_command(const std::vector<std::string>& cmd_args)
 
 void ZenithEngine::print_status() const {
     std::cout << "\n================ [ Zenith System Status ] ================\n";
+    std::cout << "Lock Status       : " << (lock_.is_acquired() ? "Acquired" : "Unheld") << "\n";
+    std::cout << "Safe Mode Status  : " << (safe_mode_.is_safe_mode_active() ? "ACTIVE (Throttled)" : "Normal") << "\n";
+    std::cout << "Recent Crashes    : " << safe_mode_.get_recent_crash_count() << "\n";
     std::cout << "Total Cores       : " << topology_.total_cores() << "\n";
     std::cout << "AMD 3D V-Cache    : " << (topology_.has_vcache() ? "YES (Optimized)" : "Not detected") << "\n";
     std::cout << "Intel Hybrid P/E  : " << (topology_.has_hybrid() ? "YES (P-cores pinned)" : "Uniform topology") << "\n";
@@ -192,6 +245,7 @@ void ZenithEngine::print_status() const {
     std::cout << "Background Cores  : " << topology_.to_cpuset_string(topology_.get_background_cores()) << "\n";
     std::cout << "cgroups v2 isol   : " << (isolator_.is_supported() ? "Supported" : "Disabled/Unsupported") << "\n";
     std::cout << "Active Game       : " << (active_game_.has_value() ? active_game_->name + " (PID " + std::to_string(active_game_->pid) + ")" : "None (Idle)") << "\n";
+    std::cout << "Journal Entries   : " << journal_.get_entries().size() << "\n";
     std::cout << "==========================================================\n\n";
 }
 
