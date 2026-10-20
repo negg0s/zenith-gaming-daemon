@@ -124,6 +124,13 @@ public:
     constexpr Result(E&& err) noexcept(std::is_nothrow_move_constructible_v<E>)
         : storage_(std::move(err)) {}
 
+    static constexpr Result ok(T val) noexcept(std::is_nothrow_move_constructible_v<T>) {
+        return Result(std::move(val));
+    }
+    static constexpr Result err(E error_val) noexcept(std::is_nothrow_move_constructible_v<E>) {
+        return Result(std::move(error_val));
+    }
+
     [[nodiscard]] constexpr bool has_value() const noexcept {
         return std::holds_alternative<T>(storage_);
     }

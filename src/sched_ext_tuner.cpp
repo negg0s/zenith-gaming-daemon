@@ -81,7 +81,7 @@ bool SchedExtTuner::start_scheduler(const std::string& scheduler_name) {
 bool SchedExtTuner::stop_scheduler() {
     if (!running_) return true;
 
-    run_cmd("/usr/bin/killall", {"-SIGINT", current_scheduler_});
+    (void)run_cmd("/usr/bin/killall", {"-SIGINT", current_scheduler_});
     running_ = false;
     ZENITH_LOG_INFO("Stopped sched_ext BPF scheduler: " + current_scheduler_);
     current_scheduler_.clear();
