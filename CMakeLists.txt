@@ -57,9 +57,14 @@ set(ZENITH_SOURCES
     src/per_game_profile.cpp
     src/proc_connector.cpp
     src/background_manager.cpp
+    src/irq_tuner.cpp
+    src/network_tuner.cpp
+    src/pipewire_tuner.cpp
+    src/latency_controller.cpp
 )
 
 add_library(zenith_core STATIC ${ZENITH_SOURCES})
+target_link_libraries(zenith_core PUBLIC ${CMAKE_DL_LIBS})
 
 add_executable(zenith src/main.cpp)
 target_link_libraries(zenith PRIVATE zenith_core)
@@ -120,4 +125,9 @@ add_test(NAME TweaksTest COMMAND test_tweaks)
 add_executable(test_game_detector tests/test_game_detector.cpp)
 target_link_libraries(test_game_detector PRIVATE zenith_core)
 add_test(NAME GameDetectorTest COMMAND test_game_detector)
+
+add_executable(test_latency_subsystems tests/test_latency_subsystems.cpp)
+target_link_libraries(test_latency_subsystems PRIVATE zenith_core)
+add_test(NAME LatencySubsystemsTest COMMAND test_latency_subsystems)
+
 

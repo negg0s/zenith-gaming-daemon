@@ -5,6 +5,9 @@
 #include "zenith/cgroup_isolator.hpp"
 #include "zenith/sysctl_tuner.hpp"
 #include "zenith/gpu_controller.hpp"
+#include "zenith/irq_tuner.hpp"
+#include "zenith/network_tuner.hpp"
+#include "zenith/pipewire_tuner.hpp"
 #include "zenith/process_tuner.hpp"
 #include "zenith/audio_network.hpp"
 #include "zenith/game_detector.hpp"
@@ -48,6 +51,9 @@ private:
     CgroupIsolator isolator_;
     SysctlTuner sysctl_;
     GpuController gpu_;
+    IrqTuner irq_;
+    NetworkTuner network_;
+    PipewireTuner pipewire_;
     GameDetector detector_;
 
     std::optional<DetectedGame> active_game_;

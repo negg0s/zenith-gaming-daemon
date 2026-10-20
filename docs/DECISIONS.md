@@ -149,3 +149,32 @@ Adopt **Option 3: Event-Driven Kernel Connector + Non-Invasive OS-Standard Tunin
 
 ### Status
 Accepted and implemented for Stage 5.
+
+---
+
+## ADR-0008: Modular Latency Subsystems, Dynamic NVML Loading, and Hardware Safety Guardrails
+
+### Context
+Low latency in competitive gaming requires orchestrating multiple independent hardware and kernel domains: IRQ interrupt steering, network queueing disciplines, audio server buffering, and GPU clock domains. However, systems exhibit wide hardware heterogeneity: AMD vs NVIDIA vs Intel graphics, diverse network adapters (Ethernet, Wi-Fi), and varying audio daemons. Crucially, a failure or absence of one component (e.g. no NVIDIA driver, or an unmanaged network interface) must never cause a cascading failure in other subsystems. Furthermore, aggressive GPU clock forcing without thermal and power guardrails can cause thermal throttling or battery exhaustion.
+
+### Options Considered
+1. **Monolithic Procedural Tuning**: Combine all tuning steps into a single sequence. Fragile: if any command fails (e.g. `tc` fails on a virtual bridge, or `nvidia-smi` is missing), the entire optimization pipeline aborts.
+2. **External Shell Scripting**: Call unvetted bash scripts for `tc`, `iw`, `nvidia-smi`, `pw-metadata`. Violates the Zero Shell Policy and makes atomic rollback impossible.
+3. **Modular Subsystems with Safety Guardrails & Dynamic NVML Loading**:
+   - **Independent Subsystems**: Each subsystem (`IrqTuner`, `NetworkTuner`, `PipewireTuner`, `GpuController`) implements an independent RAII contract with isolated `probe()`, `apply()`, `revert()`, and `describe()` methods. Failure in one subsystem is non-fatal and does not block others.
+   - **IRQ Steering**: Move network, USB, and NVMe interrupts to housekeeping cores while binding GPU interrupts to gaming CCD cores. Temporarily pause `irqbalance` during gaming sessions and restore it on exit.
+   - **Targeted Network QoS & Wi-Fi Power Save**: Discover active default gateway route from `/proc/net/route` and apply CAKE/FQ_CODEL strictly to the active interface, preserving the original qdisc for clean restoration. Disable Wi-Fi power save via `iw` during gaming.
+   - **Audio Latency & xrun Guardian**: Configure PipeWire quantum via `pw-metadata` or ephemeral drop-in configuration (`/run/pipewire/pipewire.conf.d/99-zenith.conf`), avoiding modification of `/etc` or user configuration. Monitor xrun counters; dynamically elevate quantum upon audio dropouts.
+   - **Multi-Vendor GPU & Dynamic NVML**:
+     - NVIDIA: Dynamically load `libnvidia-ml.so.1` via `dlopen`/`dlsym` for direct in-process NVML queries and clock locking without fork/exec overhead. Graceful fallback to `nvidia-smi` binary.
+     - AMD: Manage `power_dpm_force_performance_level` via sysfs with rollback.
+     - Intel: Tune `gt_min_freq_mhz` and `gt_boost_freq_mhz` via sysfs.
+   - **Thermal & Battery Safety Guard**:
+     - Thermal Guard: Check GPU temperature via hwmon/NVML. If $T \ge 85^\circ\text{C}$, refuse to lock maximum clocks.
+     - Battery Guard: Probe power supplies. If discharging on battery, refuse to engage aggressive GPU performance profiles.
+
+### Decision
+Adopt **Option 3: Modular Subsystems with Safety Guardrails & Dynamic NVML Loading**.
+
+### Status
+Accepted and implemented for Stage 6.

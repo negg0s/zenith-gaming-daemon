@@ -133,18 +133,23 @@ bool ZenithEngine::activate(const DetectedGame& game) {
         gpu_.lock_clocks();
     }
 
-    // 4. Game Process & Thread Affinity Tuning (Fine-grained per-thread scheduling)
+    // 4. IRQ Affinity Steering
+    irq_.apply(topology_.get_gaming_cores(), topology_.get_background_cores());
+
+    // 5. Game Process & Thread Affinity Tuning (Fine-grained per-thread scheduling)
     std::vector<int> all_cores;
     for (const auto& c : topology_.get_cores()) {
         if (c.is_online) all_cores.push_back(c.id);
     }
     ProcessTuner::tune_process_fine_grained(game.pid, topology_.get_gaming_cores(), all_cores);
 
-    // 5. Audio & Network low-latency
+    // 6. Network QoS & Wi-Fi Power Save
+    network_.apply();
+
+    // 7. Audio PipeWire real-time quantum
     if (config_.pipewire_quantum_tuning) {
-        AudioNetworkTuner::apply_pipewire_quantum(config_.pipewire_latency_numerator, config_.pipewire_latency_denominator);
+        pipewire_.apply(config_.pipewire_latency_numerator, config_.pipewire_latency_denominator);
     }
-    AudioNetworkTuner::optimize_network_qdisc();
 
     ZENITH_LOG_INFO("Zenith optimizations are ACTIVE. Low input-lag and stutter-free gaming engaged.");
     return true;
@@ -157,6 +162,9 @@ void ZenithEngine::deactivate() {
     ZENITH_LOG_INFO("<<< Game exited (" + active_game_->name + "). Restoring original system state...");
     std::cout << "=======================================================\n";
 
+    irq_.revert();
+    network_.revert();
+    pipewire_.revert();
     sysctl_.rollback();
     gpu_.rollback();
     isolator_.rollback();

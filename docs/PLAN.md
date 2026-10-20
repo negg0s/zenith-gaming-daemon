@@ -128,21 +128,30 @@
   - Zero false positives test across 100 system daemons
   - Zero file descriptor leaks and zero zombie process verification
 
-### [ ] Stage 6: GPU Power & Clock Domain Controller (P1)
-- [ ] AMD Radeon sysfs DPM performance level controller (`power_dpm_force_performance_level`)
-- [ ] NVIDIA GeForce persistent clocks & boost control abstraction
-- [ ] Intel Xe / Arc sysfs frequency lock probe
-- [ ] Hardware mock tests for AMD sysfs and NVIDIA CLI interfaces
-
-### [ ] Stage 7: Audio & Real-time PipeWire Tuning (P1)
-- [ ] PipeWire metadata quantum controller (`pw-metadata` / libpipewire interface)
-- [ ] Environment variable propagator for child game processes (`PIPEWIRE_LATENCY`)
-- [ ] Verification tests for quantum calculations and environment export
-
-### [ ] Stage 8: Network QoS & Bufferbloat Mitigation (P1)
-- [ ] Queueing discipline tuner (`cake` / `fq_codel` via sysctl and `tc`)
-- [ ] TCP buffer optimization probes
-- [ ] Non-root fallback and status reporting
+### [ ] Stage 6: Latency Optimization Subsystems & Hardware Controllers (P0)
+- [ ] IRQ Affinity Tuner (`irq_tuner`):
+  - Isolate Network, USB, and NVMe interrupts to background housekeeping cores
+  - Bind GPU interrupts to gaming CCD / performance cores
+  - Temporary suspension and guaranteed rollback of `irqbalance`
+  - Idempotent affinity restoration via Journal WAL
+- [ ] Network Low-Latency & Bufferbloat Tuner (`network_tuner`):
+  - Active default route interface discovery via `/proc/net/route`
+  - Non-destructive queueing discipline (CAKE / FQ_CODEL) via `tc` with full rollback
+  - Wi-Fi Power Save management via `iw` (inhibit during gaming, restore on exit)
+- [ ] Audio Latency & xrun Guardian (`pipewire_tuner`):
+  - PipeWire quantum adjustment via `pw-metadata` and isolated drop-in configuration (`/run/pipewire/pipewire.conf.d/99-zenith.conf`)
+  - Real-time priority via rtkit / `CAP_SYS_NICE`
+  - Dynamic xrun Guardian: automatic quantum elevation upon audio dropouts
+- [ ] Multi-Vendor GPU Controller (`gpu_controller`):
+  - AMD Radeon: `power_dpm_force_performance_level` with rollback
+  - NVIDIA GeForce: Native NVML library dynamic loader (`libnvidia-ml.so.1`) with persistence mode and locked clocks (safe limits), fallback to `nvidia-smi`
+  - Intel Arc / iGPU: `gt_min_freq_mhz` and `gt_boost_freq_mhz` sysfs tuning
+- [ ] Comprehensive Thermal & Battery Safety Guard:
+  - Thermal limit enforcement ($\ge 85^\circ\text{C}$ aborts clock locks)
+  - Battery discharge detection (prevents frequency lock on battery power)
+- [ ] Subsystem Independence & Resilience:
+  - Total decoupling: failure in one subsystem (e.g. GPU, PipeWire, IRQ, Network) does not crash or block the others
+  - Comprehensive unit test suite with mock sysfs, mock NVML, and mock IRQ fixtures (`test_latency_subsystems.cpp`)
 
 ### [ ] Stage 9: Client-Server IPC & CLI Interface (P1)
 - [ ] UNIX domain socket IPC between CLI client (`zenith`) and background daemon
