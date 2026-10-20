@@ -2,6 +2,8 @@
 #include <cassert>
 #include <iostream>
 
+namespace fs = std::filesystem;
+
 void test_flock_concurrency() {
     fs::path test_dir = fs::current_path() / "test_run_flock";
     std::error_code ec;

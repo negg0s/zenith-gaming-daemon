@@ -2,6 +2,8 @@
 #include <cassert>
 #include <iostream>
 
+namespace fs = std::filesystem;
+
 void test_safe_mode_crash_loop() {
     fs::path test_dir = fs::current_path() / "test_run_safemode";
     std::error_code ec;

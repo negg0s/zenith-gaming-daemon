@@ -4,6 +4,8 @@
 #include <iostream>
 #include <iomanip>
 
+namespace fs = std::filesystem;
+
 struct MockEnvironment {
     fs::path root;
     fs::path split_lock;

@@ -2,6 +2,8 @@
 #include <cassert>
 #include <iostream>
 
+namespace fs = std::filesystem;
+
 void test_atomic_journal_wal() {
     fs::path test_dir = fs::current_path() / "test_run_journal";
     std::error_code ec;
