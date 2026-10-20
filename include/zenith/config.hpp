@@ -4,6 +4,11 @@
 
 namespace zenith {
 
+struct ConfigResult {
+    bool success = false;
+    std::string error_message;
+};
+
 struct Config {
     // Core features
     bool cgroup_isolation_enabled = true;
@@ -34,8 +39,12 @@ struct Config {
         "steamwebhelper", "transmission", "qbittorrent", "obs"
     };
 
-    static Config load_from_file(const fs::path& path);
     static Config default_config();
+    static Config load_from_file(const fs::path& path);
+    static std::pair<Config, ConfigResult> parse_string(std::string_view content);
+
+    // Max allowed config file size: 64 KB
+    static constexpr size_t MAX_CONFIG_SIZE = 64 * 1024;
 };
 
 } // namespace zenith

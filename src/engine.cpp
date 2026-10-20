@@ -1,4 +1,5 @@
 #include "zenith/engine.hpp"
+#include "zenith/capability_guard.hpp"
 #include <csignal>
 #include <thread>
 #include <iostream>
@@ -60,7 +61,10 @@ bool ZenithEngine::initialize() {
         return false;
     }
 
-    // 2. Safe Mode Evaluation (Crash Loop Protection)
+    // 2. Privilege Sandboxing (drop unneeded capabilities)
+    CapabilityGuard::drop_unneeded_capabilities();
+
+    // 3. Safe Mode Evaluation (Crash Loop Protection)
     safe_mode_.evaluate_and_record_boot();
     if (safe_mode_.is_safe_mode_active()) {
         ZENITH_LOG_WARN("SAFE MODE ENGAGED: Aggressive mutations disabled due to recent crash loops.");

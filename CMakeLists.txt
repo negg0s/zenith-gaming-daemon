@@ -4,11 +4,24 @@ project(zenith-gaming-daemon VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(MSVC)
     add_compile_options(/W4 /permissive-)
 else()
-    add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-parameter)
+    # Security Hardening Flags
+    add_compile_options(
+        -Wall -Wextra -Wpedantic -Wno-unused-parameter
+        -fstack-protector-strong
+        -fstack-clash-protection
+        -fcf-protection=full
+        -D_FORTIFY_SOURCE=3
+    )
+    add_link_options(
+        -Wl,-z,relro
+        -Wl,-z,now
+        -Wl,-z,noexecstack
+    )
 endif()
 
 include_directories(include)
@@ -27,6 +40,10 @@ set(ZENITH_SOURCES
     src/safe_mode.cpp
     src/mutation.cpp
     src/engine.cpp
+    src/secure_process.cpp
+    src/secure_io.cpp
+    src/socket_server.cpp
+    src/capability_guard.cpp
 )
 
 add_library(zenith_core STATIC ${ZENITH_SOURCES})
@@ -74,3 +91,11 @@ add_test(NAME SafeModeTest COMMAND test_safe_mode)
 add_executable(test_fault_injection tests/test_fault_injection.cpp)
 target_link_libraries(test_fault_injection PRIVATE zenith_core)
 add_test(NAME FaultInjectionMatrixTest COMMAND test_fault_injection)
+
+add_executable(test_security tests/test_security.cpp)
+target_link_libraries(test_security PRIVATE zenith_core)
+add_test(NAME SecurityTest COMMAND test_security)
+
+add_executable(test_fuzz_corpus tests/test_fuzz_corpus.cpp)
+target_link_libraries(test_fuzz_corpus PRIVATE zenith_core)
+add_test(NAME FuzzCorpusTest COMMAND test_fuzz_corpus)

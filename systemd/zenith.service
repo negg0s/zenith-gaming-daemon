@@ -10,13 +10,32 @@ Restart=on-failure
 RestartSec=3
 WatchdogSec=15
 ExecStopPost=/usr/bin/zenith --rollback
-AmbientCapabilities=CAP_SYS_NICE CAP_SYS_ADMIN CAP_SYS_RESOURCE
-CapabilityBoundingSet=CAP_SYS_NICE CAP_SYS_ADMIN CAP_SYS_RESOURCE
 
-# Hardening
-ProtectSystem=full
-ProtectHome=read-only
-NoNewPrivileges=false
+# Privilege & Capabilities
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_SYS_NICE CAP_SYS_ADMIN CAP_SYS_RESOURCE
+AmbientCapabilities=CAP_SYS_NICE CAP_SYS_ADMIN CAP_SYS_RESOURCE
+
+# Filesystem Isolation
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=no
+PrivateDevices=no
+
+# Minimum required write paths
+ReadWritePaths=/run/zenith /sys/fs/cgroup /proc/sys/kernel /proc/sys/vm /proc/sys/net/core /sys/kernel/mm/transparent_hugepage /sys/class/drm
+
+# System Call & Kernel Surface Hardening
+SystemCallArchitectures=native
+SystemCallFilter=@system-service @system-service-for-cgroups
+RestrictAddressFamilies=AF_UNIX AF_NETLINK
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+MemoryDenyWriteExecute=yes
+LockPersonality=yes
 
 [Install]
 WantedBy=multi-user.target

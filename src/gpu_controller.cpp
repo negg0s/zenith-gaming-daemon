@@ -1,5 +1,5 @@
 #include "zenith/gpu_controller.hpp"
-#include <cstdlib>
+#include "zenith/secure_process.hpp"
 
 namespace zenith {
 
@@ -36,13 +36,13 @@ bool GpuController::detect_gpus() {
         }
     }
 
-    // Check NVIDIA via nvidia-smi
-    if (std::system("which nvidia-smi >/dev/null 2>&1") == 0) {
+    // Check NVIDIA via whitelisted binary path
+    if (fs::exists("/usr/bin/nvidia-smi")) {
         GpuDevice dev;
         dev.vendor = GpuVendor::Nvidia;
-        dev.name = "NVIDIA GPU (nvidia-smi)";
+        dev.name = "NVIDIA GPU (/usr/bin/nvidia-smi)";
         gpus_.push_back(dev);
-        ZENITH_LOG_INFO("Detected NVIDIA GPU via driver CLI.");
+        ZENITH_LOG_INFO("Detected NVIDIA GPU via whitelisted binary.");
     }
 
     return !gpus_.empty();
@@ -62,10 +62,10 @@ bool GpuController::lock_amd_gpu(GpuDevice& gpu) {
 
 bool GpuController::lock_nvidia_gpu(GpuDevice& gpu) {
     // Set persistence mode on
-    int ret1 = std::system("nvidia-smi -pm 1 >/dev/null 2>&1");
+    auto res1 = SecureProcess::execute("/usr/bin/nvidia-smi", {"-pm", "1"});
     // Lock compute/graphics clocks to max if supported
-    int ret2 = std::system("nvidia-smi --auto-boost-permission=0 >/dev/null 2>&1");
-    gpu.clock_locked = (ret1 == 0 || ret2 == 0);
+    auto res2 = SecureProcess::execute("/usr/bin/nvidia-smi", {"--auto-boost-permission=0"});
+    gpu.clock_locked = (res1.executed && res1.exit_code == 0) || (res2.executed && res2.exit_code == 0);
     if (gpu.clock_locked) {
         ZENITH_LOG_INFO("Configured NVIDIA GPU persistence mode and boost permissions.");
     }
@@ -84,8 +84,8 @@ void GpuController::rollback_amd_gpu(GpuDevice& gpu) {
 
 void GpuController::rollback_nvidia_gpu(GpuDevice& gpu) {
     if (gpu.clock_locked) {
-        (void)std::system("nvidia-smi -rgc >/dev/null 2>&1");
-        (void)std::system("nvidia-smi -pm 0 >/dev/null 2>&1");
+        SecureProcess::execute("/usr/bin/nvidia-smi", {"-rgc"});
+        SecureProcess::execute("/usr/bin/nvidia-smi", {"-pm", "0"});
         ZENITH_LOG_DEBUG("Reset NVIDIA GPU clocks.");
         gpu.clock_locked = false;
     }

@@ -14,6 +14,8 @@
 #include <functional>
 #include <unordered_map>
 #include <algorithm>
+#include <cstdint>
+#include <cstring>
 
 namespace zenith {
 

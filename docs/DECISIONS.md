@@ -47,3 +47,27 @@ All builds, cloned repositories, logs, fixtures, and source files must reside ex
 
 ### Status
 Accepted and strictly enforced.
+
+---
+
+## ADR-0004: Defense-in-Depth Security & Hardening Architecture
+
+### Context
+Zenith operates with elevated privileges (`CAP_SYS_ADMIN`, `CAP_SYS_NICE`, `CAP_SYS_RESOURCE`) to adjust kernel parameters, process priorities, and GPU power profiles. This creates potential attack surfaces: command injection via malicious process names, symlink traversal in virtual filesystems, socket spoofing by local unprivileged users, configuration corruption, and memory safety vulnerabilities.
+
+### Options Considered
+1. **Unchecked Shell / System Invocations**: Use `std::system()` or `popen()` with formatted strings. Highly susceptible to command injection via crafted game titles or executable paths.
+2. **Minimal Hardening**: Standard file I/O and unauthenticated UNIX domain sockets. Vulnerable to symlink races (`/proc` pointing outside) and unprivileged local users sending commands to alter hardware clock states.
+3. **Defense-in-Depth Hardening**:
+   - Zero Shell Policy: Total elimination of `std::system()` and `popen()`. All external tools executed via `fork()` + `execve()` with whitelisted binaries (`/usr/bin/nvidia-smi`, `/usr/bin/pw-metadata`) and sanitized environment variables.
+   - Filesystem Sandboxing: `openat2` with `RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS` via trusted base dirfds to prevent symlink traversal attacks.
+   - IPC Authorization: UNIX domain socket at `/run/zenith/zenith.sock` with `0660` permissions, group ownership restricted to `wheel`/`gamemode`, kernel-level `SO_PEERCRED` validation, and 4 KB payload limit.
+   - Strict Configuration Validation: Config files capped at 64 KB; any unknown key triggers parse failure; strict type and numerical range enforcement.
+   - Privilege Containment: `PR_SET_NO_NEW_PRIVS` set on startup; systemd service hardened with `ProtectSystem=strict`, `ProtectHome=yes`, `PrivateTmp=yes`, and `ProtectKernelModules=yes`.
+   - Toolchain Hardening: PIE, Full RELRO (`-Wl,-z,relro,-z,now`), `-fstack-protector-strong`, `-fstack-clash-protection`, `-fcf-protection=full`, `_FORTIFY_SOURCE=3`, and `-Wl,-z,noexecstack`.
+
+### Decision
+Adopt **Option 3: Defense-in-Depth Hardening**.
+
+### Status
+Accepted and implemented for Stage 2.

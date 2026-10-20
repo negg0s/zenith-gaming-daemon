@@ -1,4 +1,5 @@
 #include "zenith/journal.hpp"
+#include "zenith/secure_process.hpp"
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -327,8 +328,8 @@ bool StateJournal::execute_entry_revert(const JournalEntry& entry) {
             return true;
         }
         case MutationType::GpuNvidiaSmi: {
-            (void)std::system("nvidia-smi -rgc >/dev/null 2>&1");
-            (void)std::system("nvidia-smi -pm 0 >/dev/null 2>&1");
+            SecureProcess::execute("/usr/bin/nvidia-smi", {"-rgc"});
+            SecureProcess::execute("/usr/bin/nvidia-smi", {"-pm", "0"});
             return true;
         }
         case MutationType::CgroupSlice: {
@@ -349,7 +350,7 @@ bool StateJournal::execute_entry_revert(const JournalEntry& entry) {
         }
         case MutationType::PipewireQuantum: {
             // Revert quantum to dynamic default 0
-            (void)std::system("pw-metadata -n settings 0 clock.force-quantum 0 >/dev/null 2>&1");
+            SecureProcess::execute("/usr/bin/pw-metadata", {"-n", "settings", "0", "clock.force-quantum", "0"});
             return true;
         }
         default:

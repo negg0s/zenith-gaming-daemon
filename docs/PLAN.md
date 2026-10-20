@@ -29,7 +29,19 @@
 - [x] Systemd hardening: `Type=notify`, `WatchdogSec=15`, `Restart=on-failure`, `ExecStopPost=/usr/bin/zenith --rollback`.
 - [x] Fault Injection Matrix test (`test_fault_injection`): 21 crash points tested across pre-mutation, mid-WAL, and post-applied phases. 100% green verification.
 
-### [ ] Stage 2: Hardware Discovery & CPU Topology Engine (P0)
+### [x] Stage 2: Security & Hardening Architecture (P0)
+- [x] `docs/THREAT_MODEL.md`: Assets, trust boundaries, attacker vectors (local user, malicious config, process spoofing).
+- [x] Zero Shell Policy: Total elimination of `std::system()` and `popen()`; all executions through `SecureProcess` using `fork()` + `execve()` with approved whitelist (`/usr/bin/nvidia-smi`, `/usr/bin/pw-metadata`).
+- [x] Virtual FS Sandboxing (`SecureIo`): `openat2` with `RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS` via trusted base dirfds.
+- [x] Strict configuration validation: 64 KB cap, immediate error on unknown keys, strict boolean/integer ranges.
+- [x] Control socket hardening (`SocketServer`): 0660 permissions, `SO_PEERCRED` kernel authorization (root/wheel/gamemode), 4 KB payload limit.
+- [x] Capabilities dropping & privilege containment (`CapabilityGuard`): `PR_SET_NO_NEW_PRIVS`, ambient capabilities dropped down to `CAP_SYS_NICE`, `CAP_SYS_ADMIN`, `CAP_SYS_RESOURCE`.
+- [x] Systemd hardening (`systemd/zenith.service`): `NoNewPrivileges=yes`, `ProtectSystem=strict`, `ProtectHome=yes`, `PrivateTmp=yes`, `ProtectKernelModules=yes`, `RestrictAddressFamilies=AF_UNIX AF_NETLINK`, `SystemCallFilter=@system-service`, minimal `ReadWritePaths`.
+- [x] Compiler and Linker Hardening: PIE, Full RELRO (`-Wl,-z,relro,-z,now`), `-fstack-protector-strong`, `-fstack-clash-protection`, `-fcf-protection=full`, `-D_FORTIFY_SOURCE=3`, `-Wl,-z,noexecstack`.
+- [x] Fuzzing and adversarial regression suite: `fuzz_one_config`, `fuzz_one_sysfs`, `fuzz_one_socket`, `fuzz_one_proc` with seed corpus in `fuzz/corpus/` tested via `test_fuzz_corpus`.
+- [x] `SECURITY.md`: Responsible disclosure policy with encrypted contact and response SLAs.
+
+### [ ] Stage 3: Hardware Discovery & CPU Topology Engine (P0)
 - [ ] Sysfs parser for L1/L2/L3 cache sizes, NUMA domains, physical packages, core IDs
 - [ ] Reliable AMD 3D V-Cache CCD identification via cache asymmetry heuristic & sysfs
 - [ ] Intel Hybrid (P-core vs E-core) identification via max frequency & core type
