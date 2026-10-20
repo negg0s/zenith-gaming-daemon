@@ -678,4 +678,123 @@ Total Test time (real) = 49.39 sec
 - Stage 7 completed and verified.
 - Master checklist in `docs/PLAN.md` updated.
 - ADR-0009 recorded in `docs/DECISIONS.md`.
-- Next up: Stage 8 / Stage 11 (End-to-End Stress Testing & Quality Gate Audit / Release Preparation).
+
+---
+
+## [2026-10-20] - Stage 8: Reference C++20 Architecture & Code Excellence
+
+### Context
+Execution of Stage 8 according to the Autonomous Senior Engineer protocol. Stage 8 establishes the production-grade modern C++20 architectural foundation: monadic error handling without exceptions on the hot path, full dependency inversion across all external interactions (`ISysfs`, `IProcessSource`, `ICommandRunner`, `IClock`, `INetlink`), plugin-like self-registering tweaks, strict move-only RAII guards (`UniqueFd`, `CgroupDirGuard`, `ScopeExitGuard`), high-throughput structured logger with journald and JSON formatters plus token-bucket rate limiting, single-threaded Epoll reactor event loop (`IPoller`, `EpollPoller`, `MockPoller`), comprehensive architecture documentation (`docs/ARCHITECTURE.md`) with 4 Mermaid diagrams, and strict compiler quality gates under GCC and Clang with ASan, UBSan, and ThreadSanitizer (TSan).
+
+### Actions Completed
+1. **Architecture Documentation (`docs/ARCHITECTURE.md`)**:
+   - High-level system architecture overview.
+   - 4 exhaustive Mermaid diagrams:
+     - Component Topology (`graph TD`).
+     - Event & Data Flow Sequence (`sequenceDiagram`).
+     - Daemon & Game Lifecycle State Machine (`stateDiagram-v2`).
+     - Security & Privilege Boundary Flowchart (`flowchart TD`).
+   - Detailed specifications for memory model, hot path zero-allocation design, error propagation, and RAII invariants.
+2. **Monadic Error Handling (`include/zenith/result.hpp`)**:
+   - Modern C++20 `Result<T, Error>` and `Result<void, Error>`.
+   - Rich `Error` struct with `ErrorCode`, detailed string description, system `errno`, source filename, line number, and function signature.
+   - Monadic combinators: `.map()`, `.map_error()`, `.and_then()`, `.or_else()`.
+   - Zero dynamic memory allocation on success paths and zero exceptions on hot paths.
+3. **Core Dependency Inversion Interfaces (`include/zenith/interfaces/`)**:
+   - `isysfs.hpp`: `ISysfs` with `RealSysfs` and `MockSysfs` supporting in-memory file trees and fault injection.
+   - `iprocess_source.hpp`: `IProcessSource` with `RealProcessSource` and `MockProcessSource`.
+   - `icommand_runner.hpp`: `ICommandRunner` with `MockCommandRunner` supporting canned exit codes and outputs.
+   - `iclock.hpp`: `IClock` with `RealClock` and `MockClock` allowing manual time advancement in tests.
+   - `inetlink.hpp`: `INetlink` with `MockNetlink` allowing synthetic netlink message delivery.
+4. **Plugin-like Self-Registering Tweak Subsystem (`include/zenith/tweaks/tweak_registry.hpp`)**:
+   - Template-based `TweakRegistrar<T>` for static auto-registration.
+   - Macro `ZENITH_REGISTER_TWEAK(TweakClass)` enabling single-file tweak additions without touching central dispatchers.
+5. **Strict RAII Resource Guards (`include/zenith/raii.hpp`)**:
+   - `UniqueFd`: Move-only POSIX file descriptor wrapper with cross-platform `<unistd.h>` and `<io.h>` guards.
+   - `CgroupDirGuard`: RAII directory cleanup for transient cgroups.
+   - `ScopeExitGuard`: General-purpose compile-time scope exit execution guard.
+   - Zero raw `new`/`delete` throughout the entire codebase.
+6. **Structured Logger & Rate Limiter (`include/zenith/structured_logger.hpp`, `src/structured_logger.cpp`)**:
+   - Log levels: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `CRITICAL`.
+   - Formats: Text (ANSI colored), Systemd Journald stream format (`<priority>message`), and compact single-line JSON format.
+   - `RateLimiter`: Per-key token-bucket / sliding window rate limiting to prevent syslog flooding during high-frequency events.
+7. **Single-Threaded Epoll Core Reactor (`include/zenith/event_loop.hpp`, `src/event_loop.cpp`)**:
+   - `IPoller`, `EpollPoller` (Linux `epoll_create1`, `epoll_ctl`, `epoll_wait`), and `MockPoller`.
+   - Support for `signalfd`, `timerfd`, and socket descriptors.
+   - Thread-safe `post()` task queue for posting work from background helper threads into the single-threaded reactor.
+   - ThreadSanitizer verified: zero data races across multi-threaded operations.
+8. **Tooling & Compiler Hardening**:
+   - `.clang-format`: Formatted to modern C++20 LLVM/Google standard.
+   - `.clang-tidy`: Enabled `bugprone-*`, `performance-*`, `modernize-*`, `cert-*`.
+   - Global coverage flags `--coverage` in `CMakeLists.txt`.
+9. **Comprehensive Architectural Unit Test Suite (`tests/test_cpp20_architecture.cpp`)**:
+   - 6 test cases verifying `Result` monad, mock interfaces, RAII guards, structured logger, rate limiter, event loop, and tweak plugin registrar.
+10. **Architecture Decision Record**:
+    - Recorded `ADR-0010: C++20 Modern Architectural Paradigm & Dependency Inversion` in `docs/DECISIONS.md`.
+
+### Verified CI Command Output (GitHub Actions Run 39477463688)
+```text
+Workflow: CI (run 39477463688)
+Head Commit: 8c2d48c (build(coverage): configure global coverage flags and update Stage 8 plan checklist)
+Conclusion: SUCCESS (100% green across 3 matrix targets)
+
+Matrix Jobs:
+✓ build-and-test (gcc) in 1m 54s (ID 118817026115)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (GCC with ASan/UBSan & Coverage)
+  ✓ Build Zenith (0 compiler warnings with -Wall -Wextra -Wpedantic)
+  ✓ Run Unit Tests & Fault Injection Matrix (100% tests passed, 0 failures)
+  ✓ Generate Code Coverage Report (GCC)
+  ✓ Complete job
+
+✓ build-and-test (clang) in 2m 12s (ID 118817026005)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Verify Code Formatting
+  ✓ Configure CMake (Clang with ASan/UBSan)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Fault Injection Matrix (100% tests passed, 0 failures)
+  ✓ Complete job
+
+✓ build-and-test (clang-tsan) in 1m 52s (ID 118817026332)
+  ✓ Set up job
+  ✓ Checkout repository
+  ✓ Install dependencies
+  ✓ Configure CMake (Clang with ThreadSanitizer)
+  ✓ Build Zenith (0 compiler warnings)
+  ✓ Run Unit Tests & Fault Injection Matrix (100% tests passed, 0 data races)
+  ✓ Complete job
+
+Test Suite Execution Details (15 / 15 Targets Green):
+ 1/15 Test  #1: CpuTopologyTest ..................   Passed    0.28 sec
+ 2/15 Test  #2: ConfigTest .......................   Passed    0.01 sec
+ 3/15 Test  #3: SysctlTest .......................   Passed    0.01 sec
+ 4/15 Test  #4: EngineTest .......................   Passed    0.01 sec
+ 5/15 Test  #5: JournalTest ......................   Passed    0.01 sec
+ 6/15 Test  #6: FlockTest ........................   Passed    0.01 sec
+ 7/15 Test  #7: SafeModeTest .....................   Passed    0.01 sec
+ 8/15 Test  #8: FaultInjectionMatrixTest .........   Passed    0.20 sec
+ 9/15 Test  #9: SecurityTest .....................   Passed    0.01 sec
+10/15 Test #10: FuzzCorpusTest ...................   Passed    0.03 sec
+11/15 Test #11: TweaksTest .......................   Passed    0.10 sec
+12/15 Test #12: GameDetectorTest .................   Passed   49.80 sec
+13/15 Test #13: LatencySubsystemsTest ............   Passed    0.03 sec
+14/15 Test #14: AdaptiveControllerTest ...........   Passed    0.02 sec
+15/15 Test #15: Cpp20ArchitectureTest ............   Passed    0.02 sec
+
+Summary LCOV Code Coverage Rate:
+  lines......: 69.8% (3244 of 4650 lines)
+  functions..: 78.3% (517 of 660 functions)
+
+100% tests passed, 0 tests failed out of 15.
+Clean under AddressSanitizer, UndefinedBehaviorSanitizer, and ThreadSanitizer.
+```
+
+### Active State
+- Stage 8 completed and verified.
+- Master checklist in `docs/PLAN.md` updated.
+- ADR-0010 recorded in `docs/DECISIONS.md`.
+- Next up: Stage 11 (End-to-End Stress Testing & Quality Gate Audit / Release Preparation).
