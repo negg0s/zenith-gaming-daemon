@@ -135,20 +135,15 @@ DoctorItem Doctor::check_conflicting_services() {
     item.name = "conflicting_services";
 
     auto conflicts = ConflictDetector::probe_system_conflicts();
-    int active_conflicts = 0;
-    std::string names;
-    for (const auto& c : conflicts) {
-        if (c.status == ServiceStatus::Active) {
-            active_conflicts++;
-            if (!names.empty()) names += ", ";
-            names += c.name;
-        }
-    }
-
-    if (active_conflicts == 0) {
+    if (conflicts.empty()) {
         item.status = DoctorStatus::Pass;
         item.message = i18n::tr("conflicts_none");
     } else {
+        std::string names;
+        for (const auto& c : conflicts) {
+            if (!names.empty()) names += ", ";
+            names += c.service_name;
+        }
         item.status = DoctorStatus::Warning;
         item.message = i18n::tr("conflicts_found") + ": " + names;
         item.advice = "Competing optimizers may override CPU governors, nice values, or cgroup isolation.";

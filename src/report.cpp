@@ -61,11 +61,10 @@ std::string IssueReportGenerator::generate_anonymized_report() {
 #endif
 
     // Topology Summary
-    CpuTopology topo;
-    if (topo.probe()) {
-        ss << "- **CPU Model**: " << topo.get_cpu_model() << "\n";
-        ss << "- **Total Cores / Threads**: " << topo.get_total_cores() << "\n";
-        ss << "- **Architecture**: " << (topo.is_x3d() ? "AMD 3D V-Cache" : (topo.is_intel_hybrid() ? "Intel Hybrid (P/E)" : "Standard SMP")) << "\n";
+    CpuTopology topo = CpuTopology::detect();
+    if (topo.total_cores() > 0) {
+        ss << "- **Total Cores / Threads**: " << topo.total_cores() << "\n";
+        ss << "- **Architecture**: " << (topo.has_vcache() ? "AMD 3D V-Cache" : (topo.has_hybrid() ? "Intel Hybrid (P/E)" : "Standard SMP")) << "\n";
     }
 
     ss << "\n#### System Doctor Results\n\n```text\n";

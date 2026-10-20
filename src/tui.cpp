@@ -108,10 +108,10 @@ void TuiRenderer::run_watch_loop(int interval_ms, int max_iterations) {
     TuiSnapshot snapshot;
 
     // Probe hardware topology
-    CpuTopology topo;
-    if (topo.probe()) {
+    CpuTopology topo = CpuTopology::detect();
+    if (topo.total_cores() > 0) {
         snapshot.gaming_cores = topo.get_gaming_cores();
-        snapshot.housekeeping_cores = topo.get_housekeeping_cores();
+        snapshot.housekeeping_cores = topo.get_background_cores();
     } else {
         snapshot.gaming_cores = {0, 1, 2, 3};
         snapshot.housekeeping_cores = {4, 5, 6, 7};
