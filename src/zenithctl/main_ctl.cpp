@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include "zenith/version.hpp"
 #include <string>
 #include <vector>
 
@@ -29,8 +30,8 @@ void print_ctl_help() {
 "    / / ___ _ __   _| |_| |__   ___| |_| |\n"
 "   / / / _ \\ '_ \\ | | __| '_ \\ / __| __| |\n"
 "  / /_|  __/ | | || | |_| | | | (__| |_| |\n"
-" /_____\\___|_| |_||_|\\__|_| |_|\\___|\\__|_| (v1.0.0)\n\n"
-"Zenith Gaming Daemon User Control Utility\n\n"
+" /_____\\___|_| |_||_|\\__|_| |_|\\___|\\__|_| (v" << zenith::ZENITH_VERSION << ")\n\n"
+<< "Zenith Gaming Daemon User Control Utility\n\n"
 "Usage: zenithctl <command> [options] [arguments]\n\n"
 "Core Commands:\n"
 "  status [--watch, -w] [--json]    Display daemon status, active game, and core topology\n"
@@ -74,7 +75,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (cmd == "version" || cmd == "--version" || cmd == "-v") {
-        std::cout << "zenithctl version 1.0.0 (C++20 Linux Ultra-Low Latency Daemon)\n"
+        std::cout << "zenithctl version " << zenith::ZENITH_VERSION << " (C++20 Linux Ultra-Low Latency Daemon)\n"
                   << "Repository: https://github.com/NEGG0/zenith-gaming-daemon\n"
                   << "Docs: https://github.com/NEGG0/zenith-gaming-daemon/blob/main/docs/ARCHITECTURE.md\n";
         return 0;

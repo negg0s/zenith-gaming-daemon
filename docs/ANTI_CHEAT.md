@@ -15,11 +15,11 @@ Zenith operates under a **Strict Non-Invasive Process Policy**. The daemon is de
 2. **Zero Debugging / Tracing Hooks**: Zenith **never** invokes `ptrace()`, `PTRACE_ATTACH`, `PTRACE_SEIZE`, or any hardware debug registers.
 3. **Zero Code or Shared Object Injection**: Zenith **never** uses `LD_PRELOAD`, `dlopen()`, `libmem` hooks, remote thread creation, or function detour trampolines.
 4. **Standard Kernel-Level Resource Attribution Only**: Zenith interacts with games exclusively through official Linux kernel system calls provided by the POSIX standard and cgroups v2:
-   - `sched_setaffinity(2)`: Pins threads to selected performance cores or V-Cache CCDs.
-   - `setpriority(2)` / `nice`: Adjusts standard process nice levels (-20 to +19).
-   - `sched_setscheduler(2)` / `sched_setattr(2)`: Requests standard scheduling classes (`SCHED_OTHER`, `SCHED_BATCH`, `SCHED_ISO`, `SCHED_RR`).
-   - `sched_setattr(2)` with `uclamp.min`: Informs the kernel CFS/EEVDF scheduler of expected minimum compute capacity.
-   - `cgroups v2` (`cgroup.procs`): Moves non-game background tasks into dedicated throttled cgroup slices (`cpu.weight=50`, `cpu.idle=1`).
+  - `sched_setaffinity(2)`: Pins threads to selected performance cores or V-Cache CCDs.
+  - `setpriority(2)` / `nice`: Adjusts standard process nice levels (-20 to +19).
+  - `sched_setscheduler(2)` / `sched_setattr(2)`: Requests standard scheduling classes (`SCHED_OTHER`, `SCHED_BATCH`, `SCHED_ISO`, `SCHED_RR`).
+  - `sched_setattr(2)` with `uclamp.min`: Informs the kernel CFS/EEVDF scheduler of expected minimum compute capacity.
+  - `cgroups v2` (`cgroup.procs`): Moves non-game background tasks into dedicated throttled cgroup slices (`cpu.weight=50`, `cpu.idle=1`).
 
 ---
 

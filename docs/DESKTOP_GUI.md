@@ -42,17 +42,17 @@ For desktop users on Arch Linux, CachyOS, and SteamOS who desire visual feedback
 ## 3. Tray Applet Features
 
 1. **Dynamic Tray Icon State**:
-   - ⚡ **Green Flame / Lightning**: Game active, optimizations engaged.
-   - 💤 **Dim Shield / Z**: Daemon idle, monitoring background processes.
-   - ⚠️ **Orange Alert**: Safe Mode engaged (crash loop prevention).
-   - ❌ **Red Cross**: Daemon offline.
+  - ⚡ **Green Flame / Lightning**: Game active, optimizations engaged.
+  - 💤 **Dim Shield / Z**: Daemon idle, monitoring background processes.
+  - ⚠️ **Orange Alert**: Safe Mode engaged (crash loop prevention).
+  - ❌ **Red Cross**: Daemon offline.
 2. **Context Menu Actions**:
-   - **Active Game**: Title, PID, elapsed time, current profile.
-   - **Quick Profile Switcher**: Radio selector for `Safe`, `Balanced`, and `Aggressive`.
-   - **Live PSI Pressure**: CPU, Memory, and IO pressure percentages.
-   - **Launch Dashboard**: Spawns terminal running `zenithctl status --watch`.
-   - **Emergency Revert**: Immediate trigger for `zenithctl rollback`.
-   - **Doctor Diagnostics**: Runs `zenithctl doctor` in a floating terminal window.
+  - **Active Game**: Title, PID, elapsed time, current profile.
+  - **Quick Profile Switcher**: Radio selector for `Safe`, `Balanced`, and `Aggressive`.
+  - **Live PSI Pressure**: CPU, Memory, and IO pressure percentages.
+  - **Launch Dashboard**: Spawns terminal running `zenithctl status --watch`.
+  - **Emergency Revert**: Immediate trigger for `zenithctl rollback`.
+  - **Doctor Diagnostics**: Runs `zenithctl doctor` in a floating terminal window.
 
 ---
 

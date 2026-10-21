@@ -278,7 +278,7 @@
   - GitHub Actions pinned to exact immutable commit SHAs.
 - [x] 11.6 Configuration Migration Engine & Test Suite:
   - `ConfigMigrator` (`include/zenith/config_migration.hpp`, `src/config_migration.cpp`);
-  - Unit tests verifying seamless v1.0.0 $\to$ v1.1.0 schema upgrade and idempotence (`tests/test_config_migration.cpp`, 18th CMake test target).
+  - Unit tests verifying automated v1.0.0 $\to$ v1.1.0 schema upgrade and idempotence (`tests/test_config_migration.cpp`, 18th CMake test target).
 
 ### [x] Stage 12: Project Showcase, Documentation & Distribution Excellence (P0)
 - [x] 12.1 Project Showcase & README Overhaul (`README.md`):
@@ -320,6 +320,6 @@
   - Automated deployment workflow `.github/workflows/docs.yml`.
 - [x] 12.8 Final Acceptance & Release Verification:
   - Release v1.1.0 published with native packages (`.deb`, `.rpm`, `.tar.gz`, SBOM, SHA256SUMS);
-  - Flawless single-command installation path verified.
+  - Single-command installation path verified.
 
 

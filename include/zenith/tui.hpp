@@ -3,11 +3,12 @@
 
 #include <string>
 #include <vector>
+#include "zenith/version.hpp"
 
 namespace zenith {
 
 struct TuiSnapshot {
-    std::string daemon_version = "1.0.0";
+    std::string daemon_version = ZENITH_VERSION;
     std::string profile = "Balanced";
     bool is_game_active = false;
     int game_pid = 0;

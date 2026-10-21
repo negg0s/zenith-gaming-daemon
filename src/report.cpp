@@ -2,6 +2,7 @@
 #include "zenith/report.hpp"
 #include "zenith/doctor.hpp"
 #include "zenith/cpu_topology.hpp"
+#include "zenith/version.hpp"
 
 #include <chrono>
 #include <cstdlib>
@@ -50,7 +51,7 @@ std::string IssueReportGenerator::generate_anonymized_report() {
 
     ss << "### Zenith System Diagnostics & Issue Report\n\n";
     ss << "- **Timestamp**: " << std::put_time(std::gmtime(&now_c), "%Y-%m-%d %H:%M:%S UTC") << "\n";
-    ss << "- **Zenith Version**: 1.0.0\n";
+    ss << "- **Zenith Version**: " << zenith::ZENITH_VERSION << "\n";
 
 #if defined(__linux__)
     struct utsname buf;

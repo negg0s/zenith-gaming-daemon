@@ -40,8 +40,8 @@ On the Steam Deck (monolithic AMD Van Gogh APU with single quad-core CCX):
 
 ### 4. Will Zenith increase my average FPS?
 Zenith is engineered to fix **frame-time consistency and 0.1% / 1% FPS lows**, not to artificially inflate average FPS when a game is purely GPU-bound:
-* If your GPU is running at 99% utilization, Zenith will not magically double your frame rate.
-* What Zenith **does** do is eliminate the sudden 50–100ms micro-stutters, shader-compile hiccups, L3 cache-bounce spikes, and split-lock penalties that ruin competitive gaming.
+* If your GPU is running at 99% utilization, Zenith will not double your frame rate when GPU-bound.
+* What Zenith **does** do is eliminate the sudden 50-100ms micro-stutters, shader-compile hiccups, L3 cache-bounce spikes, and split-lock penalties that ruin competitive gaming.
 * In CPU-bound and cache-sensitive titles (e.g. *Counter-Strike 2*, *Dota 2*, *Cyberpunk 2077*, *Baldur's Gate 3*), users typically see a **15% to 35% improvement in 1% and 0.1% lows**.
 
 ---
@@ -61,6 +61,6 @@ Zenith includes `zenith-run` as a lightweight companion wrapper. If you prefer t
 ---
 
 ### 7. How does Zenith integrate with CachyOS kernels?
-CachyOS is a premier Linux gaming distribution featuring specialized kernels (BORE, EEVDF, sched-ext). Zenith detects CachyOS environments automatically:
+CachyOS is an optimized Linux gaming distribution featuring specialized kernels (BORE, EEVDF, sched-ext). Zenith detects CachyOS environments automatically:
 * If the `amd_x3d_vcache` driver is present, Zenith prioritizes hardware-level frequency/cache switching.
 * If `sched_ext` (e.g. `scx_bpfland`, `scx_lavd`) is running, Zenith cooperates with the BPF scheduler and applies targeted nice/uclamp hints.

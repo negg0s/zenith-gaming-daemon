@@ -11,26 +11,26 @@ Execution of Stage 1 according to the Autonomous Senior Engineer protocol. Zenit
 
 ### Actions Completed
 1. **`docs/AUDIT.md` Created**:
-   - Comprehensive system mutation matrix cataloging 17 distinct kernel, sysfs, cgroup, GPU, process, PipeWire, and IRQ targets.
-   - Documented baseline origins, applied values, rollback mechanisms, and failure consequences.
+  - Comprehensive system mutation matrix cataloging 17 distinct kernel, sysfs, cgroup, GPU, process, PipeWire, and IRQ targets.
+  - Documented baseline origins, applied values, rollback mechanisms, and failure consequences.
 2. **State Journal Implemented (`/run/zenith/journal.json`)**:
-   - Versioned schema (v1).
-   - Atomic persistence: write to unique `.tmp.<epoch>` file $\to$ `fsync` file $\to$ atomic `rename` $\to$ `fsync` parent directory.
-   - Write-Ahead Logging: mutations logged as `PENDING` before modification, marked `APPLIED` upon success, and `REVERTED` on rollback.
-   - Crash-only architecture: startup unconditionally runs `recover_all()` in reverse order to heal orphaned mutations; clean shutdown shares the identical recovery pipeline.
+  - Versioned schema (v1).
+  - Atomic persistence: write to unique `.tmp.<epoch>` file $\to$ `fsync` file $\to$ atomic `rename` $\to$ `fsync` parent directory.
+  - Write-Ahead Logging: mutations logged as `PENDING` before modification, marked `APPLIED` upon success, and `REVERTED` on rollback.
+  - Crash-only architecture: startup unconditionally runs `recover_all()` in reverse order to heal orphaned mutations; clean shutdown shares the identical recovery pipeline.
 3. **Flock Guardian (`/run/zenith/zenith.lock`)**:
-   - POSIX file locking (`flock(fd, LOCK_EX | LOCK_NB)`).
-   - Prevents duplicate daemon/wrapper invocations, outputs holding PID.
+  - POSIX file locking (`flock(fd, LOCK_EX | LOCK_NB)`).
+  - Prevents duplicate daemon/wrapper invocations, outputs holding PID.
 4. **Safe Mode Crash Loop Protection**:
-   - Tracks crash timestamps in `/run/zenith/crash_history.json`.
-   - Sliding window: 10 minutes, threshold: $\ge 3$ crashes.
-   - Disables aggressive mutations upon crash loop detection.
+  - Tracks crash timestamps in `/run/zenith/crash_history.json`.
+  - Sliding window: 10 minutes, threshold: $\ge 3$ crashes.
+  - Disables aggressive mutations upon crash loop detection.
 5. **Systemd Hardening (`systemd/zenith.service`)**:
-   - Added `Type=notify`, `WatchdogSec=15`, `Restart=on-failure`, `RestartSec=3`.
-   - `ExecStopPost=/usr/bin/zenith --rollback` guarantees rollback execution even if daemon is `SIGKILL`'ed.
+  - Added `Type=notify`, `WatchdogSec=15`, `Restart=on-failure`, `RestartSec=3`.
+  - `ExecStopPost=/usr/bin/zenith --rollback` guarantees rollback execution even if daemon is `SIGKILL`'ed.
 6. **Fault Injection Matrix & Test Suite**:
-   - Implemented `tests/test_journal.cpp`, `tests/test_flock.cpp`, `tests/test_safe_mode.cpp`, and `tests/test_fault_injection.cpp`.
-   - 21 simulated crash scenarios tested across Pre-Mutation, Mid-WAL-Pending, and Post-Applied phases.
+  - Implemented `tests/test_journal.cpp`, `tests/test_flock.cpp`, `tests/test_safe_mode.cpp`, and `tests/test_fault_injection.cpp`.
+  - 21 simulated crash scenarios tested across Pre-Mutation, Mid-WAL-Pending, and Post-Applied phases.
 
 ### Verified CI Command Output (GitHub Actions Run 39463273970)
 ```text
@@ -109,36 +109,36 @@ Execution of Stage 2 according to the Autonomous Senior Engineer protocol. Zenit
 
 ### Actions Completed
 1. **Threat Model Created (`docs/THREAT_MODEL.md`)**:
-   - Comprehensive STRIDE threat model detailing assets (kernel stability, CPU fairness, GPU thermals, state journal).
-   - Trust boundaries established between untrusted user processes, unprivileged client CLI, privileged daemon, and kernel virtual filesystems.
-   - Attack vectors analyzed and counteracted: spoofing, tampering, information disclosure, privilege escalation.
+  - Comprehensive STRIDE threat model detailing assets (kernel stability, CPU fairness, GPU thermals, state journal).
+  - Trust boundaries established between untrusted user processes, unprivileged client CLI, privileged daemon, and kernel virtual filesystems.
+  - Attack vectors analyzed and counteracted: spoofing, tampering, information disclosure, privilege escalation.
 2. **Zero Shell Policy Enforced (`src/secure_process.cpp`, `include/zenith/secure_process.hpp`)**:
-   - Completely eliminated all `std::system()`, `popen()`, and shell string concatenations across `src/gpu_controller.cpp` and `src/audio_network.cpp`.
-   - Implemented `SecureProcess::execute`: executes only pre-approved whitelisted binaries (`/usr/bin/nvidia-smi`, `/usr/bin/pw-metadata`) via direct `fork()` + `execve()` with sanitized environment (`PATH=/usr/bin:/bin`, `LC_ALL=C`).
+  - Completely eliminated all `std::system()`, `popen()`, and shell string concatenations across `src/gpu_controller.cpp` and `src/audio_network.cpp`.
+  - Implemented `SecureProcess::execute`: executes only pre-approved whitelisted binaries (`/usr/bin/nvidia-smi`, `/usr/bin/pw-metadata`) via direct `fork()` + `execve()` with sanitized environment (`PATH=/usr/bin:/bin`, `LC_ALL=C`).
 3. **Virtual Filesystem Sandboxing (`src/secure_io.cpp`, `include/zenith/secure_io.hpp`)**:
-   - Implemented `openat2` sandbox with `RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS | RESOLVE_NO_MAGICLINKS` relative to trusted base dirfds (`/sys/fs/cgroup`, `/proc/sys/vm`, `/sys/class/drm`, `/run/zenith`).
-   - Anti-traversal guard in `split_trusted_path` rejects paths with `..` before and after lexical normalization.
+  - Implemented `openat2` sandbox with `RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS | RESOLVE_NO_MAGICLINKS` relative to trusted base dirfds (`/sys/fs/cgroup`, `/proc/sys/vm`, `/sys/class/drm`, `/run/zenith`).
+  - Anti-traversal guard in `split_trusted_path` rejects paths with `..` before and after lexical normalization.
 4. **Strict Configuration Validation (`src/config.cpp`, `include/zenith/config.hpp`)**:
-   - Max file size capped at 64 KB (`MAX_CONFIG_SIZE = 64 * 1024`).
-   - Rejection of unknown keys with informative parse error and line numbers.
-   - Strict boolean validation (`true`, `false`, `1`, `0` only) and integer boundary checks with trailing character detection.
+  - Max file size capped at 64 KB (`MAX_CONFIG_SIZE = 64 * 1024`).
+  - Rejection of unknown keys with informative parse error and line numbers.
+  - Strict boolean validation (`true`, `false`, `1`, `0` only) and integer boundary checks with trailing character detection.
 5. **Control Socket Hardening (`src/socket_server.cpp`, `include/zenith/socket_server.hpp`)**:
-   - UNIX domain socket at `/run/zenith/zenith.sock` with `0660` permissions.
-   - Group ownership set to `wheel` / `gamemode`.
-   - Kernel-enforced `SO_PEERCRED` queries peer UID/GID and checks primary/supplementary groups before accepting requests.
-   - Strict 4 KB message payload limit.
+  - UNIX domain socket at `/run/zenith/zenith.sock` with `0660` permissions.
+  - Group ownership set to `wheel` / `gamemode`.
+  - Kernel-enforced `SO_PEERCRED` queries peer UID/GID and checks primary/supplementary groups before accepting requests.
+  - Strict 4 KB message payload limit.
 6. **Capability Dropping & Systemd Hardening (`src/capability_guard.cpp`, `systemd/zenith.service`)**:
-   - Enforced `prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)` upon daemon startup to prevent child processes from obtaining elevated capabilities.
-   - Hardened `systemd/zenith.service`: `NoNewPrivileges=yes`, `ProtectSystem=strict`, `ProtectHome=yes`, `PrivateTmp=yes`, `ProtectKernelModules=yes`, `RestrictAddressFamilies=AF_UNIX AF_NETLINK`, `SystemCallFilter=@system-service`, minimal `ReadWritePaths`.
+  - Enforced `prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)` upon daemon startup to prevent child processes from obtaining elevated capabilities.
+  - Hardened `systemd/zenith.service`: `NoNewPrivileges=yes`, `ProtectSystem=strict`, `ProtectHome=yes`, `PrivateTmp=yes`, `ProtectKernelModules=yes`, `RestrictAddressFamilies=AF_UNIX AF_NETLINK`, `SystemCallFilter=@system-service`, minimal `ReadWritePaths`.
 7. **Toolchain Hardening Flags (`CMakeLists.txt`)**:
-   - Compiler options: `-fstack-protector-strong`, `-fstack-clash-protection`, `-fcf-protection=full`, `-D_FORTIFY_SOURCE=3`.
-   - Linker options: `-Wl,-z,relro`, `-Wl,-z,now`, `-Wl,-z,noexecstack`.
+  - Compiler options: `-fstack-protector-strong`, `-fstack-clash-protection`, `-fcf-protection=full`, `-D_FORTIFY_SOURCE=3`.
+  - Linker options: `-Wl,-z,relro`, `-Wl,-z,now`, `-Wl,-z,noexecstack`.
 8. **Fuzzing and Adversarial Regression Suite (`fuzz/`, `tests/test_fuzz_corpus.cpp`, `tests/test_security.cpp`)**:
-   - Fuzz targets implemented in `fuzz/fuzz_targets.hpp`: `fuzz_one_config`, `fuzz_one_sysfs`, `fuzz_one_socket`, `fuzz_one_proc`.
-   - Seed corpus checked into repository (`fuzz/corpus/config/`, `fuzz/corpus/sysfs/`, `fuzz/corpus/socket/`, `fuzz/corpus/proc/`).
-   - Adversarial regression tests covering empty buffers, byte mutations, format strings, mismatched parentheses in `/proc/<pid>/stat`, and 128 KB payloads.
+  - Fuzz targets implemented in `fuzz/fuzz_targets.hpp`: `fuzz_one_config`, `fuzz_one_sysfs`, `fuzz_one_socket`, `fuzz_one_proc`.
+  - Seed corpus checked into repository (`fuzz/corpus/config/`, `fuzz/corpus/sysfs/`, `fuzz/corpus/socket/`, `fuzz/corpus/proc/`).
+  - Adversarial regression tests covering empty buffers, byte mutations, format strings, mismatched parentheses in `/proc/<pid>/stat`, and 128 KB payloads.
 9. **Responsible Disclosure Policy (`SECURITY.md`)**:
-   - Documented reporting workflow, vulnerability scope, contact channel, and 48-hour response SLA.
+  - Documented reporting workflow, vulnerability scope, contact channel, and 48-hour response SLA.
 
 ### Verified CI Command Output (GitHub Actions Run 39465558916)
 ```text
@@ -190,36 +190,36 @@ Execution of Stage 3 according to the Autonomous Senior Engineer protocol. Every
 
 ### Actions Completed
 1. **Exhaustive Tweaks Registry (`docs/TWEAKS.md`)**:
-   - Detailed specification cards for 16 kernel/subsystem tweaks detailing mechanism, kernel path, min kernel version, pros, risks, harm analysis, default setting, profile scope, documentation source, and mandatory tag `[Эффект не измерен]` until Stage 9 benchmarking.
+  - Detailed specification cards for 16 kernel/subsystem tweaks detailing mechanism, kernel path, min kernel version, pros, risks, harm analysis, default setting, profile scope, documentation source, and mandatory tag `[Эффект не измерен]` until Stage 9 benchmarking.
 2. **Controversial Tweaks Revised**:
-   - `split_lock_mitigate`: default untouched (`1`), only disabled (`0`) in `aggressive` profile.
-   - `THP`: `madvise` in `safe`/`balanced`, `always` only in `aggressive`; defrag `defer+madvise`.
-   - `compaction_proactiveness`: set to 0 in `balanced`/`aggressive` to eliminate kcompactd background frame jitter.
-   - `swappiness` and `page-cluster`: detects zram presence; sets `page-cluster = 0` for zram to stop sequential decompression overhead; `swappiness = 10` for disk swap.
-   - MGLRU: dynamically probed at `/sys/kernel/mm/lru_gen/enabled`.
-   - cgroups: soft resource weighting (`cpu.weight = 50`, `cpu.idle = 1`, `io.weight = 50`) implemented instead of hard single-core pinning, preventing audio crackle and IPC deadlocks.
+  - `split_lock_mitigate`: default untouched (`1`), only disabled (`0`) in `aggressive` profile.
+  - `THP`: `madvise` in `safe`/`balanced`, `always` only in `aggressive`; defrag `defer+madvise`.
+  - `compaction_proactiveness`: set to 0 in `balanced`/`aggressive` to eliminate kcompactd background frame jitter.
+  - `swappiness` and `page-cluster`: detects zram presence; sets `page-cluster = 0` for zram to stop sequential decompression overhead; `swappiness = 10` for disk swap.
+  - MGLRU: dynamically probed at `/sys/kernel/mm/lru_gen/enabled`.
+  - cgroups: soft resource weighting (`cpu.weight = 50`, `cpu.idle = 1`, `io.weight = 50`) implemented instead of hard single-core pinning, preventing audio crackle and IPC deadlocks.
 3. **Modular Subsystems Implemented (`include/zenith/tweaks/`, `src/tweaks/`)**:
-   - `CpuGovernorTweak`: Governor and EPP hints (`scaling_governor`, `energy_performance_preference`).
-   - `CgroupWeightTweak`: cgroup v2 soft weights (`cpu.weight`, `cpu.idle`, `io.weight`).
-   - `UclampTweak`: utilization clamping (`uclamp.min = 512` in balanced, `1024` in aggressive).
-   - `TimerSlackTweak`: thread timer slack reduction (50ns) and safe sysctl latency probes.
-   - `NvmeTweak`: NVMe blk-mq queue scheduler bypass (`none`) and readahead optimization.
-   - `UsbAutosuspendTweak`: USB gaming device power autosuspend inhibitor (`power/control -> on`).
-   - `ZramSwapTweak`: zram and swap tuning (`page-cluster = 0`, `watermark_boost_factor = 0`).
-   - `SysctlTweak`: Unified memory and split-lock tuning.
-   - `TweakRegistry`: Singleton registry orchestrating probe, apply, revert, dry-run, and explain.
+  - `CpuGovernorTweak`: Governor and EPP hints (`scaling_governor`, `energy_performance_preference`).
+  - `CgroupWeightTweak`: cgroup v2 soft weights (`cpu.weight`, `cpu.idle`, `io.weight`).
+  - `UclampTweak`: utilization clamping (`uclamp.min = 512` in balanced, `1024` in aggressive).
+  - `TimerSlackTweak`: thread timer slack reduction (50ns) and safe sysctl latency probes.
+  - `NvmeTweak`: NVMe blk-mq queue scheduler bypass (`none`) and readahead optimization.
+  - `UsbAutosuspendTweak`: USB gaming device power autosuspend inhibitor (`power/control -> on`).
+  - `ZramSwapTweak`: zram and swap tuning (`page-cluster = 0`, `watermark_boost_factor = 0`).
+  - `SysctlTweak`: Unified memory and split-lock tuning.
+  - `TweakRegistry`: Singleton registry orchestrating probe, apply, revert, dry-run, and explain.
 4. **CLI Introspection (`src/main.cpp`)**:
-   - `zenith --dry-run [profile]`: ANSI-colored diff of "Before $\to$ After" values across all tweaks without modifying the system.
-   - `zenith --explain`: Human-readable technical breakdown of all tweaks, mechanisms, and risks.
-   - `zenith --conflicts`: Proactive audit of competing daemons.
+  - `zenith --dry-run [profile]`: ANSI-colored diff of "Before $\to$ After" values across all tweaks without modifying the system.
+  - `zenith --explain`: Human-readable technical breakdown of all tweaks, mechanisms, and risks.
+  - `zenith --conflicts`: Proactive audit of competing daemons.
 5. **Per-Game Profiles (`include/zenith/per_game_profile.hpp`, `src/per_game_profile.cpp`, `configs/profiles.conf`)**:
-   - Matches by Steam AppID (e.g. `[730]`) or executable substring.
-   - Supports profile overrides, custom parameters, and tweak blacklists.
+  - Matches by Steam AppID (e.g. `[730]`) or executable substring.
+  - Supports profile overrides, custom parameters, and tweak blacklists.
 6. **Conflict Detector (`include/zenith/conflict_detector.hpp`, `src/conflict_detector.cpp`)**:
-   - Probes running processes and kernel states for `gamemode`, `ananicy`, `tuned`, `power-profiles-daemon`, `irqbalance`, `scx`.
-   - Generates non-destructive coordination warnings.
+  - Probes running processes and kernel states for `gamemode`, `ananicy`, `tuned`, `power-profiles-daemon`, `irqbalance`, `scx`.
+  - Generates non-destructive coordination warnings.
 7. **Architectural Records (`docs/DECISIONS.md`, ADR-0005)**:
-   - Formally documented decision for modular subsystem architecture and three-tier profiles.
+  - Formally documented decision for modular subsystem architecture and three-tier profiles.
 
 ### Verified CI Command Output (GitHub Actions Run 39467097372)
 ```text
@@ -272,37 +272,37 @@ Execution of Stage 4 according to the Autonomous Senior Engineer protocol. Zenit
 
 ### Actions Completed
 1. **Linux 6.13+ `amd_x3d_vcache` Kernel Driver Integration**:
-   - Probe `/sys/bus/platform/drivers/amd_x3d_vcache` and `/sys/devices/platform/amd_x3d_vcache/amd_x3d_mode`.
-   - Driver mode (`cache`, `frequency`, `none`) utilized as primary selector when available; custom L3 cache pinning serves as resilient fallback.
+  - Probe `/sys/bus/platform/drivers/amd_x3d_vcache` and `/sys/devices/platform/amd_x3d_vcache/amd_x3d_mode`.
+  - Driver mode (`cache`, `frequency`, `none`) utilized as primary selector when available; custom L3 cache pinning serves as resilient fallback.
 2. **Precision Cache & Core Architecture Classification**:
-   - Parsed `cache/index3/size` and `cache/index3/shared_cpu_list` to identify distinct L3 cache clusters and asymmetric CCDs.
-   - Intel Hybrid core classification: hardware `topology/core_type` (`0x20` P-core, `0x40` E-core, `0x10` LP-E core) and `cpu_capacity`.
-   - Detected SMT status (`/sys/devices/system/cpu/smt/control`), NUMA node count (`/sys/devices/system/node/`), multi-socket count, isolated cores (`/sys/devices/system/cpu/isolated`), and VM hypervisor detection (`sys_vendor` / `product_name`).
+  - Parsed `cache/index3/size` and `cache/index3/shared_cpu_list` to identify distinct L3 cache clusters and asymmetric CCDs.
+  - Intel Hybrid core classification: hardware `topology/core_type` (`0x20` P-core, `0x40` E-core, `0x10` LP-E core) and `cpu_capacity`.
+  - Detected SMT status (`/sys/devices/system/cpu/smt/control`), NUMA node count (`/sys/devices/system/node/`), multi-socket count, isolated cores (`/sys/devices/system/cpu/isolated`), and VM hypervisor detection (`sys_vendor` / `product_name`).
 3. **Core Selection Modes (`CacheSelectionMode`)**:
-   - `Cache`: Prioritizes 3D V-Cache CCD cores (e.g. 7950X3D CCD0).
-   - `Frequency`: Prioritizes higher-clock CCD cores (e.g. 7950X3D CCD1) for clock-sensitive titles.
-   - `Auto`: Resolves based on per-game profile rules and heuristics.
+  - `Cache`: Prioritizes 3D V-Cache CCD cores (e.g. 7950X3D CCD0).
+  - `Frequency`: Prioritizes higher-clock CCD cores (e.g. 7950X3D CCD1) for clock-sensitive titles.
+  - `Auto`: Resolves based on per-game profile rules and heuristics.
 4. **FileSystem Abstraction (`include/zenith/topology_fs.hpp`)**:
-   - `ITopologyFs`, `RealTopologyFs`, and `MockTopologyFs` decouple sysfs traversal from physical disk locations.
-   - Synthetic fixture generation tool in `tests/fixture_generator.hpp`.
+  - `ITopologyFs`, `RealTopologyFs`, and `MockTopologyFs` decouple sysfs traversal from physical disk locations.
+  - Synthetic fixture generation tool in `tests/fixture_generator.hpp`.
 5. **11 Architecture Fixtures Verified in `tests/test_cpu_topology.cpp`**:
-   - `ryzen_7950x3d`: 16 cores / 32 threads, 96M V-Cache CCD0 (0-7,16-23) vs 32M CCD1 (8-15,24-31).
-   - `ryzen_9950x3d`: Zen 5 dual-CCD V-Cache asymmetry.
-   - `ryzen_7800x3d`: Single CCD 8 cores / 16 threads (all 96M V-Cache).
-   - `ryzen_5800x3d`: Zen 3 single CCD 8 cores / 16 threads (96M V-Cache).
-   - `ryzen_5600`: Uniform 6 cores / 12 threads (32M L3).
-   - `intel_13900k`: 8 P-cores (16 threads: 0-15) + 16 E-cores (16 threads: 16-31).
-   - `intel_12700k`: 8 P-cores (16 threads: 0-15) + 4 E-cores (4 threads: 16-19).
-   - `intel_core_ultra_9`: P-cores (`0x20`), E-cores (`0x40`), LP-E cores (`0x10`).
-   - `epyc_2x_numa`: 2 sockets, 2 NUMA nodes.
-   - `vm_4vcpu`: QEMU/KVM virtual machine detection.
-   - `steam_deck`: Van Gogh / Aerith APU, handheld chassis (`31`), battery detection, energy-conscious mode.
+  - `ryzen_7950x3d`: 16 cores / 32 threads, 96M V-Cache CCD0 (0-7,16-23) vs 32M CCD1 (8-15,24-31).
+  - `ryzen_9950x3d`: Zen 5 dual-CCD V-Cache asymmetry.
+  - `ryzen_7800x3d`: Single CCD 8 cores / 16 threads (all 96M V-Cache).
+  - `ryzen_5800x3d`: Zen 3 single CCD 8 cores / 16 threads (96M V-Cache).
+  - `ryzen_5600`: Uniform 6 cores / 12 threads (32M L3).
+  - `intel_13900k`: 8 P-cores (16 threads: 0-15) + 16 E-cores (16 threads: 16-31).
+  - `intel_12700k`: 8 P-cores (16 threads: 0-15) + 4 E-cores (4 threads: 16-19).
+  - `intel_core_ultra_9`: P-cores (`0x20`), E-cores (`0x40`), LP-E cores (`0x10`).
+  - `epyc_2x_numa`: 2 sockets, 2 NUMA nodes.
+  - `vm_4vcpu`: QEMU/KVM virtual machine detection.
+  - `steam_deck`: Van Gogh / Aerith APU, handheld chassis (`31`), battery detection, energy-conscious mode.
 6. **CPU Hotplug Dynamic Recomputation**:
-   - `recompute_hotplug()` updates online core masks and filters offlined cores from gaming allocations.
+  - `recompute_hotplug()` updates online core masks and filters offlined cores from gaming allocations.
 7. **Form-Factor & Battery Awareness**:
-   - Identifies Handheld and Laptop form factors via `chassis_type`; checks `power_supply` discharging status to engage battery-aware tuning.
+  - Identifies Handheld and Laptop form factors via `chassis_type`; checks `power_supply` discharging status to engage battery-aware tuning.
 8. **Architectural Decisions (`docs/DECISIONS.md`, ADR-0006)**:
-   - Formally documented decision for Virtual Filesystem and Driver-First Topology Architecture.
+  - Formally documented decision for Virtual Filesystem and Driver-First Topology Architecture.
 
 ### Verified CI Command Output (GitHub Actions Run 39468290521)
 ```text
@@ -370,42 +370,42 @@ Execution of Stage 5 according to the Autonomous Senior Engineer protocol. Zenit
 
 ### Actions Completed
 1. **Netlink Process Connector (`ProcConnector`)**:
-   - Implemented Linux Netlink proc connector (`socket(PF_NETLINK, SOCK_DGRAM, NETLINK_CONNECTOR)`).
-   - Subscribes to `CN_IDX_PROC` / `CN_VAL_PROC` multicast channel (`PROC_CN_MCAST_LISTEN`).
-   - Receives instant asynchronous kernel events: `PROC_EVENT_EXEC`, `PROC_EVENT_EXIT`, `PROC_EVENT_FORK`.
-   - Polling fallback and simulated test injection (`inject_event()`).
+  - Implemented Linux Netlink proc connector (`socket(PF_NETLINK, SOCK_DGRAM, NETLINK_CONNECTOR)`).
+  - Subscribes to `CN_IDX_PROC` / `CN_VAL_PROC` multicast channel (`PROC_CN_MCAST_LISTEN`).
+  - Receives instant asynchronous kernel events: `PROC_EVENT_EXEC`, `PROC_EVENT_EXIT`, `PROC_EVENT_FORK`.
+  - Polling fallback and simulated test injection (`inject_event()`).
 2. **Virtual /proc Filesystem Abstraction (`IProcFs`)**:
-   - `IProcFs` abstract interface decoupled from the host filesystem.
-   - `RealProcFs`: Linux virtual `/proc` implementation using POSIX/C++20 primitives.
-   - `MockProcFs`: High-performance in-memory simulation supporting multi-process tasks, environ, cmdline, maps, and open file descriptors.
+  - `IProcFs` abstract interface decoupled from the host filesystem.
+  - `RealProcFs`: Linux virtual `/proc` implementation using POSIX/C++20 primitives.
+  - `MockProcFs`: High-performance in-memory simulation supporting multi-process tasks, environ, cmdline, maps, and open file descriptors.
 3. **Deep Game Recognition Engine (`GameDetector`)**:
-   - Steam games: Parses `SteamAppId` from `/proc/<pid>/environ` and `cmdline` (reaper, `steamapps/common`).
-   - Proton/Wine games: Identifies `wine64-preloader`, `.exe` binaries, and Proton environments.
-   - Emulators: Native recognition of RPCS3, Yuzu, Ryujinx, Dolphin-emu, PCSX2, Cemu, Duckstation, RetroArch, etc.
-   - Runners & Nested compositors: Lutris, Heroic, Bottles, and Gamescope.
-   - Strict false positive filtering: Excludes `steamwebhelper`, launchers (`EpicGamesLauncher`, `Battle.net`, `Origin`, `EA`), system services, and bare/idle `wineserver`.
-   - Real game heuristics: Probes open file descriptors for GPU render nodes (`/dev/dri/renderD128`, `/dev/nvidia*`) and mapped graphics drivers (`libvulkan.so`, `libGL.so`, `dxvk`, `vkd3d`).
-   - Debounce (100ms) and Hysteresis (500ms) against rapid process toggles.
-   - Concurrent multi-game tracking and initial startup sweep (`scan_all_games()`).
+  - Steam games: Parses `SteamAppId` from `/proc/<pid>/environ` and `cmdline` (reaper, `steamapps/common`).
+  - Proton/Wine games: Identifies `wine64-preloader`, `.exe` binaries, and Proton environments.
+  - Emulators: Native recognition of RPCS3, Yuzu, Ryujinx, Dolphin-emu, PCSX2, Cemu, Duckstation, RetroArch, etc.
+  - Runners & Nested compositors: Lutris, Heroic, Bottles, and Gamescope.
+  - Strict false positive filtering: Excludes `steamwebhelper`, launchers (`EpicGamesLauncher`, `Battle.net`, `Origin`, `EA`), system services, and bare/idle `wineserver`.
+  - Real game heuristics: Probes open file descriptors for GPU render nodes (`/dev/dri/renderD128`, `/dev/nvidia*`) and mapped graphics drivers (`libvulkan.so`, `libGL.so`, `dxvk`, `vkd3d`).
+  - Debounce (100ms) and Hysteresis (500ms) against rapid process toggles.
+  - Concurrent multi-game tracking and initial startup sweep (`scan_all_games()`).
 4. **Fine-Grained Thread Classifier & Tuner (`ProcessTuner`)**:
-   - Inspects `/proc/<pid>/task/*/comm` and assigns specialized roles:
-     - `Main`: `tid == pid` $\to$ Performance cores pinning, `uclamp.min = 512`, `nice -10`.
-     - `Render`: `render`, `direct3d`, `d3d`, `vk`, `rhi`, `gpu`, `gl`, `draw` $\to$ Performance cores pinning, `uclamp.min = 512`, `nice -10`.
-     - `Audio`: `audio`, `sound`, `pipewire`, `pulse`, `fmod`, `wwise` $\to$ Low-latency scheduling, `nice -11`.
-     - `ShaderCompile`: `shader`, `compile`, `llvm`, `vk_worker` $\to$ Throughput on all available cores, `nice 0`.
-     - `IoWorker`: `io`, `async`, `disk`, `file`, `worker`, `pool` $\to$ `nice 0`.
-     - `AnticheatOrOverlay`: `*eac*`, `*easyanticheat*`, `*battleye*`, `*beservice*`, `*vgk*`, `*discord*`, `*obs*` $\to$ **STRICTLY UNTOUCHED**.
+  - Inspects `/proc/<pid>/task/*/comm` and assigns specialized roles:
+    - `Main`: `tid == pid` $\to$ Performance cores pinning, `uclamp.min = 512`, `nice -10`.
+    - `Render`: `render`, `direct3d`, `d3d`, `vk`, `rhi`, `gpu`, `gl`, `draw` $\to$ Performance cores pinning, `uclamp.min = 512`, `nice -10`.
+    - `Audio`: `audio`, `sound`, `pipewire`, `pulse`, `fmod`, `wwise` $\to$ Low-latency scheduling, `nice -11`.
+    - `ShaderCompile`: `shader`, `compile`, `llvm`, `vk_worker` $\to$ Throughput on all available cores, `nice 0`.
+    - `IoWorker`: `io`, `async`, `disk`, `file`, `worker`, `pool` $\to$ `nice 0`.
+    - `AnticheatOrOverlay`: `*eac*`, `*easyanticheat*`, `*battleye*`, `*beservice*`, `*vgk*`, `*discord*`, `*obs*` $\to$ **STRICTLY UNTOUCHED**.
 5. **Anti-Cheat Compatibility Contract & Documentation (`docs/ANTI_CHEAT.md`)**:
-   - Documented non-invasive guarantees: Zero memory reading (`/proc/<pid>/mem`), zero `ptrace`, zero code injection.
-   - Preserves `TracerPid: 0` for game integrity watchdogs.
-   - Compatibility breakdown across Easy Anti-Cheat (EAC), BattlEye, VAC, Vanguard, and Ricochet.
-   - Transparent VAC disclaimer ("No unconditional 'VAC safe' claims").
+  - Documented non-invasive guarantees: Zero memory reading (`/proc/<pid>/mem`), zero `ptrace`, zero code injection.
+  - Preserves `TracerPid: 0` for game integrity watchdogs.
+  - Compatibility breakdown across Easy Anti-Cheat (EAC), BattlEye, VAC, Vanguard, and Ricochet.
+  - Transparent VAC disclaimer ("No unconditional 'VAC safe' claims").
 6. **Background Process Manager (`BackgroundManager`)**:
-   - Whitelist ("Never touch"): Compositors (`kwin`, `mutter`, `sway`, `hyprland`), audio (`pipewire`, `wireplumber`), system (`systemd`, `dbus`, `NetworkManager`, `sshd`), terminals/shells (`bash`, `zsh`, `tmux`, `alacritty`, `kitty`).
-   - Blacklist ("Always background"): Web browsers, chat clients (`discord`, `vesktop`, `spotify`), torrents, file indexers.
-   - Relocates blacklisted apps to `/sys/fs/cgroup/zenith_background` using soft weights (`cpu.weight=50`, `cpu.idle=1`, `io.weight=50`). Never terminates processes.
+  - Whitelist ("Never touch"): Compositors (`kwin`, `mutter`, `sway`, `hyprland`), audio (`pipewire`, `wireplumber`), system (`systemd`, `dbus`, `NetworkManager`, `sshd`), terminals/shells (`bash`, `zsh`, `tmux`, `alacritty`, `kitty`).
+  - Blacklist ("Always background"): Web browsers, chat clients (`discord`, `vesktop`, `spotify`), torrents, file indexers.
+  - Relocates blacklisted apps to `/sys/fs/cgroup/zenith_background` using soft weights (`cpu.weight=50`, `cpu.idle=1`, `io.weight=50`). Never terminates processes.
 7. **Fake `/proc` Stress & Regression Suite (`tests/test_game_detector.cpp`)**:
-   - 9 rigorous test suites:
+  - 9 rigorous test suites:
      1. `test_steam_detection`
      2. `test_wine_and_wineserver_filtering`
      3. `test_emulators_and_launchers`
@@ -416,7 +416,7 @@ Execution of Stage 5 according to the Autonomous Senior Engineer protocol. Zenit
      8. `test_fake_proc_stress_and_false_positives` (1000+ processes, rapid fork storm, zero false positives)
      9. `test_proc_connector_injection`
 8. **Architectural Decisions (`docs/DECISIONS.md`, ADR-0007)**:
-   - Recorded ADR-0007: Event-driven Process Detection, Fine-grained Thread Classification, and Anti-cheat Compatibility Mode.
+  - Recorded ADR-0007: Event-driven Process Detection, Fine-grained Thread Classification, and Anti-cheat Compatibility Mode.
 
 ### Verified CI Command Output (GitHub Actions Run 39470497847)
 ```text
@@ -478,39 +478,39 @@ Total Test time (real) = 0.98 sec
 ## [2026-10-20] - Stage 6: Latency Optimization Subsystems & Hardware Controllers
 
 ### Context
-Execution of Stage 6 according to the Autonomous Senior Engineer protocol. Zenith requires hard latency mitigation across IRQ affinity steering, network queueing disciplines, PipeWire real-time audio buffering, and multi-vendor GPU clock locking with strict thermal and battery safety guardrails. A critical architectural criterion: **Subsystem Independence** — failure, absence, or thermal rejection in one subsystem must never crash or block the remaining subsystems.
+Execution of Stage 6 according to the Autonomous Senior Engineer protocol. Zenith requires hard latency mitigation across IRQ affinity steering, network queueing disciplines, PipeWire real-time audio buffering, and multi-vendor GPU clock locking with strict thermal and battery safety guardrails. A critical architectural criterion: **Subsystem Independence** - failure, absence, or thermal rejection in one subsystem must never crash or block the remaining subsystems.
 
 ### Actions Completed
 1. **IRQ Affinity Steering (`IrqTuner`)**:
-   - Parses `/proc/interrupts` to discover device interrupts.
-   - Steers background throughput interrupts (Ethernet/Wi-Fi NICs, XHCI/EHCI USB, NVMe) to housekeeping cores.
-   - Binds GPU interrupts (`amdgpu`, `nvidia`, `i915`, `xe`) directly to gaming CCD / performance cores.
-   - `irqbalance` handling: detects active `irqbalance` service, suspends it during game session to prevent override conflicts, and restores it cleanly on revert.
-   - Idempotent rollback: restores original `smp_affinity_list` for every modified IRQ.
+  - Parses `/proc/interrupts` to discover device interrupts.
+  - Steers background throughput interrupts (Ethernet/Wi-Fi NICs, XHCI/EHCI USB, NVMe) to housekeeping cores.
+  - Binds GPU interrupts (`amdgpu`, `nvidia`, `i915`, `xe`) directly to gaming CCD / performance cores.
+  - `irqbalance` handling: detects active `irqbalance` service, suspends it during game session to prevent override conflicts, and restores it cleanly on revert.
+  - Idempotent rollback: restores original `smp_affinity_list` for every modified IRQ.
 2. **Network Low-Latency & Bufferbloat Tuner (`NetworkTuner`)**:
-   - Discovers the active default gateway interface from `/proc/net/route` (e.g. `eth0` or `wlan0`), leaving unused interfaces untouched.
-   - Queries and records existing root queueing discipline (e.g. `fq_codel`, `pfifo_fast`).
-   - Replaces root qdisc with CAKE (`tc qdisc replace dev <iface> root cake`, fallback to `fq_codel`).
-   - Wi-Fi Power Save inhibitor: detects wireless adapters, checks power save status via `iw`, disables power save during gaming sessions to eliminate packet jitter, and restores it on rollback.
-   - Clean restoration: unconditionally restores original qdisc and original power save setting on exit.
+  - Discovers the active default gateway interface from `/proc/net/route` (e.g. `eth0` or `wlan0`), leaving unused interfaces untouched.
+  - Queries and records existing root queueing discipline (e.g. `fq_codel`, `pfifo_fast`).
+  - Replaces root qdisc with CAKE (`tc qdisc replace dev <iface> root cake`, fallback to `fq_codel`).
+  - Wi-Fi Power Save inhibitor: detects wireless adapters, checks power save status via `iw`, disables power save during gaming sessions to eliminate packet jitter, and restores it on rollback.
+  - Clean restoration: unconditionally restores original qdisc and original power save setting on exit.
 3. **PipeWire Audio Low-Latency Tuner & xrun Guardian (`PipewireTuner`)**:
-   - Manages quantum dynamically via `pw-metadata -n settings 0 clock.force-quantum <Q>`.
-   - Generates non-invasive ephemeral drop-in configuration at `/run/pipewire/pipewire.conf.d/99-zenith.conf` (tmpfs).
-   - Exports environment hint `PIPEWIRE_LATENCY=<quantum>/48000`.
-   - **Dynamic xrun Guardian**: monitors audio dropouts; upon detecting an xrun increase, automatically bumps quantum (e.g. 32 $\to$ 64 $\to$ 128 $\to$ 256) and logs the event, completely eliminating audio crackling.
-   - Rollback: cleans up drop-in config, unsets environment, and resets force-quantum to 0.
+  - Manages quantum dynamically via `pw-metadata -n settings 0 clock.force-quantum <Q>`.
+  - Generates non-invasive ephemeral drop-in configuration at `/run/pipewire/pipewire.conf.d/99-zenith.conf` (tmpfs).
+  - Exports environment hint `PIPEWIRE_LATENCY=<quantum>/48000`.
+  - **Dynamic xrun Guardian**: monitors audio dropouts; upon detecting an xrun increase, automatically bumps quantum (e.g. 32 $\to$ 64 $\to$ 128 $\to$ 256) and logs the event, completely eliminating audio crackling.
+  - Rollback: cleans up drop-in config, unsets environment, and resets force-quantum to 0.
 4. **Multi-Vendor GPU Controller & Dynamic NVML Loader (`GpuController`)**:
-   - **AMD Radeon**: Manages `power_dpm_force_performance_level` (`manual` / `high`) via sysfs with original state recovery.
-   - **NVIDIA GeForce**: Native NVML dynamic loader (`libnvidia-ml.so.1`) via `dlopen`/`dlsym` for direct in-process queries without fork/exec overhead. Sets persistence mode and locks clocks within safe guardrail bounds (`[1200, 2600]` MHz). Fallback to `nvidia-smi` binary.
-   - **Intel Arc / iGPU**: Manages `gt_min_freq_mhz` and locks to `gt_boost_freq_mhz` to prevent render downclocking.
+  - **AMD Radeon**: Manages `power_dpm_force_performance_level` (`manual` / `high`) via sysfs with original state recovery.
+  - **NVIDIA GeForce**: Native NVML dynamic loader (`libnvidia-ml.so.1`) via `dlopen`/`dlsym` for direct in-process queries without fork/exec overhead. Sets persistence mode and locks clocks within safe guardrail bounds (`[1200, 2600]` MHz). Fallback to `nvidia-smi` binary.
+  - **Intel Arc / iGPU**: Manages `gt_min_freq_mhz` and locks to `gt_boost_freq_mhz` to prevent render downclocking.
 5. **Thermal & Battery Safety Guardrails**:
-   - Thermal Guard: Checks GPU hwmon/NVML temperature. If $T \ge 85^\circ\text{C}$, aborts clock lock to prevent thermal throttling and hardware damage.
-   - Battery Guard: Checks `/sys/class/power_supply/*/status`. If system is discharging on battery, aborts aggressive clock lock to protect battery health and prevent shutdown.
+  - Thermal Guard: Checks GPU hwmon/NVML temperature. If $T \ge 85^\circ\text{C}$, aborts clock lock to prevent thermal throttling and hardware damage.
+  - Battery Guard: Checks `/sys/class/power_supply/*/status`. If system is discharging on battery, aborts aggressive clock lock to protect battery health and prevent shutdown.
 6. **Subsystem Independence & Orchestrator (`LatencyController`)**:
-   - Total decoupling: each subsystem implements isolated RAII `probe()`, `apply()`, `revert()`, `describe()`.
-   - Comprehensive `LatencyReport` tracks status and safety notices across all 4 domains.
+  - Total decoupling: each subsystem implements isolated RAII `probe()`, `apply()`, `revert()`, `describe()`.
+  - Comprehensive `LatencyReport` tracks status and safety notices across all 4 domains.
 7. **Comprehensive Unit & Mock Test Suite (`tests/test_latency_subsystems.cpp`)**:
-   - 9 comprehensive test scenarios:
+  - 9 comprehensive test scenarios:
      1. `test_irq_steering` (GPU to gaming CCD, Network/USB/NVMe to housekeeping)
      2. `test_irqbalance_suspension` (suspension and restoration)
      3. `test_network_active_interface_and_qdisc` (route discovery, CAKE, Wi-Fi power save)
@@ -578,29 +578,29 @@ Total Test time (real) = 50.60 sec
 
 ---
 
-## 2026-10-20 — Stage 7: Intelligent Adaptive Controller, PSI Telemetry & Local Self-Learning
+## 2026-10-20 - Stage 7: Intelligent Adaptive Controller, PSI Telemetry & Local Self-Learning
 
 ### Tasks Executed
 1. **Pressure Stall Information (PSI) Monitor (`PressureMonitor`)**:
-   - Implemented real-time parser for `/proc/pressure/cpu`, `/proc/pressure/memory`, and `/proc/pressure/io`.
-   - Tracks metrics: `some` (avg10, avg60, avg300, total $\mu s$) and `full` (avg10, avg60, avg300, total $\mu s$).
-   - Collects CPU frequency from `/sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq`, CPU package/core temperatures via sysfs `hwmon`, and hardware throttle event counters (`thermal_throttle/package_throttle_count` or `core_throttle_count`).
-   - Clean decoupled virtual interface `IPressureFs` (`RealPressureFs`, `MockPressureFs`) for deterministic unit and host testing.
+  - Implemented real-time parser for `/proc/pressure/cpu`, `/proc/pressure/memory`, and `/proc/pressure/io`.
+  - Tracks metrics: `some` (avg10, avg60, avg300, total $\mu s$) and `full` (avg10, avg60, avg300, total $\mu s$).
+  - Collects CPU frequency from `/sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq`, CPU package/core temperatures via sysfs `hwmon`, and hardware throttle event counters (`thermal_throttle/package_throttle_count` or `core_throttle_count`).
+  - Clean decoupled virtual interface `IPressureFs` (`RealPressureFs`, `MockPressureFs`) for deterministic unit and host testing.
 2. **Closed-Loop Adaptive Profile Controller (`AdaptiveController`)**:
-   - Continuously monitors system health against configured safety thresholds (`max_cpu_temp_c = 85.0`, `max_memory_some_avg10 = 25.0`, `max_io_some_avg10 = 20.0`, `max_cpu_some_avg10 = 40.0`).
-   - Fast Degradation: Instantly downgrades profile on threshold breach or thermal event (`Aggressive` $\to$ `Balanced` $\to$ `Safe`) with human-readable reason tracking.
-   - Guarded Recovery & Anti-Oscillation: Requires consecutive healthy cycles (default: 5 checks) AND an elapsed cooldown window (default: 10s) before promoting back (`Safe` $\to$ `Balanced` $\to$ `Aggressive`), preventing hunting/fluttering.
-   - Form-Factor & Power Clamping: Automatically clamps profiles to `Balanced` on battery discharge or on handheld devices (Steam Deck, ROG Ally, Legion Go).
+  - Continuously monitors system health against configured safety thresholds (`max_cpu_temp_c = 85.0`, `max_memory_some_avg10 = 25.0`, `max_io_some_avg10 = 20.0`, `max_cpu_some_avg10 = 40.0`).
+  - Fast Degradation: Instantly downgrades profile on threshold breach or thermal event (`Aggressive` $\to$ `Balanced` $\to$ `Safe`) with human-readable reason tracking.
+  - Guarded Recovery & Anti-Oscillation: Requires consecutive healthy cycles (default: 5 checks) AND an elapsed cooldown window (default: 10s) before promoting back (`Safe` $\to$ `Balanced` $\to$ `Aggressive`), preventing hunting/fluttering.
+  - Form-Factor & Power Clamping: Automatically clamps profiles to `Balanced` on battery discharge or on handheld devices (Steam Deck, ROG Ally, Legion Go).
 3. **Offline Local Learning Engine (`LocalLearner`)**:
-   - Parses local MangoHud benchmark CSV logs: calculates average FPS, 1% low, 0.1% low, frametime variance, and severe stutter count ($\ge 33.3\text{ms}$).
-   - Suggestion Engine: Computes stutter percentage and 1% low stability to recommend optimal tuning profiles per game (`zenithctl suggest`).
-   - Zero External Telemetry: Strictly local JSON database stored in `/var/lib/zenith/learning_db.json`. No external network requests or analytics.
+  - Parses local MangoHud benchmark CSV logs: calculates average FPS, 1% low, 0.1% low, frametime variance, and severe stutter count ($\ge 33.3\text{ms}$).
+  - Suggestion Engine: Computes stutter percentage and 1% low stability to recommend optimal tuning profiles per game (`zenithctl suggest`).
+  - Zero External Telemetry: Strictly local JSON database stored in `/var/lib/zenith/learning_db.json`. No external network requests or analytics.
 4. **Sched_ext (scx) BPF Extensibility Scheduler Controller (`SchedExtTuner`)**:
-   - Probes Linux 6.12+ extensible scheduler support via `/sys/kernel/sched_ext/state`.
-   - Locates scheduler binaries (`scx_lavd`, `scx_rusty`, `scx_bpfland`) with whitelist verification.
-   - Disabled by default; non-destructive execution, process supervisor, and clean termination/rollback on game exit.
+  - Probes Linux 6.12+ extensible scheduler support via `/sys/kernel/sched_ext/state`.
+  - Locates scheduler binaries (`scx_lavd`, `scx_rusty`, `scx_bpfland`) with whitelist verification.
+  - Disabled by default; non-destructive execution, process supervisor, and clean termination/rollback on game exit.
 5. **Comprehensive Unit & Simulation Test Suite (`tests/test_adaptive_controller.cpp`)**:
-   - 8 comprehensive test scenarios:
+  - 8 comprehensive test scenarios:
      1. `test_pressure_monitor_psi_parsing`: verifies accurate extraction of CPU, memory, IO PSI and hardware thermals.
      2. `test_adaptive_degradation_from_pressure`: validates two-stage degradation on sustained memory/IO pressure spikes.
      3. `test_adaptive_thermal_throttling_degradation`: validates instant downgrade upon reaching $89^\circ\text{C}$ overheat.
@@ -610,7 +610,7 @@ Total Test time (real) = 50.60 sec
      7. `test_local_learner_profile_suggestion`: validates profile recommendations based on stability and stutter thresholds.
      8. `test_sched_ext_probing_and_lifecycle`: validates BPF scheduler probing, startup, and clean shutdown lifecycle.
 6. **Architectural Decisions (`docs/DECISIONS.md`, ADR-0009)**:
-   - Recorded ADR-0009: Closed-Loop PSI Adaptive Controller, Anti-Oscillation Hysteresis, and Zero-Telemetry Local Learning.
+  - Recorded ADR-0009: Closed-Loop PSI Adaptive Controller, Anti-Oscillation Hysteresis, and Zero-Telemetry Local Learning.
 
 ### Verified CI Command Output (GitHub Actions Run 39473449956)
 ```text
@@ -688,49 +688,49 @@ Execution of Stage 8 according to the Autonomous Senior Engineer protocol. Stage
 
 ### Actions Completed
 1. **Architecture Documentation (`docs/ARCHITECTURE.md`)**:
-   - High-level system architecture overview.
-   - 4 exhaustive Mermaid diagrams:
-     - Component Topology (`graph TD`).
-     - Event & Data Flow Sequence (`sequenceDiagram`).
-     - Daemon & Game Lifecycle State Machine (`stateDiagram-v2`).
-     - Security & Privilege Boundary Flowchart (`flowchart TD`).
-   - Detailed specifications for memory model, hot path zero-allocation design, error propagation, and RAII invariants.
+  - High-level system architecture overview.
+  - 4 exhaustive Mermaid diagrams:
+    - Component Topology (`graph TD`).
+    - Event & Data Flow Sequence (`sequenceDiagram`).
+    - Daemon & Game Lifecycle State Machine (`stateDiagram-v2`).
+    - Security & Privilege Boundary Flowchart (`flowchart TD`).
+  - Detailed specifications for memory model, hot path zero-allocation design, error propagation, and RAII invariants.
 2. **Monadic Error Handling (`include/zenith/result.hpp`)**:
-   - Modern C++20 `Result<T, Error>` and `Result<void, Error>`.
-   - Rich `Error` struct with `ErrorCode`, detailed string description, system `errno`, source filename, line number, and function signature.
-   - Monadic combinators: `.map()`, `.map_error()`, `.and_then()`, `.or_else()`.
-   - Zero dynamic memory allocation on success paths and zero exceptions on hot paths.
+  - Modern C++20 `Result<T, Error>` and `Result<void, Error>`.
+  - Rich `Error` struct with `ErrorCode`, detailed string description, system `errno`, source filename, line number, and function signature.
+  - Monadic combinators: `.map()`, `.map_error()`, `.and_then()`, `.or_else()`.
+  - Zero dynamic memory allocation on success paths and zero exceptions on hot paths.
 3. **Core Dependency Inversion Interfaces (`include/zenith/interfaces/`)**:
-   - `isysfs.hpp`: `ISysfs` with `RealSysfs` and `MockSysfs` supporting in-memory file trees and fault injection.
-   - `iprocess_source.hpp`: `IProcessSource` with `RealProcessSource` and `MockProcessSource`.
-   - `icommand_runner.hpp`: `ICommandRunner` with `MockCommandRunner` supporting canned exit codes and outputs.
-   - `iclock.hpp`: `IClock` with `RealClock` and `MockClock` allowing manual time advancement in tests.
-   - `inetlink.hpp`: `INetlink` with `MockNetlink` allowing synthetic netlink message delivery.
+  - `isysfs.hpp`: `ISysfs` with `RealSysfs` and `MockSysfs` supporting in-memory file trees and fault injection.
+  - `iprocess_source.hpp`: `IProcessSource` with `RealProcessSource` and `MockProcessSource`.
+  - `icommand_runner.hpp`: `ICommandRunner` with `MockCommandRunner` supporting canned exit codes and outputs.
+  - `iclock.hpp`: `IClock` with `RealClock` and `MockClock` allowing manual time advancement in tests.
+  - `inetlink.hpp`: `INetlink` with `MockNetlink` allowing synthetic netlink message delivery.
 4. **Plugin-like Self-Registering Tweak Subsystem (`include/zenith/tweaks/tweak_registry.hpp`)**:
-   - Template-based `TweakRegistrar<T>` for static auto-registration.
-   - Macro `ZENITH_REGISTER_TWEAK(TweakClass)` enabling single-file tweak additions without touching central dispatchers.
+  - Template-based `TweakRegistrar<T>` for static auto-registration.
+  - Macro `ZENITH_REGISTER_TWEAK(TweakClass)` enabling single-file tweak additions without touching central dispatchers.
 5. **Strict RAII Resource Guards (`include/zenith/raii.hpp`)**:
-   - `UniqueFd`: Move-only POSIX file descriptor wrapper with cross-platform `<unistd.h>` and `<io.h>` guards.
-   - `CgroupDirGuard`: RAII directory cleanup for transient cgroups.
-   - `ScopeExitGuard`: General-purpose compile-time scope exit execution guard.
-   - Zero raw `new`/`delete` throughout the entire codebase.
+  - `UniqueFd`: Move-only POSIX file descriptor wrapper with cross-platform `<unistd.h>` and `<io.h>` guards.
+  - `CgroupDirGuard`: RAII directory cleanup for transient cgroups.
+  - `ScopeExitGuard`: General-purpose compile-time scope exit execution guard.
+  - Zero raw `new`/`delete` throughout the entire codebase.
 6. **Structured Logger & Rate Limiter (`include/zenith/structured_logger.hpp`, `src/structured_logger.cpp`)**:
-   - Log levels: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `CRITICAL`.
-   - Formats: Text (ANSI colored), Systemd Journald stream format (`<priority>message`), and compact single-line JSON format.
-   - `RateLimiter`: Per-key token-bucket / sliding window rate limiting to prevent syslog flooding during high-frequency events.
+  - Log levels: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `CRITICAL`.
+  - Formats: Text (ANSI colored), Systemd Journald stream format (`<priority>message`), and compact single-line JSON format.
+  - `RateLimiter`: Per-key token-bucket / sliding window rate limiting to prevent syslog flooding during high-frequency events.
 7. **Single-Threaded Epoll Core Reactor (`include/zenith/event_loop.hpp`, `src/event_loop.cpp`)**:
-   - `IPoller`, `EpollPoller` (Linux `epoll_create1`, `epoll_ctl`, `epoll_wait`), and `MockPoller`.
-   - Support for `signalfd`, `timerfd`, and socket descriptors.
-   - Thread-safe `post()` task queue for posting work from background helper threads into the single-threaded reactor.
-   - ThreadSanitizer verified: zero data races across multi-threaded operations.
+  - `IPoller`, `EpollPoller` (Linux `epoll_create1`, `epoll_ctl`, `epoll_wait`), and `MockPoller`.
+  - Support for `signalfd`, `timerfd`, and socket descriptors.
+  - Thread-safe `post()` task queue for posting work from background helper threads into the single-threaded reactor.
+  - ThreadSanitizer verified: zero data races across multi-threaded operations.
 8. **Tooling & Compiler Hardening**:
-   - `.clang-format`: Formatted to modern C++20 LLVM/Google standard.
-   - `.clang-tidy`: Enabled `bugprone-*`, `performance-*`, `modernize-*`, `cert-*`.
-   - Global coverage flags `--coverage` in `CMakeLists.txt`.
+  - `.clang-format`: Formatted to modern C++20 LLVM/Google standard.
+  - `.clang-tidy`: Enabled `bugprone-*`, `performance-*`, `modernize-*`, `cert-*`.
+  - Global coverage flags `--coverage` in `CMakeLists.txt`.
 9. **Comprehensive Architectural Unit Test Suite (`tests/test_cpp20_architecture.cpp`)**:
-   - 6 test cases verifying `Result` monad, mock interfaces, RAII guards, structured logger, rate limiter, event loop, and tweak plugin registrar.
+  - 6 test cases verifying `Result` monad, mock interfaces, RAII guards, structured logger, rate limiter, event loop, and tweak plugin registrar.
 10. **Architecture Decision Record**:
-    - Recorded `ADR-0010: C++20 Modern Architectural Paradigm & Dependency Inversion` in `docs/DECISIONS.md`.
+   - Recorded `ADR-0010: C++20 Modern Architectural Paradigm & Dependency Inversion` in `docs/DECISIONS.md`.
 
 ### Verified CI Command Output (GitHub Actions Run 39477463688)
 ```text
@@ -807,34 +807,34 @@ Execution of Stage 9 according to the Autonomous Senior Engineer protocol. In ac
 
 ### Actions Completed
 1. **Reproducible Benchmarking Suite (`bench/`)**:
-   - `bench/bench_daemon_metrics.cpp`: Nanosecond-accurate C++20 microbenchmark binary measuring startup time, peak memory RSS, and mutation apply/revert performance across 50 runs.
-   - `bench/frametime_parser.py`: Python analyzer for MangoHud and CapFrameX CSV files; calculates total frames, Mean FPS, 1% Low FPS, 0.1% Low FPS, frametime standard deviation (jitter), and microstutter event frequency (>2.5x mean or >50ms).
-   - `bench/cyclictest.sh`: Script measuring Linux thread scheduling latency and jitter using `cyclictest` (from `rt-tests`).
-   - `bench/bench_pipewire.sh`: Probes PipeWire active audio quantum and clock settings; monitors audio dropouts (xruns) via `pw-top`.
-   - `bench/bench_network.sh`: Measures ping latency and jitter under concurrent saturated TCP load (Bufferbloat test) with standard qdisc vs CAKE/FQ_CODEL.
-   - `bench/bench_daemon.sh`: Sustained 10-second resource profiler sampling active daemon CPU % and memory RSS.
-   - `bench/runner.py`: Comprehensive A/B and ablation runner testing Baseline vs Profiles (Safe, Balanced, Aggressive) vs Individual Isolated Tweaks (e.g. `split_lock`, `thp`, `cgroups`, `vcache`, `epp`, `pipewire`, `nvme`) across $\ge 10$ iterations with 2 warmup runs, recording thermal state and exporting to `bench/results/sweep_<timestamp>.csv` and `.json`.
-   - `bench/plot_results.py`: Headless Matplotlib visualizer rendering publication-ready comparison charts with 95% CI error bars (`benchmark_fps_comparison.png`) and frametime jitter distributions (`benchmark_jitter_stutters.png`).
-   - `bench/run_benchmarks.sh`: Universal one-command entrypoint (`./bench/run_benchmarks.sh [all|daemon|ablation|quick]`).
+  - `bench/bench_daemon_metrics.cpp`: Nanosecond-accurate C++20 microbenchmark binary measuring startup time, peak memory RSS, and mutation apply/revert performance across 50 runs.
+  - `bench/frametime_parser.py`: Python analyzer for MangoHud and CapFrameX CSV files; calculates total frames, Mean FPS, 1% Low FPS, 0.1% Low FPS, frametime standard deviation (jitter), and microstutter event frequency (>2.5x mean or >50ms).
+  - `bench/cyclictest.sh`: Script measuring Linux thread scheduling latency and jitter using `cyclictest` (from `rt-tests`).
+  - `bench/bench_pipewire.sh`: Probes PipeWire active audio quantum and clock settings; monitors audio dropouts (xruns) via `pw-top`.
+  - `bench/bench_network.sh`: Measures ping latency and jitter under concurrent saturated TCP load (Bufferbloat test) with standard qdisc vs CAKE/FQ_CODEL.
+  - `bench/bench_daemon.sh`: Sustained 10-second resource profiler sampling active daemon CPU % and memory RSS.
+  - `bench/runner.py`: Comprehensive A/B and ablation runner testing Baseline vs Profiles (Safe, Balanced, Aggressive) vs Individual Isolated Tweaks (e.g. `split_lock`, `thp`, `cgroups`, `vcache`, `epp`, `pipewire`, `nvme`) across $\ge 10$ iterations with 2 warmup runs, recording thermal state and exporting to `bench/results/sweep_<timestamp>.csv` and `.json`.
+  - `bench/plot_results.py`: Headless Matplotlib visualizer rendering publication-ready comparison charts with 95% CI error bars (`benchmark_fps_comparison.png`) and frametime jitter distributions (`benchmark_jitter_stutters.png`).
+  - `bench/run_benchmarks.sh`: Universal one-command entrypoint (`./bench/run_benchmarks.sh [all|daemon|ablation|quick]`).
 2. **Empirical Daemon Metrics Verified (Actual Measurements)**:
-   - **Startup Latency**: Target $< 100\text{ ms}$. Measured actual: **$0.0407\text{ ms}$ (median)**, $0.0625\text{ ms}$ (mean), $0.0598\text{ ms}$ (p95), $0.8220\text{ ms}$ (p99). **Target exceeded by $>100\times$**.
-   - **Idle CPU Utilization**: Target $< 0.1\%$. Measured actual: **$0.00\%$** (reactor suspended in `epoll_wait`). **Target met**.
-   - **Resident Set Size (RSS)**: Target $< 15\text{ MB}$.
-     - Non-instrumented / Release binary: **$3.8\text{ MB}$ – $6.2\text{ MB}$**. **Target met**.
-     - ASan/UBSan Debug binary: **$32.4\text{ MB}$** (due to mandatory AddressSanitizer shadow memory pre-allocation).
-   - **Tweak Apply Latency**: **$2.27\text{ ms}$** across all enabled balanced tweaks.
-   - **Tweak Revert Latency**: **$0.10\text{ ms}$**.
+  - **Startup Latency**: Target $< 100\text{ ms}$. Measured actual: **$0.0407\text{ ms}$ (median)**, $0.0625\text{ ms}$ (mean), $0.0598\text{ ms}$ (p95), $0.8220\text{ ms}$ (p99). **Target exceeded by $>100\times$**.
+  - **Idle CPU Utilization**: Target $< 0.1\%$. Measured actual: **$0.00\%$** (reactor suspended in `epoll_wait`). **Target met**.
+  - **Resident Set Size (RSS)**: Target $< 15\text{ MB}$.
+    - Non-instrumented / Release binary: **$3.8\text{ MB}$ - $6.2\text{ MB}$**. **Target met**.
+    - ASan/UBSan Debug binary: **$32.4\text{ MB}$** (due to mandatory AddressSanitizer shadow memory pre-allocation).
+  - **Tweak Apply Latency**: **$2.27\text{ ms}$** across all enabled balanced tweaks.
+  - **Tweak Revert Latency**: **$0.10\text{ ms}$**.
 3. **Tweak Decision Matrix & `docs/BENCHMARKS.md`**:
-   - Comprehensive documentation created in `docs/BENCHMARKS.md`: testing tiers (Desktop X3D, Steam Deck APU, Automated CI), methodology, empirical decision table for all 17 tweaks, and bare-metal contribution template.
-   - Strict rule enforced: Tweaks without proven benefit (such as aggressive split_lock mitigation or GPU clock locks on non-competitive titles) are disabled by default.
+  - Comprehensive documentation created in `docs/BENCHMARKS.md`: testing tiers (Desktop X3D, Steam Deck APU, Automated CI), methodology, empirical decision table for all 17 tweaks, and bare-metal contribution template.
+  - Strict rule enforced: Tweaks without proven benefit (such as aggressive split_lock mitigation or GPU clock locks on non-competitive titles) are disabled by default.
 4. **README Cleanup & Hardening**:
-   - Purged unproven assertions ("consuming zero CPU cycles", "100% exclusive access", "eliminating inter-CCD latency penalties", "restores within milliseconds").
-   - Replaced speculative benchmark expectation table with factual empirical guidance and instructions for single-command benchmark reproduction.
+  - Purged unproven assertions ("consuming zero CPU cycles", "100% exclusive access", "eliminating inter-CCD latency penalties", "restores within milliseconds").
+  - Replaced speculative benchmark expectation table with factual empirical guidance and instructions for single-command benchmark reproduction.
 5. **Unit Tests & Automated CI Verification**:
-   - Implemented `tests/test_benchmarks.cpp`: unit tests for statistical calculations, timing mechanisms, and RSS memory probes (registered as 16th test target in CMake).
-   - Integrated `./bench/run_benchmarks.sh quick` directly into GitHub Actions CI pipeline.
+  - Implemented `tests/test_benchmarks.cpp`: unit tests for statistical calculations, timing mechanisms, and RSS memory probes (registered as 16th test target in CMake).
+  - Integrated `./bench/run_benchmarks.sh quick` directly into GitHub Actions CI pipeline.
 6. **Architecture Decision Record**:
-   - Recorded `ADR-0011: Empirical Benchmarking, Statistical Ablation & Tweak Decision Framework` in `docs/DECISIONS.md`.
+  - Recorded `ADR-0011: Empirical Benchmarking, Statistical Ablation & Tweak Decision Framework` in `docs/DECISIONS.md`.
 
 ### Verified CI Command Output (GitHub Actions Run 39479528172)
 ```text
@@ -938,26 +938,26 @@ Total Test time (real) = 32.25 sec
 
 ### Objectives Implemented
 1. **`zenithctl` Unified Control CLI (`src/zenithctl/main_ctl.cpp`)**:
-   - Comprehensive command-line utility with rich ASCII art banner and subcommands:
-     - `status [--watch, -w] [--json]`: Live ASCII/ANSI dashboard or machine-readable JSON status from `/run/zenith/zenith.sock`.
-     - `doctor [--json]`: 8-point system diagnostic health audit with formatted `[✅ PASS]`, `[⚠️ WARN]`, `[❌ FAIL]`, and copy-paste remediation commands.
-     - `enable` / `disable`: Dynamic gaming optimization toggle.
-     - `profile list` / `profile set <safe|balanced|aggressive>`: Live profile switching over UNIX domain socket.
-     - `game list` / `game add <target> [profile]`: Per-game override management.
-     - `dry-run [profile]`: Safe preview of sysfs/sysctl/cgroup mutations without applying changes.
-     - `explain`: Kernel mechanism documentation and risk analysis.
-     - `rollback`: Direct or daemon-mediated emergency rollback.
-     - `suggest [game]`: Local machine learning recommendation based on historical variance.
-     - `logs [-f]`: Systemd/journald log streaming.
-     - `report`: Anonymized markdown diagnostic report generator redacting usernames, home directories, and IP addresses for GitHub issues.
-     - `completions <bash|zsh|fish>`: Dynamic shell autocompletion script generators.
-     - `version`: Version and build information display.
+  - Comprehensive command-line utility with rich ASCII art banner and subcommands:
+    - `status [--watch, -w] [--json]`: Live ASCII/ANSI dashboard or machine-readable JSON status from `/run/zenith/zenith.sock`.
+    - `doctor [--json]`: 8-point system diagnostic health audit with formatted `[✅ PASS]`, `[⚠️ WARN]`, `[❌ FAIL]`, and copy-paste remediation commands.
+    - `enable` / `disable`: Dynamic gaming optimization toggle.
+    - `profile list` / `profile set <safe|balanced|aggressive>`: Live profile switching over UNIX domain socket.
+    - `game list` / `game add <target> [profile]`: Per-game override management.
+    - `dry-run [profile]`: Safe preview of sysfs/sysctl/cgroup mutations without applying changes.
+    - `explain`: Kernel mechanism documentation and risk analysis.
+    - `rollback`: Direct or daemon-mediated emergency rollback.
+    - `suggest [game]`: Local machine learning recommendation based on historical variance.
+    - `logs [-f]`: Systemd/journald log streaming.
+    - `report`: Anonymized markdown diagnostic report generator redacting usernames, home directories, and IP addresses for GitHub issues.
+    - `completions <bash|zsh|fish>`: Dynamic shell autocompletion script generators.
+    - `version`: Version and build information display.
 2. **Versioned UNIX Domain Socket Protocol (`include/zenith/socket_client.hpp`, `src/socket_client.cpp`, `src/engine.cpp`)**:
-   - Communication over `/run/zenith/zenith.sock` with payload protocol versioning (`"version": 1`).
-   - Non-blocking I/O with `::poll` timeout protection (default 2000 ms) preventing client hangs.
-   - Handled commands: `STATUS`, `GET_PROFILES`, `SET_PROFILE <p>`, `ROLLBACK`, `PING`.
+  - Communication over `/run/zenith/zenith.sock` with payload protocol versioning (`"version": 1`).
+  - Non-blocking I/O with `::poll` timeout protection (default 2000 ms) preventing client hangs.
+  - Handled commands: `STATUS`, `GET_PROFILES`, `SET_PROFILE <p>`, `ROLLBACK`, `PING`.
 3. **`zenithctl doctor` System Diagnostics (`include/zenith/doctor.hpp`, `src/doctor.cpp`)**:
-   - 8 automated diagnostic probes:
+  - 8 automated diagnostic probes:
      1. `cgroups_v2`: Unified hierarchy verification and controller subtree delegation (`cpu`, `cpuset`).
      2. `kernel_version`: Linux kernel release evaluation (minimum 5.15 LTS, optimal 6.12+ for sched_ext / 6.13+ for amd_x3d_vcache).
      3. `privileges`: Root execution and wheel/gamemode group membership.
@@ -967,22 +967,22 @@ Total Test time (real) = 32.25 sec
      7. `gpu_driver`: Hardware driver detection (AMD Radeon DPM, NVIDIA NVML, DRM).
      8. `pipewire_audio`: Sub-millisecond PipeWire runtime socket verification.
 4. **`zenithctl status --watch` Live TUI Dashboard (`include/zenith/tui.hpp`, `src/tui.cpp`)**:
-   - ANSI/ASCII terminal interface displaying active game PID, runtime type, CPU core allocation (Gaming CCD vs Housekeeping cores), real-time PSI pressure bars, CPU/GPU temperatures, active tweak count, and recent events log.
+  - ANSI/ASCII terminal interface displaying active game PID, runtime type, CPU core allocation (Gaming CCD vs Housekeeping cores), real-time PSI pressure bars, CPU/GPU temperatures, active tweak count, and recent events log.
 5. **Steam Integration Wrapper (`src/zenith-run/main_run.cpp`)**:
-   - Drop-in launcher for Steam launch options: `zenith-run %command%`.
-   - `gamescope` pass-through awareness (e.g. `gamescope -W 2560 -H 1440 -r 144 -- zenith-run %command%`).
-   - D-Bus desktop notification integration via `notify-send` for game activation and deactivation.
-   - Desktop tray companion specification documented in `docs/DESKTOP_GUI.md`.
+  - Drop-in launcher for Steam launch options: `zenith-run %command%`.
+  - `gamescope` pass-through awareness (e.g. `gamescope -W 2560 -H 1440 -r 144 -- zenith-run %command%`).
+  - D-Bus desktop notification integration via `notify-send` for game activation and deactivation.
+  - Desktop tray companion specification documented in `docs/DESKTOP_GUI.md`.
 6. **Bilingual Localization & Error Catalog (`include/zenith/i18n.hpp`, `src/i18n.cpp`, `docs/ERRORS.md`)**:
-   - Russian (`ru`) and English (`en`) bilingual translations.
-   - Standardized error codes `[ZENITH-EXXX]` linking directly to remediation instructions in `docs/ERRORS.md`.
+  - Russian (`ru`) and English (`en`) bilingual translations.
+  - Standardized error codes `[ZENITH-EXXX]` linking directly to remediation instructions in `docs/ERRORS.md`.
 7. **Issue Report Sanitizer (`include/zenith/report.hpp`, `src/report.cpp`)**:
-   - Generates markdown issue templates containing kernel version, CPU topology, and doctor checks.
-   - Regex-based redaction of usernames, `/home/$USER`, and IPv4 addresses (preserving `127.0.0.1`).
+  - Generates markdown issue templates containing kernel version, CPU topology, and doctor checks.
+  - Regex-based redaction of usernames, `/home/$USER`, and IPv4 addresses (preserving `127.0.0.1`).
 8. **Shell Autocompletions (`include/zenith/completions.hpp`, `src/completions.cpp`)**:
-   - Generated native autocompletion scripts for `bash`, `zsh`, and `fish`.
+  - Generated native autocompletion scripts for `bash`, `zsh`, and `fish`.
 9. **ADR-0012 Recorded (`docs/DECISIONS.md`)**:
-   - Architectural decision record documenting UX, CLI tooling, Unix socket protocol, and diagnostics.
+  - Architectural decision record documenting UX, CLI tooling, Unix socket protocol, and diagnostics.
 
 ### Verified CI Command Output (GitHub Actions Run 39483922594)
 ```text
@@ -1061,50 +1061,50 @@ Stage 11 represents the final delivery and production distribution milestone for
 
 ### Actions Completed
 1. **Extended CI/CD Matrix (`.github/workflows/ci.yml`)**:
-   - Compilers & Toolchains: GCC (12, 13, 14), Clang (16, 17, 18), both Debug and Release configurations.
-   - Containerized Native Arch Linux runner (`archlinux:latest`) validating clean compilation and tests on bleeding-edge rolling-release environments.
-   - Sanitizers: AddressSanitizer (`-fsanitize=address`), UndefinedBehaviorSanitizer (`-fsanitize=undefined`), and dedicated ThreadSanitizer job (`-fsanitize=thread`).
-   - Static Analysis & Linting: `clang-tidy`, `cppcheck`, and formatting enforcement (`clang-format`).
-   - Compiler Cache: Configured `ccache` with unique hash-keyed cache paths for accelerated CI builds.
-   - Test Coverage: Integrated `lcov` / `gcov` reporting under GCC.
+  - Compilers & Toolchains: GCC (12, 13, 14), Clang (16, 17, 18), both Debug and Release configurations.
+  - Containerized Native Arch Linux runner (`archlinux:latest`) validating clean compilation and tests on bleeding-edge rolling-release environments.
+  - Sanitizers: AddressSanitizer (`-fsanitize=address`), UndefinedBehaviorSanitizer (`-fsanitize=undefined`), and dedicated ThreadSanitizer job (`-fsanitize=thread`).
+  - Static Analysis & Linting: `clang-tidy`, `cppcheck`, and formatting enforcement (`clang-format`).
+  - Compiler Cache: Configured `ccache` with unique hash-keyed cache paths for accelerated CI builds.
+  - Test Coverage: Integrated `lcov` / `gcov` reporting under GCC.
 2. **End-to-End Privileged & Rollback Integration Testing (`tests/integration/test_e2e_privileged.sh`)**:
-   - Takes comprehensive baseline snapshot of kernel knobs (`split_lock_mitigate`, `dirty_ratio`, `swappiness`, `compaction_proactiveness`, `transparent_hugepage/enabled`, and CPU governor).
-   - Starts Zenith and applies aggressive mutations.
-   - Verifies mutated state matches targets.
-   - Triggers `zenithctl rollback` emergency recovery.
-   - Asserts a strict zero-drift diff between pre-run baseline and post-rollback state.
+  - Takes comprehensive baseline snapshot of kernel knobs (`split_lock_mitigate`, `dirty_ratio`, `swappiness`, `compaction_proactiveness`, `transparent_hugepage/enabled`, and CPU governor).
+  - Starts Zenith and applies aggressive mutations.
+  - Verifies mutated state matches targets.
+  - Triggers `zenithctl rollback` emergency recovery.
+  - Asserts a strict zero-drift diff between pre-run baseline and post-rollback state.
 3. **Multi-Platform Native Packaging**:
-   - **Arch Linux / CachyOS (AUR)**:
-     - `aur/PKGBUILD`: Clean, reproducible package build passing `namcap` without errors or warnings.
-     - `aur/PKGBUILD-git`: VCS development tracking package.
-     - `aur/zenith.install`: Guarantees `zenithctl rollback` on `pre_remove`.
-   - **Debian / Ubuntu (`.deb`)**:
-     - Configured CPack Debian generator with dependencies `libc6 (>= 2.35)`, `libstdc++6 (>= 12)`.
-     - `packaging/deb/postinst`: Enables systemd service and generates default config.
-     - `packaging/deb/prerm`: Guarantees `zenithctl rollback` before binary removal.
-     - `packaging/deb/postrm`: Cleans runtime lock/journal state.
-   - **Fedora / RHEL (`.rpm`)**:
-     - `packaging/rpm/zenith.spec`: Full native RPM specification.
-     - `packaging/rpm/postinst.sh` and `packaging/rpm/prerm.sh`: Pre-uninstall rollback guard.
-   - **NixOS / Nix (`flake.nix`)**:
-     - Full modern Nix flake defining default package, development shell, and `zenith-gaming-daemon` NixOS systemd module with configurable tuning options.
+  - **Arch Linux / CachyOS (AUR)**:
+    - `aur/PKGBUILD`: Clean, reproducible package build passing `namcap` without errors or warnings.
+    - `aur/PKGBUILD-git`: VCS development tracking package.
+    - `aur/zenith.install`: Guarantees `zenithctl rollback` on `pre_remove`.
+  - **Debian / Ubuntu (`.deb`)**:
+    - Configured CPack Debian generator with dependencies `libc6 (>= 2.35)`, `libstdc++6 (>= 12)`.
+    - `packaging/deb/postinst`: Enables systemd service and generates default config.
+    - `packaging/deb/prerm`: Guarantees `zenithctl rollback` before binary removal.
+    - `packaging/deb/postrm`: Cleans runtime lock/journal state.
+  - **Fedora / RHEL (`.rpm`)**:
+    - `packaging/rpm/zenith.spec`: Full native RPM specification.
+    - `packaging/rpm/postinst.sh` and `packaging/rpm/prerm.sh`: Pre-uninstall rollback guard.
+  - **NixOS / Nix (`flake.nix`)**:
+    - Full modern Nix flake defining default package, development shell, and `zenith-gaming-daemon` NixOS systemd module with configurable tuning options.
 4. **Reproducible Builds & Releases (`packaging/build_reproducible.sh` & `.github/workflows/release.yml`)**:
-   - Reproducible build script utilizing `SOURCE_DATE_EPOCH` and `-ffile-prefix-map=$(pwd)=.`.
-   - CycloneDX 1.5 Software Bill of Materials (`packaging/sbom/cyclonedx.json`).
-   - Automated cryptographic checksum generation (`dist/SHA256SUMS`).
-   - GitHub Actions automated release pipeline publishing `.deb`, `.rpm`, `.tar.gz`, SBOM, and `SHA256SUMS` on tag push (`v*`).
+  - Reproducible build script utilizing `SOURCE_DATE_EPOCH` and `-ffile-prefix-map=$(pwd)=.`.
+  - CycloneDX 1.5 Software Bill of Materials (`packaging/sbom/cyclonedx.json`).
+  - Automated cryptographic checksum generation (`dist/SHA256SUMS`).
+  - GitHub Actions automated release pipeline publishing `.deb`, `.rpm`, `.tar.gz`, SBOM, and `SHA256SUMS` on tag push (`v*`).
 5. **Supply Chain Hardening**:
-   - Dependabot configuration (`.github/dependabot.yml`) updating GitHub Actions dependencies weekly.
-   - CodeQL Advanced Analysis (`.github/workflows/codeql.yml`) scanning C++ code for CWE vulnerabilities on every push and schedule.
-   - OpenSSF Scorecard (`.github/workflows/scorecard.yml`) assessing supply chain integrity.
-   - All third-party GitHub Actions pinned to immutable full commit SHAs.
+  - Dependabot configuration (`.github/dependabot.yml`) updating GitHub Actions dependencies weekly.
+  - CodeQL Advanced Analysis (`.github/workflows/codeql.yml`) scanning C++ code for CWE vulnerabilities on every push and schedule.
+  - OpenSSF Scorecard (`.github/workflows/scorecard.yml`) assessing supply chain integrity.
+  - All third-party GitHub Actions pinned to immutable full commit SHAs.
 6. **Schema Versioning & Config Migration (`ConfigMigrator`)**:
-   - Created `zenith::ConfigMigrator` in `include/zenith/config_migration.hpp` and `src/config_migration.cpp`.
-   - Seamlessly upgrades legacy v1.0.0 configurations to v1.1.0 schema while preserving user keys and inline comments.
-   - Implemented unit tests in `tests/test_config_migration.cpp` (Target #18).
+  - Created `zenith::ConfigMigrator` in `include/zenith/config_migration.hpp` and `src/config_migration.cpp`.
+  - Automatically upgrades legacy v1.0.0 configurations to v1.1.0 schema while preserving user keys and inline comments.
+  - Implemented unit tests in `tests/test_config_migration.cpp` (Target #18).
 7. **Official Release v1.1.0 Published**:
-   - Pushed release tag `v1.1.0`.
-   - Release workflow built packages and published live release with all assets attached.
+  - Pushed release tag `v1.1.0`.
+  - Release workflow built packages and published live release with all assets attached.
 
 ### Verified CI Command Output (GitHub Actions)
 ```text

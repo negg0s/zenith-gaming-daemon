@@ -25,13 +25,13 @@ Zenith operates autonomously at the kernel and hardware boundary. It intercepts 
 
 ## 🚀 Quick Navigation
 
-* [Installation Guide](INSTALL.md) — Pre-compiled packages for Arch AUR, Debian/Ubuntu `.deb`, Fedora `.rpm`, Nix Flake, and Source.
-* [Configuration Guide](CONFIGURATION.md) — Detailed explanation of every key in `/etc/zenith/zenith.conf`.
-* [Optimization Profiles](PROFILES.md) — Safe, Balanced, and Aggressive tiers with adaptive PSI/thermal auto-downgrade.
-* [Tweaks Reference](TWEAKS.md) — Kernel paths, mechanisms, risks, and benchmarked benefits.
-* [Architecture & Design](ARCHITECTURE.md) — Complete module architecture with Mermaid lifecycle diagrams.
-* [Anti-Cheat Compliance](ANTI_CHEAT.md) — Why Zenith is safe with modern anti-cheat engines.
-* [Empirical Benchmarks](BENCHMARKS.md) — Benchmark data, frametime variance analysis, and hardware tier results.
-* [Troubleshooting & Diagnostics](TROUBLESHOOTING.md) — `zenithctl doctor` guide and conflicting daemon resolution.
-* [Frequently Asked Questions (FAQ)](FAQ.md) — Common questions, Steam Deck, CachyOS, and NVIDIA tuning.
-* [Документация на русском (Russian)](ru/index.md) — Полное руководство на русском языке.
+* [Installation Guide](INSTALL.md) - Pre-compiled packages for Arch AUR, Debian/Ubuntu `.deb`, Fedora `.rpm`, Nix Flake, and Source.
+* [Configuration Guide](CONFIGURATION.md) - Detailed explanation of every key in `/etc/zenith/zenith.conf`.
+* [Optimization Profiles](PROFILES.md) - Safe, Balanced, and Aggressive tiers with adaptive PSI/thermal auto-downgrade.
+* [Tweaks Reference](TWEAKS.md) - Kernel paths, mechanisms, risks, and benchmarked benefits.
+* [Architecture & Design](ARCHITECTURE.md) - Complete module architecture with Mermaid lifecycle diagrams.
+* [Anti-Cheat Compliance](ANTI_CHEAT.md) - Why Zenith is safe with modern anti-cheat engines.
+* [Empirical Benchmarks](BENCHMARKS.md) - Benchmark data, frametime variance analysis, and hardware tier results.
+* [Troubleshooting & Diagnostics](TROUBLESHOOTING.md) - `zenithctl doctor` guide and conflicting daemon resolution.
+* [Frequently Asked Questions (FAQ)](FAQ.md) - Common questions, Steam Deck, CachyOS, and NVIDIA tuning.
+* [Документация на русском (Russian)](ru/index.md) - Полное руководство на русском языке.

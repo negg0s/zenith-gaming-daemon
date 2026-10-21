@@ -9,6 +9,7 @@
 #include "zenith/tui.hpp"
 
 #include <cassert>
+#include "zenith/version.hpp"
 #include <iostream>
 #include <string>
 
@@ -62,7 +63,7 @@ void test_doctor_engine() {
 
 void test_tui_dashboard_rendering() {
     zenith::TuiSnapshot snap;
-    snap.daemon_version = "1.0.0";
+    snap.daemon_version = zenith::ZENITH_VERSION;
     snap.profile = "Balanced";
     snap.is_game_active = true;
     snap.game_name = "Cyberpunk 2077";

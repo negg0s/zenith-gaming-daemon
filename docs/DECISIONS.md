@@ -59,12 +59,12 @@ Zenith operates with elevated privileges (`CAP_SYS_ADMIN`, `CAP_SYS_NICE`, `CAP_
 1. **Unchecked Shell / System Invocations**: Use `std::system()` or `popen()` with formatted strings. Highly susceptible to command injection via crafted game titles or executable paths.
 2. **Minimal Hardening**: Standard file I/O and unauthenticated UNIX domain sockets. Vulnerable to symlink races (`/proc` pointing outside) and unprivileged local users sending commands to alter hardware clock states.
 3. **Defense-in-Depth Hardening**:
-   - Zero Shell Policy: Total elimination of `std::system()` and `popen()`. All external tools executed via `fork()` + `execve()` with whitelisted binaries (`/usr/bin/nvidia-smi`, `/usr/bin/pw-metadata`) and sanitized environment variables.
-   - Filesystem Sandboxing: `openat2` with `RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS` via trusted base dirfds to prevent symlink traversal attacks.
-   - IPC Authorization: UNIX domain socket at `/run/zenith/zenith.sock` with `0660` permissions, group ownership restricted to `wheel`/`gamemode`, kernel-level `SO_PEERCRED` validation, and 4 KB payload limit.
-   - Strict Configuration Validation: Config files capped at 64 KB; any unknown key triggers parse failure; strict type and numerical range enforcement.
-   - Privilege Containment: `PR_SET_NO_NEW_PRIVS` set on startup; systemd service hardened with `ProtectSystem=strict`, `ProtectHome=yes`, `PrivateTmp=yes`, and `ProtectKernelModules=yes`.
-   - Toolchain Hardening: PIE, Full RELRO (`-Wl,-z,relro,-z,now`), `-fstack-protector-strong`, `-fstack-clash-protection`, `-fcf-protection=full`, `_FORTIFY_SOURCE=3`, and `-Wl,-z,noexecstack`.
+  - Zero Shell Policy: Total elimination of `std::system()` and `popen()`. All external tools executed via `fork()` + `execve()` with whitelisted binaries (`/usr/bin/nvidia-smi`, `/usr/bin/pw-metadata`) and sanitized environment variables.
+  - Filesystem Sandboxing: `openat2` with `RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS` via trusted base dirfds to prevent symlink traversal attacks.
+  - IPC Authorization: UNIX domain socket at `/run/zenith/zenith.sock` with `0660` permissions, group ownership restricted to `wheel`/`gamemode`, kernel-level `SO_PEERCRED` validation, and 4 KB payload limit.
+  - Strict Configuration Validation: Config files capped at 64 KB; any unknown key triggers parse failure; strict type and numerical range enforcement.
+  - Privilege Containment: `PR_SET_NO_NEW_PRIVS` set on startup; systemd service hardened with `ProtectSystem=strict`, `ProtectHome=yes`, `PrivateTmp=yes`, and `ProtectKernelModules=yes`.
+  - Toolchain Hardening: PIE, Full RELRO (`-Wl,-z,relro,-z,now`), `-fstack-protector-strong`, `-fstack-clash-protection`, `-fcf-protection=full`, `_FORTIFY_SOURCE=3`, and `-Wl,-z,noexecstack`.
 
 ### Decision
 Adopt **Option 3: Defense-in-Depth Hardening**.
@@ -83,17 +83,17 @@ A gaming daemon that mutates system state without fine-grained scoping risks sys
 1. **Monolithic Global Switches**: All tweaks enabled simultaneously. Increases the risk of regressions on unstable hardware or battery-powered devices.
 2. **Ad-Hoc Manual Flags**: Every knob exposed independently with no profile grouping. Overwhelms users and complicates safe defaults.
 3. **Modular Subsystems with Three-Tier Profiles**:
-   - Universal `ITweak` Interface: Every tweak implements `probe()`, `apply(profile)`, `revert()`, `describe()`, `explain()`, `get_current_value()`, `get_target_value(profile)`.
-   - Three Operational Profiles:
-     - `safe`: Near-zero risk; no hardware clock overrides; soft cgroup prioritization; PipeWire quantum 128.
-     - `balanced` (Default): THP `madvise`, NVMe `none`, EPP `performance`, soft cgroups, `uclamp.min = 512`, USB autosuspend disabled.
-     - `aggressive`: Split-lock mitigation disabled (`0`), THP `always`, GPU clock lock, `SCHED_RR` priority with 3-second watchdog, PipeWire quantum 32.
-   - Non-Destructive CLI Introspection:
-     - `--dry-run`: Colorized diff of "Before $\to$ After" values without applying mutations.
-     - `--explain`: Human-readable technical breakdown of kernel mechanisms, pros, and risks.
-     - `--conflicts`: Proactive detection and coordination with `gamemode`, `ananicy`, `tuned`, `power-profiles-daemon`, `irqbalance`, and `scx`.
-   - Per-Game Profile Overrides: Match by Steam AppID (e.g. `[730]`) or executable pattern, with tweak blacklisting support.
-   - Empirical Rigor: All tweaks documented in `docs/TWEAKS.md` and explicitly labeled `[Эффект не измерен]` until empirical benchmark verification in Stage 9.
+  - Universal `ITweak` Interface: Every tweak implements `probe()`, `apply(profile)`, `revert()`, `describe()`, `explain()`, `get_current_value()`, `get_target_value(profile)`.
+  - Three Operational Profiles:
+    - `safe`: Near-zero risk; no hardware clock overrides; soft cgroup prioritization; PipeWire quantum 128.
+    - `balanced` (Default): THP `madvise`, NVMe `none`, EPP `performance`, soft cgroups, `uclamp.min = 512`, USB autosuspend disabled.
+    - `aggressive`: Split-lock mitigation disabled (`0`), THP `always`, GPU clock lock, `SCHED_RR` priority with 3-second watchdog, PipeWire quantum 32.
+  - Non-Destructive CLI Introspection:
+    - `--dry-run`: Colorized diff of "Before $\to$ After" values without applying mutations.
+    - `--explain`: Human-readable technical breakdown of kernel mechanisms, pros, and risks.
+    - `--conflicts`: Proactive detection and coordination with `gamemode`, `ananicy`, `tuned`, `power-profiles-daemon`, `irqbalance`, and `scx`.
+  - Per-Game Profile Overrides: Match by Steam AppID (e.g. `[730]`) or executable pattern, with tweak blacklisting support.
+  - Empirical Rigor: All tweaks documented in `docs/TWEAKS.md` and explicitly labeled `[Эффект не измерен]` until empirical benchmark verification in Stage 9.
 
 ### Decision
 Adopt **Option 3: Modular Subsystems with Three-Tier Profiles**.
@@ -112,12 +112,12 @@ Modern gaming systems feature diverse hardware topologies: AMD asymmetric dual-C
 1. **Frequency-Only Heuristic**: Guess P vs E cores by comparing max frequencies. Fails on architectures where E-cores clock high or when thermal throttling occurs. Fails on AMD 3D V-Cache where core types are identical except for L3 cache attachment.
 2. **Hardcoded CPU Model Tables**: Maintain a hardcoded database of CPU models by name string. Fragile, requires constant updates, breaks on unreleased or custom CPUs.
 3. **Hardware Discovery via Kernel Virtual Filesystem & Driver Abstraction**:
-   - `amd_x3d_vcache` Driver (Linux 6.13+): Primary driver probe via `/sys/devices/platform/amd_x3d_vcache/amd_x3d_mode` (`cache`, `frequency`, `none`). Fallback to L3 cache asymmetry if driver not present.
-   - Cache Parsing: Parse `cache/index3/size` and `cache/index3/shared_cpu_list` to identify distinct L3 clusters.
-   - Intel Core Types: Parse `topology/core_type` (`0x20` P-core, `0x40` E-core, `0x10` LP-E core) and `cpu_capacity`.
-   - Core Selection Modes: `cache` (prioritize V-Cache), `frequency` (prioritize high clock CCD), `auto`.
-   - Virtualization & Platform Awareness: Detect VMs (`QEMU`, `KVM`, `VMware`), Handhelds (Steam Deck, ROG Ally), and laptops on battery via `chassis_type` and `power_supply`.
-   - FileSystem Abstraction (`ITopologyFs`): Decouple topology detection from the live host filesystem, enabling full unit test validation across 11 synthetic architecture fixtures.
+  - `amd_x3d_vcache` Driver (Linux 6.13+): Primary driver probe via `/sys/devices/platform/amd_x3d_vcache/amd_x3d_mode` (`cache`, `frequency`, `none`). Fallback to L3 cache asymmetry if driver not present.
+  - Cache Parsing: Parse `cache/index3/size` and `cache/index3/shared_cpu_list` to identify distinct L3 clusters.
+  - Intel Core Types: Parse `topology/core_type` (`0x20` P-core, `0x40` E-core, `0x10` LP-E core) and `cpu_capacity`.
+  - Core Selection Modes: `cache` (prioritize V-Cache), `frequency` (prioritize high clock CCD), `auto`.
+  - Virtualization & Platform Awareness: Detect VMs (`QEMU`, `KVM`, `VMware`), Handhelds (Steam Deck, ROG Ally), and laptops on battery via `chassis_type` and `power_supply`.
+  - FileSystem Abstraction (`ITopologyFs`): Decouple topology detection from the live host filesystem, enabling full unit test validation across 11 synthetic architecture fixtures.
 
 ### Decision
 Adopt **Option 3: Hardware Discovery via Kernel Virtual Filesystem & Driver Abstraction**.
@@ -136,13 +136,13 @@ Detecting game launches and process lifecycles via high-frequency `/proc` pollin
 1. **Periodic High-Frequency Polling**: Poll `/proc` every 50ms, reading cmdline and stat for all PIDs. Inefficient, causes constant cache line thrashing and energy drain, especially on handhelds/laptops.
 2. **Ptrace / In-Memory Inspection / DLL Injection**: Attach to game processes with `ptrace`, hook Vulkan/OpenGL symbols with `LD_PRELOAD`. Strictly prohibited: triggers immediate anti-cheat bans, causes game crashes, and violates zero-overhead design.
 3. **Event-Driven Kernel Connector + Non-Invasive OS-Standard Tuning**:
-   - **Netlink Process Connector (`AF_NETLINK`, `NETLINK_CONNECTOR`, `CN_IDX_PROC`)**: Kernel sends instant asynchronous events (`PROC_EVENT_EXEC`, `PROC_EVENT_EXIT`, `PROC_EVENT_FORK`) directly to Zenith with sub-millisecond delivery and zero CPU polling overhead. Graceful fallback to timer-based polling if unprivileged or unsupported.
-   - **Deep Recognition & False Positive Immunity**: Detect Steam (`SteamAppId` in environ/cmdline, reaper), Proton/Wine prefixes and `.exe` binaries, Lutris, Heroic, Bottles, Gamescope, native games, and emulators (RPCS3, Yuzu, etc.). Specifically filter out `steamwebhelper`, launchers (Epic, Battle.net), and idle `wineserver`.
-   - **Real Game Verification & Hysteresis**: Inspect open file descriptors for GPU render nodes (`/dev/dri/renderD128`, `/dev/nvidia*`) and mapped graphics drivers (`libvulkan`, `libGL`). 100ms debounce on launch and 500ms hysteresis on exit prevent fluttering.
-   - **Background Soft Throttling (Never Kill)**: Whitelist essential system services (compositor, PipeWire, audio, network, security, agent terminal). Blacklist heavy apps (browsers, Discord, torrents) and throttle them non-destructively via cgroup v2 soft weights (`cpu.weight=50`, `cpu.idle=1`, `io.weight=50`).
-   - **Selective Thread-Level Tuning**: Scan `/proc/<pid>/task/*/comm` to classify threads: Main and Render threads receive performance core pinning and `uclamp.min`; Audio threads receive low-latency scheduling; Shader compilation runs on throughput cores. Anticheat and third-party overlay threads are explicitly excluded from priority elevation.
-   - **Anti-Cheat Safety Contract**: 100% non-invasive. Zero `ptrace`, zero memory reading (`/proc/<pid>/mem`), zero code injection. Tuning strictly employs POSIX standard OS scheduler calls (`sched_setaffinity`, `setpriority`, `sched_setscheduler`) and cgroups. Explicit documentation in `docs/ANTI_CHEAT.md` with transparent VAC/anti-cheat limitations.
-   - **Filesystem Abstraction (`IProcFs`)**: Decouple procfs operations for unit and stress testing (1000-process fork/exit races, crash injection, zero fd leaks).
+  - **Netlink Process Connector (`AF_NETLINK`, `NETLINK_CONNECTOR`, `CN_IDX_PROC`)**: Kernel sends instant asynchronous events (`PROC_EVENT_EXEC`, `PROC_EVENT_EXIT`, `PROC_EVENT_FORK`) directly to Zenith with sub-millisecond delivery and zero CPU polling overhead. Graceful fallback to timer-based polling if unprivileged or unsupported.
+  - **Deep Recognition & False Positive Immunity**: Detect Steam (`SteamAppId` in environ/cmdline, reaper), Proton/Wine prefixes and `.exe` binaries, Lutris, Heroic, Bottles, Gamescope, native games, and emulators (RPCS3, Yuzu, etc.). Specifically filter out `steamwebhelper`, launchers (Epic, Battle.net), and idle `wineserver`.
+  - **Real Game Verification & Hysteresis**: Inspect open file descriptors for GPU render nodes (`/dev/dri/renderD128`, `/dev/nvidia*`) and mapped graphics drivers (`libvulkan`, `libGL`). 100ms debounce on launch and 500ms hysteresis on exit prevent fluttering.
+  - **Background Soft Throttling (Never Kill)**: Whitelist essential system services (compositor, PipeWire, audio, network, security, agent terminal). Blacklist heavy apps (browsers, Discord, torrents) and throttle them non-destructively via cgroup v2 soft weights (`cpu.weight=50`, `cpu.idle=1`, `io.weight=50`).
+  - **Selective Thread-Level Tuning**: Scan `/proc/<pid>/task/*/comm` to classify threads: Main and Render threads receive performance core pinning and `uclamp.min`; Audio threads receive low-latency scheduling; Shader compilation runs on throughput cores. Anticheat and third-party overlay threads are explicitly excluded from priority elevation.
+  - **Anti-Cheat Safety Contract**: 100% non-invasive. Zero `ptrace`, zero memory reading (`/proc/<pid>/mem`), zero code injection. Tuning strictly employs POSIX standard OS scheduler calls (`sched_setaffinity`, `setpriority`, `sched_setscheduler`) and cgroups. Explicit documentation in `docs/ANTI_CHEAT.md` with transparent VAC/anti-cheat limitations.
+  - **Filesystem Abstraction (`IProcFs`)**: Decouple procfs operations for unit and stress testing (1000-process fork/exit races, crash injection, zero fd leaks).
 
 ### Decision
 Adopt **Option 3: Event-Driven Kernel Connector + Non-Invasive OS-Standard Tuning**.
@@ -161,17 +161,17 @@ Low latency in competitive gaming requires orchestrating multiple independent ha
 1. **Monolithic Procedural Tuning**: Combine all tuning steps into a single sequence. Fragile: if any command fails (e.g. `tc` fails on a virtual bridge, or `nvidia-smi` is missing), the entire optimization pipeline aborts.
 2. **External Shell Scripting**: Call unvetted bash scripts for `tc`, `iw`, `nvidia-smi`, `pw-metadata`. Violates the Zero Shell Policy and makes atomic rollback impossible.
 3. **Modular Subsystems with Safety Guardrails & Dynamic NVML Loading**:
-   - **Independent Subsystems**: Each subsystem (`IrqTuner`, `NetworkTuner`, `PipewireTuner`, `GpuController`) implements an independent RAII contract with isolated `probe()`, `apply()`, `revert()`, and `describe()` methods. Failure in one subsystem is non-fatal and does not block others.
-   - **IRQ Steering**: Move network, USB, and NVMe interrupts to housekeeping cores while binding GPU interrupts to gaming CCD cores. Temporarily pause `irqbalance` during gaming sessions and restore it on exit.
-   - **Targeted Network QoS & Wi-Fi Power Save**: Discover active default gateway route from `/proc/net/route` and apply CAKE/FQ_CODEL strictly to the active interface, preserving the original qdisc for clean restoration. Disable Wi-Fi power save via `iw` during gaming.
-   - **Audio Latency & xrun Guardian**: Configure PipeWire quantum via `pw-metadata` or ephemeral drop-in configuration (`/run/pipewire/pipewire.conf.d/99-zenith.conf`), avoiding modification of `/etc` or user configuration. Monitor xrun counters; dynamically elevate quantum upon audio dropouts.
-   - **Multi-Vendor GPU & Dynamic NVML**:
-     - NVIDIA: Dynamically load `libnvidia-ml.so.1` via `dlopen`/`dlsym` for direct in-process NVML queries and clock locking without fork/exec overhead. Graceful fallback to `nvidia-smi` binary.
-     - AMD: Manage `power_dpm_force_performance_level` via sysfs with rollback.
-     - Intel: Tune `gt_min_freq_mhz` and `gt_boost_freq_mhz` via sysfs.
-   - **Thermal & Battery Safety Guard**:
-     - Thermal Guard: Check GPU temperature via hwmon/NVML. If $T \ge 85^\circ\text{C}$, refuse to lock maximum clocks.
-     - Battery Guard: Probe power supplies. If discharging on battery, refuse to engage aggressive GPU performance profiles.
+  - **Independent Subsystems**: Each subsystem (`IrqTuner`, `NetworkTuner`, `PipewireTuner`, `GpuController`) implements an independent RAII contract with isolated `probe()`, `apply()`, `revert()`, and `describe()` methods. Failure in one subsystem is non-fatal and does not block others.
+  - **IRQ Steering**: Move network, USB, and NVMe interrupts to housekeeping cores while binding GPU interrupts to gaming CCD cores. Temporarily pause `irqbalance` during gaming sessions and restore it on exit.
+  - **Targeted Network QoS & Wi-Fi Power Save**: Discover active default gateway route from `/proc/net/route` and apply CAKE/FQ_CODEL strictly to the active interface, preserving the original qdisc for clean restoration. Disable Wi-Fi power save via `iw` during gaming.
+  - **Audio Latency & xrun Guardian**: Configure PipeWire quantum via `pw-metadata` or ephemeral drop-in configuration (`/run/pipewire/pipewire.conf.d/99-zenith.conf`), avoiding modification of `/etc` or user configuration. Monitor xrun counters; dynamically elevate quantum upon audio dropouts.
+  - **Multi-Vendor GPU & Dynamic NVML**:
+    - NVIDIA: Dynamically load `libnvidia-ml.so.1` via `dlopen`/`dlsym` for direct in-process NVML queries and clock locking without fork/exec overhead. Graceful fallback to `nvidia-smi` binary.
+    - AMD: Manage `power_dpm_force_performance_level` via sysfs with rollback.
+    - Intel: Tune `gt_min_freq_mhz` and `gt_boost_freq_mhz` via sysfs.
+  - **Thermal & Battery Safety Guard**:
+    - Thermal Guard: Check GPU temperature via hwmon/NVML. If $T \ge 85^\circ\text{C}$, refuse to lock maximum clocks.
+    - Battery Guard: Probe power supplies. If discharging on battery, refuse to engage aggressive GPU performance profiles.
 
 ### Decision
 Adopt **Option 3: Modular Subsystems with Safety Guardrails & Dynamic NVML Loading**.
@@ -190,19 +190,19 @@ Static system tuning is inherently fragile: applying aggressive sysctl tweaks, u
 1. **Static Blind Tuning**: Apply configured profile once and never adapt during runtime. Fails under dynamic workload spikes, thermal buildup, or memory exhaustion.
 2. **Cloud Telemetry / Remote Optimization Profiles**: Collect user frametimes and upload them to a remote server for profile generation. Violates user privacy and adds remote network dependencies.
 3. **Local Closed-Loop Adaptive Controller & Offline Learning Engine**:
-   - **Pressure Stall Information (PSI)**: Continuously sample `/proc/pressure/{cpu,memory,io}` (`some` and `full` avg10/avg60/avg300) along with CPU/GPU hwmon temperatures and hardware throttle counts (`core_throttle_count`).
-   - **Adaptive Degradation & Hysteresis**:
-     - When thresholds are breached (e.g. `memory.some.avg10 > 25%`, `io.some.avg10 > 30%`, $T \ge 85^\circ\text{C}$, or thermal throttling events increment), automatically degrade profile: `Aggressive` $\to$ `Balanced` $\to$ `Safe`, logging the exact metric breach.
-     - Recovery requires remaining healthy for $N=5$ consecutive sampling cycles and exceeding a cooldown window (10s) to guarantee zero oscillation.
-   - **Offline Local Learning (`zenithctl suggest`)**:
-     - Parses local MangoHud CSV frametime logs (`avg_fps`, `1%_low`, `0.1%_low`, `frametime_variance`).
-     - Recommends the optimal profile per game based on historical variance and thermal headroom.
-     - 100% offline: all profiles stored in local JSON (`/var/lib/zenith/learning_db.json`), zero external telemetry.
-   - **Sched_ext Extensibility**:
-     - Probe Linux 6.12+ `/sys/kernel/sched_ext/state`.
-     - Support optional user-configured BPF schedulers (`scx_lavd`, `scx_rusty`, `scx_bpfland`) with non-destructive lifecycle management and rollback.
-   - **Platform Clamps**:
-     - Automatically enforce battery and handheld ceilings (clamping profile to Balanced or Safe).
+  - **Pressure Stall Information (PSI)**: Continuously sample `/proc/pressure/{cpu,memory,io}` (`some` and `full` avg10/avg60/avg300) along with CPU/GPU hwmon temperatures and hardware throttle counts (`core_throttle_count`).
+  - **Adaptive Degradation & Hysteresis**:
+    - When thresholds are breached (e.g. `memory.some.avg10 > 25%`, `io.some.avg10 > 30%`, $T \ge 85^\circ\text{C}$, or thermal throttling events increment), automatically degrade profile: `Aggressive` $\to$ `Balanced` $\to$ `Safe`, logging the exact metric breach.
+    - Recovery requires remaining healthy for $N=5$ consecutive sampling cycles and exceeding a cooldown window (10s) to guarantee zero oscillation.
+  - **Offline Local Learning (`zenithctl suggest`)**:
+    - Parses local MangoHud CSV frametime logs (`avg_fps`, `1%_low`, `0.1%_low`, `frametime_variance`).
+    - Recommends the optimal profile per game based on historical variance and thermal headroom.
+    - 100% offline: all profiles stored in local JSON (`/var/lib/zenith/learning_db.json`), zero external telemetry.
+  - **Sched_ext Extensibility**:
+    - Probe Linux 6.12+ `/sys/kernel/sched_ext/state`.
+    - Support optional user-configured BPF schedulers (`scx_lavd`, `scx_rusty`, `scx_bpfland`) with non-destructive lifecycle management and rollback.
+  - **Platform Clamps**:
+    - Automatically enforce battery and handheld ceilings (clamping profile to Balanced or Safe).
 
 ### Decision
 Adopt **Option 3: Local Closed-Loop Adaptive Controller & Offline Learning Engine**.
@@ -222,12 +222,12 @@ Traditional C++ patterns using exceptions on hot paths, raw pointers, direct sys
 1. **Traditional Exceptions & Multithreaded Locks**: Throw `std::runtime_error` on failures and use mutexes across multiple worker threads. Incurs non-deterministic stack unwinding penalties, risk of deadlocks, and complexity under ThreadSanitizer (TSan).
 2. **Pure C-style Return Codes**: Return integer status codes (`int err`) with output parameters (`int func(T* out)`). Lacks composability, lacks type safety, and separates error metadata from return values.
 3. **Reference C++20 Clean Architecture**:
-   - **Monadic `Result<T, Error>`**: Zero-allocation error handling with functional chaining (`.map()`, `.and_then()`, `.or_else()`). Rich `Error` structs with `ErrorCode`, message, errno, and source location. Zero exceptions on hot latency paths.
-   - **Dependency Inversion Interfaces**: Core operating system interactions abstracted behind clean C++ interfaces (`ISysfs`, `IProcessSource`, `ICommandRunner`, `IClock`, `INetlink`) with production and mock implementations, enabling 100% test coverage without root permissions.
-   - **Plugin-like Tweak Registry**: Self-contained tweak definition with auto-registration macros (`ZENITH_REGISTER_TWEAK`), allowing additions with zero boilerplate.
-   - **Strict RAII**: Move-only `UniqueFd`, `CgroupDirGuard`, and `ScopeExitGuard`. Absolutely zero raw `new`/`delete`.
-   - **Single-Threaded Epoll Core Reactor**: One event loop thread for all signalfd, timerfd, netlink, and socket events, with thread-safe worker posting, proving zero data races under TSan.
-   - **Structured High-Performance Logger**: Sinks for ANSI console, journald, and JSON lines with per-key rate limiting to prevent logging overhead.
+  - **Monadic `Result<T, Error>`**: Zero-allocation error handling with functional chaining (`.map()`, `.and_then()`, `.or_else()`). Rich `Error` structs with `ErrorCode`, message, errno, and source location. Zero exceptions on hot latency paths.
+  - **Dependency Inversion Interfaces**: Core operating system interactions abstracted behind clean C++ interfaces (`ISysfs`, `IProcessSource`, `ICommandRunner`, `IClock`, `INetlink`) with production and mock implementations, enabling 100% test coverage without root permissions.
+  - **Plugin-like Tweak Registry**: Self-contained tweak definition with auto-registration macros (`ZENITH_REGISTER_TWEAK`), allowing additions with zero boilerplate.
+  - **Strict RAII**: Move-only `UniqueFd`, `CgroupDirGuard`, and `ScopeExitGuard`. Absolutely zero raw `new`/`delete`.
+  - **Single-Threaded Epoll Core Reactor**: One event loop thread for all signalfd, timerfd, netlink, and socket events, with thread-safe worker posting, proving zero data races under TSan.
+  - **Structured High-Performance Logger**: Sinks for ANSI console, journald, and JSON lines with per-key rate limiting to prevent logging overhead.
 
 ### Decision
 Adopt **Option 3: Reference C++20 Clean Architecture**.
@@ -246,16 +246,16 @@ System optimization daemons frequently suffer from "snake oil" syndrome: declari
 1. **Ad-hoc Manual Testing**: Developers run informal manual tests without warm-up, statistical confidence intervals, or automated baseline comparisons. Highly subjective, unreproducible, and prone to placebo bias.
 2. **Third-Party Game Benchmarking Exclusively**: Relying solely on built-in game benchmarks. Impractical for automated headless CI environments and lacks isolation of individual kernel knobs.
 3. **Reproducible Empirical Benchmarking & Ablation Suite (`bench/`)**:
-   - **Multi-Iteration Statistical Rigor**: $\ge 10$ runs per scenario preceded by 2 unrecorded warmup runs. Calculation of Median, Mean, Interquartile Range (IQR), Standard Deviation, and 95% Confidence Intervals.
-   - **Condition Pinning & Safety Guards**: Thermal stabilization verification, CPU scaling governor verification, and automatic flagging of runs experiencing thermal throttling ($\ge 85^\circ\text{C}$).
-   - **A/B & Ablation Architecture (`bench/runner.py`)**: Tests Baseline vs complete Profiles (Safe, Balanced, Aggressive) vs Individual Isolated Tweaks (e.g. `split_lock`, `thp`, `vcache`, `cgroups`, `epp`, `pipewire`, `nvme`) to measure the discrete delta of each intervention.
-   - **Dual Execution Engine**:
-     - *Bare-Metal Mode*: Real cyclictest, pw-top, ping load, and MangoHud/CapFrameX game logs.
-     - *Synthetic/Simulation Mode*: Deterministic, mathematically modeled frame time generator enabling full test execution in cloud CI without GPU or bare-metal hardware.
-   - **Publication-Ready Visualizations (`bench/plot_results.py`)**: Automated rendering of Matplotlib bar charts with 95% CI error bars and frametime jitter distributions.
-   - **Nanosecond-Precision Daemon Footprint Probe (`zenith_bench_daemon`)**: Real empirical measurements of startup latency, memory RSS, and mutation apply/revert duration.
-   - **Empirical Tweak Decision Table**: Every tweak must declare its measured effect; tweaks without proven benefit are disabled by default.
-   - **Documentation Integrity**: Purging all unverified claims from `README.md` and providing a single reproduction command (`./bench/run_benchmarks.sh`).
+  - **Multi-Iteration Statistical Rigor**: $\ge 10$ runs per scenario preceded by 2 unrecorded warmup runs. Calculation of Median, Mean, Interquartile Range (IQR), Standard Deviation, and 95% Confidence Intervals.
+  - **Condition Pinning & Safety Guards**: Thermal stabilization verification, CPU scaling governor verification, and automatic flagging of runs experiencing thermal throttling ($\ge 85^\circ\text{C}$).
+  - **A/B & Ablation Architecture (`bench/runner.py`)**: Tests Baseline vs complete Profiles (Safe, Balanced, Aggressive) vs Individual Isolated Tweaks (e.g. `split_lock`, `thp`, `vcache`, `cgroups`, `epp`, `pipewire`, `nvme`) to measure the discrete delta of each intervention.
+  - **Dual Execution Engine**:
+    - *Bare-Metal Mode*: Real cyclictest, pw-top, ping load, and MangoHud/CapFrameX game logs.
+    - *Synthetic/Simulation Mode*: Deterministic, mathematically modeled frame time generator enabling full test execution in cloud CI without GPU or bare-metal hardware.
+  - **Publication-Ready Visualizations (`bench/plot_results.py`)**: Automated rendering of Matplotlib bar charts with 95% CI error bars and frametime jitter distributions.
+  - **Nanosecond-Precision Daemon Footprint Probe (`zenith_bench_daemon`)**: Real empirical measurements of startup latency, memory RSS, and mutation apply/revert duration.
+  - **Empirical Tweak Decision Table**: Every tweak must declare its measured effect; tweaks without proven benefit are disabled by default.
+  - **Documentation Integrity**: Purging all unverified claims from `README.md` and providing a single reproduction command (`./bench/run_benchmarks.sh`).
 
 ### Decision
 Adopt **Option 3: Reproducible Empirical Benchmarking & Ablation Suite**.
@@ -269,19 +269,19 @@ Accepted and implemented for Stage 9.
 
 ### Context
 Zenith operates primarily as a background system daemon, but end-users interact with it through CLI tools, Steam launch options, and shell prompts. A subpar user experience (cryptic error codes, failure without actionable guidance, difficulty diagnosing system incompatibilities, or complex multi-step setups) leads to user frustration and misconfigurations.
-A first-class UX is required such that any user can install Zenith, run a diagnostic health check, inspect live core topologies, and launch games seamlessly within 2 minutes.
+A first-class UX is required such that any user can install Zenith, run a diagnostic health check, inspect live core topologies, and launch games directly without complex setup.
 
 ### Options Considered
 1. **Direct Configuration File Editing Exclusively**: Require users to manually modify `/etc/zenith/zenith.conf` and restart systemd. High friction, error-prone, and provides zero real-time feedback during gaming.
 2. **Heavy Desktop Electron / Web GUI**: Package a complete web/electron desktop application. Violates Zenith's ultra-low latency philosophy by consuming hundreds of megabytes of RAM and background CPU cycles.
 3. **Multi-Tiered CLI, Doctor Engine, and Lightweight Socket Protocol**:
-   - **Unified Control CLI (`zenithctl`)**: Intuitive verb-based command interface (`status`, `doctor`, `profile`, `game`, `dry-run`, `explain`, `rollback`, `suggest`, `logs`, `report`, `completions`).
-   - **Versioned UNIX Domain Socket Protocol (`/run/zenith/zenith.sock`)**: JSON-based request/response protocol (`STATUS`, `GET_PROFILES`, `SET_PROFILE`, `ROLLBACK`) with fallback to local inspection when the daemon is offline.
-   - **Comprehensive Health Doctor (`zenithctl doctor`)**: Automated verification of cgroups v2, kernel version, privileges, competing daemons (gamemode/ananicy/tuned), AMD X3D driver, Intel hybrid cores, PSI, and PipeWire, outputting formatted colored results with **exact actionable bash remediation commands**.
-   - **Live Terminal Dashboard (`zenithctl status --watch`)**: Real-time ASCII/ANSI TUI monitor displaying active game, core topology map (CCD0 V-Cache vs CCD1 background cores), PSI pressure gauges, temperatures, and state journal status.
-   - **Steam Launch Options Wrapper (`zenith-run %command%`)**: Transparent wrapper supporting `gamescope`, forwarding exit codes without shell expansion, and dispatching D-Bus desktop notifications (`notify-send`) upon game start and exit.
-   - **Bilingual Internationalization (`zenith::i18n`)**: English and Russian localization with standardized error codes catalog (`docs/ERRORS.md`) linked directly in output.
-   - **Anonymized Issue Reporter (`zenithctl report`)**: Generates a GitHub-ready diagnostics markdown snippet with redacting of usernames, home paths, and non-loopback IP addresses.
+  - **Unified Control CLI (`zenithctl`)**: Intuitive verb-based command interface (`status`, `doctor`, `profile`, `game`, `dry-run`, `explain`, `rollback`, `suggest`, `logs`, `report`, `completions`).
+  - **Versioned UNIX Domain Socket Protocol (`/run/zenith/zenith.sock`)**: JSON-based request/response protocol (`STATUS`, `GET_PROFILES`, `SET_PROFILE`, `ROLLBACK`) with fallback to local inspection when the daemon is offline.
+  - **Comprehensive Health Doctor (`zenithctl doctor`)**: Automated verification of cgroups v2, kernel version, privileges, competing daemons (gamemode/ananicy/tuned), AMD X3D driver, Intel hybrid cores, PSI, and PipeWire, outputting formatted colored results with **exact actionable bash remediation commands**.
+  - **Live Terminal Dashboard (`zenithctl status --watch`)**: Real-time ASCII/ANSI TUI monitor displaying active game, core topology map (CCD0 V-Cache vs CCD1 background cores), PSI pressure gauges, temperatures, and state journal status.
+  - **Steam Launch Options Wrapper (`zenith-run %command%`)**: Transparent wrapper supporting `gamescope`, forwarding exit codes without shell expansion, and dispatching D-Bus desktop notifications (`notify-send`) upon game start and exit.
+  - **Bilingual Internationalization (`zenith::i18n`)**: English and Russian localization with standardized error codes catalog (`docs/ERRORS.md`) linked directly in output.
+  - **Anonymized Issue Reporter (`zenithctl report`)**: Generates a GitHub-ready diagnostics markdown snippet with redacting of usernames, home paths, and non-loopback IP addresses.
 
 ### Decision
 Adopt **Option 3: Multi-Tiered CLI, Doctor Engine, and Lightweight Socket Protocol**.
@@ -303,24 +303,24 @@ Zenith is deployed across diverse Linux distributions (Arch Linux, CachyOS, Stea
 1. **Source Tarballs Only**: Provide only source archives and rely on users to build manually. Unacceptable UX for gamers; fails to provide system integration or uninstall guarantees.
 2. **Distribution-Agnostic Binaries (Flatpak / Snap)**: Run Zenith inside a desktop sandbox. Impossible due to sandboxing boundaries; Zenith requires access to kernel `/proc/sys`, `/sys/fs/cgroup`, and Netlink sockets.
 3. **Multi-Format Native Packaging with Guaranteed Rollback, Reproducible Builds & Hardened Supply Chain**:
-   - **Native Multi-Platform Packages**:
-     - Arch Linux: `PKGBUILD` (namcap verified) + `zenith-gaming-daemon-git` + `zenith.install` hooks.
-     - Debian / Ubuntu: CPack `.deb` generation with custom `postinst`, `prerm`, and `postrm`.
-     - Fedora / RHEL: CPack `.rpm` generation and standalone `zenith.spec`.
-     - NixOS / Nix: `flake.nix` with package, devShell, and declarative systemd service module.
-   - **Guaranteed Rollback on Removal (`prerm`)**:
-     - Pre-removal scripts strictly execute `zenithctl rollback || zenith --rollback` before binaries are unlinked, guaranteeing that all sysctl, sysfs, and cgroups alterations are reverted to their baseline snapshot.
-   - **Zero-Downtime Configuration Migration Engine (`ConfigMigrator`)**:
-     - Versioned configuration schemas with automatic detection, schema upgrading, legacy key preservation, and validation before persisting.
-   - **End-to-End Privileged & Rollback Integration Suite (`test_e2e_privileged.sh`)**:
-     - Takes baseline snapshot $\to$ applies Aggressive profile mutations $\to$ asserts target parameter state $\to$ triggers rollback $\to$ asserts zero-drift comparison with baseline.
-   - **Supply Chain Hardening & Release Reproducibility**:
-     - Pinning all GitHub Actions to exact immutable commit SHAs.
-     - Weekly Dependabot automated workflow updates.
-     - GitHub CodeQL advanced static security scanning.
-     - OpenSSF Scorecard supply chain integrity verification.
-     - Deterministic release compilation using `SOURCE_DATE_EPOCH` and `-ffile-prefix-map`.
-     - CycloneDX 1.5 Software Bill of Materials (`cyclonedx.json`) and cryptographic `SHA256SUMS` manifests attached to GitHub Releases.
+  - **Native Multi-Platform Packages**:
+    - Arch Linux: `PKGBUILD` (namcap verified) + `zenith-gaming-daemon-git` + `zenith.install` hooks.
+    - Debian / Ubuntu: CPack `.deb` generation with custom `postinst`, `prerm`, and `postrm`.
+    - Fedora / RHEL: CPack `.rpm` generation and standalone `zenith.spec`.
+    - NixOS / Nix: `flake.nix` with package, devShell, and declarative systemd service module.
+  - **Guaranteed Rollback on Removal (`prerm`)**:
+    - Pre-removal scripts strictly execute `zenithctl rollback || zenith --rollback` before binaries are unlinked, guaranteeing that all sysctl, sysfs, and cgroups alterations are reverted to their baseline snapshot.
+  - **Zero-Downtime Configuration Migration Engine (`ConfigMigrator`)**:
+    - Versioned configuration schemas with automatic detection, schema upgrading, legacy key preservation, and validation before persisting.
+  - **End-to-End Privileged & Rollback Integration Suite (`test_e2e_privileged.sh`)**:
+    - Takes baseline snapshot $\to$ applies Aggressive profile mutations $\to$ asserts target parameter state $\to$ triggers rollback $\to$ asserts zero-drift comparison with baseline.
+  - **Supply Chain Hardening & Release Reproducibility**:
+    - Pinning all GitHub Actions to exact immutable commit SHAs.
+    - Weekly Dependabot automated workflow updates.
+    - GitHub CodeQL advanced static security scanning.
+    - OpenSSF Scorecard supply chain integrity verification.
+    - Deterministic release compilation using `SOURCE_DATE_EPOCH` and `-ffile-prefix-map`.
+    - CycloneDX 1.5 Software Bill of Materials (`cyclonedx.json`) and cryptographic `SHA256SUMS` manifests attached to GitHub Releases.
 
 ### Decision
 Adopt **Option 3: Multi-Format Native Packaging with Guaranteed Rollback, Reproducible Builds & Hardened Supply Chain**.
@@ -345,12 +345,12 @@ To ensure maximum adoption, transparency, and community contributions:
 1. **Minimalist README Only**: Rely exclusively on source code comments and short markdown notes. Inadequate for new users; leaves questions regarding anti-cheat safety unanswered.
 2. **Third-Party Wiki**: Host documentation on external wikis (e.g. GitHub Wiki). Difficult to version control alongside code changes; cannot be tested in CI.
 3. **Integrated Documentation Site, UNIX Man Pages, Public Game Profiles & Showcase Repository**:
-   - **Showcase README**: Clear visual elevator pitch, real-time TUI mock, badges, hardware compatibility matrix, and the explicit "What it does / What it does NOT do / Risks / Anti-cheat compliance" section.
-   - **UNIX Man Pages**: `man/zenith.8`, `man/zenithctl.1`, and `man/zenith.conf.5` installed into `${CMAKE_INSTALL_MANDIR}`.
-   - **Community Guidelines**: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `NOTICE`, structured GitHub issue templates (requiring `zenithctl report --redact`), and PR templates.
-   - **Public Game Profiles Database**: Curated `profiles/*.toml` for major titles (*Cyberpunk 2077*, *CS2*, *Dota 2*, *Starfield*, *Baldur's Gate 3*, *Elden Ring*, *Apex Legends*) accompanied by a standalone Python validator script (`scripts/validate_game_profiles.py`) enforced in CI.
-   - **Bilingual Documentation Site**: Modern MkDocs Material site supporting English and Russian, dark/light theme, search, code copy, and Mermaid diagrams deployed via GitHub Actions.
-   - **SPDX Compliance**: Standard `// SPDX-License-Identifier: MIT` headers across all source and header files.
+  - **Showcase README**: Concise technical overview, real-time TUI mock, badges, hardware compatibility matrix, and the explicit "What it does / What it does NOT do / Risks / Anti-cheat compliance" section.
+  - **UNIX Man Pages**: `man/zenith.8`, `man/zenithctl.1`, and `man/zenith.conf.5` installed into `${CMAKE_INSTALL_MANDIR}`.
+  - **Community Guidelines**: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `NOTICE`, structured GitHub issue templates (requiring `zenithctl report --redact`), and PR templates.
+  - **Public Game Profiles Database**: Curated `profiles/*.toml` for major titles (*Cyberpunk 2077*, *CS2*, *Dota 2*, *Starfield*, *Baldur's Gate 3*, *Elden Ring*, *Apex Legends*) accompanied by a standalone Python validator script (`scripts/validate_game_profiles.py`) enforced in CI.
+  - **Bilingual Documentation Site**: Modern MkDocs Material site supporting English and Russian, dark/light theme, search, code copy, and Mermaid diagrams deployed via GitHub Actions.
+  - **SPDX Compliance**: Standard `// SPDX-License-Identifier: MIT` headers across all source and header files.
 
 ### Decision
 Adopt **Option 3: Integrated Documentation Site, UNIX Man Pages, Public Game Profiles & Showcase Repository**.

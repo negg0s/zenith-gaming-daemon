@@ -4,6 +4,7 @@
 #include "zenith/conflict_detector.hpp"
 #include "zenith/per_game_profile.hpp"
 #include <iostream>
+#include "zenith/version.hpp"
 
 namespace fs = std::filesystem;
 
@@ -14,8 +15,8 @@ void print_help() {
 "    / / ___ _ __   _| |_| |__  \n"
 "   / / / _ \\ '_ \\ | | __| '_ \\ \n"
 "  / /_|  __/ | | || | |_| | | |\n"
-" /_____\\___|_| |_||_|\\__|_| |_| Gaming Daemon (v1.0.0)\n\n"
-"Ultra-low latency Linux gaming optimizer daemon for Arch / CachyOS & SteamOS\n\n"
+" /_____\\___|_| |_||_|\\__|_| |_| Gaming Daemon (v" << zenith::ZENITH_VERSION << ")\n\n"
+<< "Ultra-low latency Linux gaming optimizer daemon for Arch / CachyOS & SteamOS\n\n"
 "Usage:\n"
 "  zenith daemon                     Run as a background daemon (systemd service)\n"
 "  zenith run <command> [args...]    Launch a game under Zenith wrapper (Steam %command%)\n"

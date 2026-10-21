@@ -24,18 +24,18 @@ To ensure statistical significance and prevent confirmation bias, all benchmarks
 
 1. **Iteration Count**: Every scenario is executed for **$\ge 10$ runs** (preceded by 2 unrecorded warmup runs).
 2. **Thermal Stabilization & Clamping**:
-   - Systems are monitored via `/sys/class/thermal/thermal_zone*/temp`.
-   - Between test iterations, a cooldown period is enforced until CPU temperature is $\le 55^\circ\text{C}$.
-   - If thermal throttling occurs ($\ge 85^\circ\text{C}$ or `/sys/devices/system/cpu/cpu*/thermal_throttle/` increments), the run is flagged as compromised.
+  - Systems are monitored via `/sys/class/thermal/thermal_zone*/temp`.
+  - Between test iterations, a cooldown period is enforced until CPU temperature is $\le 55^\circ\text{C}$.
+  - If thermal throttling occurs ($\ge 85^\circ\text{C}$ or `/sys/devices/system/cpu/cpu*/thermal_throttle/` increments), the run is flagged as compromised.
 3. **Condition Pinning**:
-   - Frequency governor is locked to a known baseline (`performance` or `powersave` depending on test).
-   - Background services (Discord, browser tabs, package updates) are fixed or managed into `/sys/fs/cgroup/zenith_background`.
+  - Frequency governor is locked to a known baseline (`performance` or `powersave` depending on test).
+  - Background services (Discord, browser tabs, package updates) are fixed or managed into `/sys/fs/cgroup/zenith_background`.
 4. **Statistical Treatment**:
-   - **Median** is reported as the primary central tendency metric (resistant to single-frame outliers).
-   - **95% Confidence Intervals** ($95\%\text{ CI}$) are calculated:
+  - **Median** is reported as the primary central tendency metric (resistant to single-frame outliers).
+  - **95% Confidence Intervals** ($95\%\text{ CI}$) are calculated:
      $$\bar{x} \pm t_{0.025, n-1} \cdot \frac{s}{\sqrt{n}}$$
-   - **Interquartile Range (IQR)** ($Q_3 - Q_1$) and Standard Deviation quantify frametime jitter.
-   - Outliers are identified and logged without arbitrary deletion.
+  - **Interquartile Range (IQR)** ($Q_3 - Q_1$) and Standard Deviation quantify frametime jitter.
+  - Outliers are identified and logged without arbitrary deletion.
 
 ---
 
@@ -46,10 +46,10 @@ The Zenith daemon is designed to run continuously in the background as a systemd
 | Metric | Target | Measured Empirical Value | Status |
 | :--- | :--- | :--- | :--- |
 | **Idle CPU Utilization** | $< 0.1\%$ | **$0.00\%$** (epoll reactor suspended in `epoll_wait`) | **MET (Target exceeded)** |
-| **Peak Resident Set Size (RSS)** | $< 15.0\text{ MB}$ | **$3.8\text{ MB}$ – $6.2\text{ MB}$** | **MET (Target exceeded)** |
-| **Cold Startup Latency** | $< 100.0\text{ ms}$ | **$0.15\text{ ms}$ – $1.40\text{ ms}$** | **MET (Target exceeded)** |
-| **Tweak Apply Latency** | $< 50.0\text{ ms}$ | **$0.08\text{ ms}$ – $0.45\text{ ms}$** | **MET** |
-| **Tweak Rollback Latency** | $< 50.0\text{ ms}$ | **$0.06\text{ ms}$ – $0.35\text{ ms}$** | **MET** |
+| **Peak Resident Set Size (RSS)** | $< 15.0\text{ MB}$ | **$3.8\text{ MB}$ - $6.2\text{ MB}$** | **MET (Target exceeded)** |
+| **Cold Startup Latency** | $< 100.0\text{ ms}$ | **$0.15\text{ ms}$ - $1.40\text{ ms}$** | **MET (Target exceeded)** |
+| **Tweak Apply Latency** | $< 50.0\text{ ms}$ | **$0.08\text{ ms}$ - $0.45\text{ ms}$** | **MET** |
+| **Tweak Rollback Latency** | $< 50.0\text{ ms}$ | **$0.06\text{ ms}$ - $0.35\text{ ms}$** | **MET** |
 
 *Verification*: Measured directly via `zenith_bench_daemon` and `bench/bench_daemon.sh` (using `getrusage()` and `/proc/self/statm`).
 
@@ -70,11 +70,11 @@ Every tweak implemented in Zenith must justify its existence. **Rule: Tweaks wit
 | **`thp_defrag`** | `.../transparent_hugepage/defrag` | Setting to `defer+madvise` offloads compaction from render thread to background `kcompactd`. | **ENABLED** | `balanced`, `aggressive` |
 | **`compaction_proactiveness`** | `/proc/sys/vm/compaction_proactiveness` | Disabling (`0`) stops periodic background wakeups during gaming; reduces microstutters. | **ENABLED** | `balanced`, `aggressive` |
 | **`watermark_boost_factor`** | `/proc/sys/vm/watermark_boost_factor` | Disabling (`0`) stops unpredictable `kswapd` reclaim bursts when allocating video buffers. | **ENABLED** | `balanced`, `aggressive` |
-| **`split_lock_mitigate`** | `/proc/sys/kernel/split_lock_mitigate` | Eliminates 50–100ms kernel-induced stalls in older DirectX 9–11 titles. High risk on shared servers. | **DISABLED by default** | `aggressive` only |
+| **`split_lock_mitigate`** | `/proc/sys/kernel/split_lock_mitigate` | Eliminates 50-100ms kernel-induced stalls in older DirectX 9-11 titles. High risk on shared servers. | **DISABLED by default** | `aggressive` only |
 | **`zram_page_cluster`** | `/proc/sys/vm/page-cluster` | For zram compressed swap: setting to `0` saves CPU decompression cycles. Dangerous on HDD. | **ENABLED (if zram)** | `balanced`, `aggressive` (only when zram is detected) |
 | **`swappiness`** | `/proc/sys/vm/swappiness` | Setting to `10` on disk swap prevents game heap paging. | **ENABLED** | `balanced`, `aggressive` |
 | **`nvme_scheduler`** | `/sys/block/nvme*/queue/scheduler` | Setting to `none` eliminates elevator overhead on modern high-IOPS NVMe drives. | **ENABLED** | `balanced`, `aggressive` |
-| **`usb_autosuspend`** | `/sys/bus/usb/devices/*/power/control` | Inhibits power down on gaming mice/keyboards; eliminates 5–15ms wakeup lag on input. | **ENABLED** | `safe`, `balanced`, `aggressive` |
+| **`usb_autosuspend`** | `/sys/bus/usb/devices/*/power/control` | Inhibits power down on gaming mice/keyboards; eliminates 5-15ms wakeup lag on input. | **ENABLED** | `safe`, `balanced`, `aggressive` |
 | **`gpu_clock_lock`** | `power_dpm_force_performance_level` / NVML | Prevents memory clock downclocking; high power/thermal cost. | **DISABLED in Safe/Balanced** | `aggressive` only |
 | **`pipewire_quantum`** | `pw-metadata -n settings 0 ...` | Quantum `64/48000` (1.33ms) or `32` (0.67ms). Elevates audio RT priority. | **ENABLED (Quantum 64)** | `balanced` (64), `aggressive` (32) |
 | **`sched_ext` (scx)** | `/sys/kernel/sched_ext/state` | Linux 6.12+ extensible BPF schedulers (`scx_lavd`, `scx_bpfland`). Experimental. | **DISABLED by default** | Explicit user enablement via config |

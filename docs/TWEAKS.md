@@ -108,7 +108,7 @@ Zenith supports three operational profiles that dictate which tweaks are active 
 - **Kernel Path**: `/sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference`
 - **Min Kernel**: Linux 5.17+ (AMD P-State / Intel P-State)
 - **Mechanism**: Hardware autonomous performance hinting register (MSR / CPPC). Informs CPU core firmware whether to ramp clocks aggressively at the first hint of load.
-- **Pros**: Setting to `performance` or `balance_performance` eliminates the 5–15ms clock ramp-up latency when frame rendering threads experience brief bursty spikes.
+- **Pros**: Setting to `performance` or `balance_performance` eliminates the 5-15ms clock ramp-up latency when frame rendering threads experience brief bursty spikes.
 - **Risks**: Higher idle power draw and higher operating temperatures.
 - **Where it hurts**: Battery life on laptops.
 - **Default**: `balance_performance` in `safe`, `performance` in `balanced` and `aggressive`.

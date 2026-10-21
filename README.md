@@ -57,22 +57,22 @@ Zenith provides a real-time terminal user interface displaying active game sessi
 
 ## ⚡ The Problem: Why Does Linux Gaming Stutter?
 
-Modern Linux gaming using Proton, Wine, and DXVK achieves outstanding average frame rates, frequently matching or exceeding Windows. However, competitive play and smooth frame pacing are frequently undermined by **frame-time inconsistency and 0.1% / 1% low frame rate drops**:
+Modern Linux gaming using Proton, Wine, and DXVK achieves high average frame rates, frequently matching or exceeding Windows. However, competitive play and smooth frame pacing are frequently undermined by **frame-time inconsistency and 0.1% / 1% low frame rate drops**:
 
-1. **Split-Lock Penalties**: Linux kernel default `kernel.split_lock_mitigate=1` intentionally throttles any process triggering unaligned atomic operations (widespread in DirectX 9–11 and Unreal Engine games) by up to **100 milliseconds per event**, creating catastrophic stutter.
-2. **CPU Core Bouncing & L3 Cache Misses**: On multi-CCD processors (especially AMD Ryzen 9 7900X3D / 7950X3D with single-CCD 3D V-Cache or Intel hybrid architectures), thread schedulers bounce game threads across CCD boundaries, causing massive L3 cache thrashing (~75ns inter-CCD latency penalty).
+1. **Split-Lock Penalties**: Linux kernel default `kernel.split_lock_mitigate=1` intentionally throttles any process triggering unaligned atomic operations (widespread in DirectX 9-11 and Unreal Engine games) by up to **100 milliseconds per event**, causing severe stutter and latency spikes.
+2. **CPU Core Bouncing & L3 Cache Misses**: On multi-CCD processors (especially AMD Ryzen 9 7900X3D / 7950X3D with single-CCD 3D V-Cache or Intel hybrid architectures), thread schedulers bounce game threads across CCD boundaries, causing L3 cache thrashing and memory latency penalties (~75ns inter-CCD penalty).
 3. **Background Process Interference**: Discord, web browsers, torrent clients, and Steam Web Helper preempt game render threads on the same physical cores.
 4. **GPU Clock Downclocking**: GPU drivers downclock memory (VRAM) and compute clocks during low-complexity scenes or menus, inducing latency spikes during sudden camera movement.
 5. **Audio & Network Bufferbloat**: High-latency PipeWire quantum defaults (default 1024 samples = 21.3ms buffer) and standard FIFO network queuing increase input-to-sound and packet jitter.
 
-**Zenith orchestrates kernel and hardware parameters dynamically to eliminate these bottlenecks with zero user intervention.**
+**Zenith orchestrates kernel and hardware parameters dynamically to eliminate these bottlenecks automatically without manual intervention.**
 
 ---
 
 ## ⚖️ The Honest Breakdown: What Zenith Does / Does NOT Do
 
 ### ✅ What Zenith Does
-* **Dramatically Improves 1% and 0.1% Lows**: Benchmarks show **15% to 35% improvement in frame-time consistency** and stutter elimination in CPU-bound and cache-sensitive titles.
+* **Improves 1% and 0.1% Lows**: Benchmarks show **15% to 35% improvement in frame-time consistency** and stutter elimination in CPU-bound and cache-sensitive titles.
 * **Autonomous Netlink Detection**: Uses the Linux kernel's Netlink proc connector to detect game launches in **<50 milliseconds** without requiring `%command%` edits in Steam.
 * **AMD 3D V-Cache Pinning**: Integrates with Linux 6.13+ `amd_x3d_vcache` driver (`amd_x3d_mode`) with fallback to hardware L3 cluster analysis.
 * **Intel P-Core / E-Core Affinity**: Binds game render loops strictly to Performance cores while moving background noise to Efficient cores.
@@ -81,8 +81,8 @@ Modern Linux gaming using Proton, Wine, and DXVK achieves outstanding average fr
 * **Adaptive Protection**: Monitors kernel Pressure Stall Information (PSI) and thermals, automatically stepping down profiles if memory pressure or temperatures rise.
 
 ### ❌ What Zenith Does NOT Do
-* **No "Double Your FPS" Magic**: If your game is purely GPU-bound at 99% GPU utilization, Zenith will not double your average FPS.
-* **No Snake Oil**: Zenith only implements documented, empirically verified Linux kernel interfaces.
+* **GPU-Bound Limits**: If your game is purely GPU-bound at 99% GPU utilization, Zenith will not increase your average FPS.
+* **Empirical Kernel Interfaces Only**: Zenith only implements documented, empirically verified Linux kernel interfaces.
 * **No Persistent System Damage**: Zenith never modifies your system's persistent `/etc/sysctl.d/` or `/etc/security/` files. When Zenith stops, your system returns 100% to stock distro defaults.
 * **No Kernel Mitigations Compromise**: Zenith does not touch or disable CPU security mitigations (`mitigations=off`).
 
@@ -107,7 +107,7 @@ Zenith is **completely safe and compliant** with all modern anti-cheat systems, 
 | **Linux Kernel** | Kernel 6.6 LTS | Kernel 6.12 / 6.13+ | CachyOS, Arch, Fedora, and SteamOS fully validated |
 | **cgroups Architecture** | cgroups v2 (`/sys/fs/cgroup`) | cgroups v2 unified | Required for background slice isolation |
 | **AMD Processors** | Ryzen 3000 / 5000 / 7000 / 9000 | Ryzen 7900X3D, 7950X3D, 9950X3D | Dual-CCD V-Cache hardware pinning via `amd_x3d_vcache` |
-| **Intel Processors** | Intel 8th Gen+ Core | Intel 12th–14th Gen, Core Ultra | Distinguishes P-cores, E-cores, and LP-E cores |
+| **Intel Processors** | Intel 8th Gen+ Core | Intel 12th-14th Gen, Core Ultra | Distinguishes P-cores, E-cores, and LP-E cores |
 | **Handhelds / APUs** | Steam Deck (LCD/OLED), ROG Ally | AMD Van Gogh, Phoenix, Hawk Point | Automatically bypasses dual-CCD pinning on monolithic APUs |
 | **NVIDIA Graphics** | Proprietary Driver ≥ 525 | Driver ≥ 550+ | Uses NVML for Persistence Mode and clock lock |
 | **AMD Radeon Graphics** | AMDGPU (GCN 4.0 / RDNA 1-3) | RDNA 2 / RDNA 3 / RDNA 3.5 | Uses sysfs `power_dpm_force_performance_level` |

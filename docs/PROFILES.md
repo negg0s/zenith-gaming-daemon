@@ -28,15 +28,15 @@ Additionally, Zenith features an **Adaptive Controller with Hysteresis** that co
 ---
 
 ## 1. Safe Profile (`safe`)
-* **Philosophy**: Zero risk, zero elevated power draw, zero battery compromise.
+* **Philosophy**: Conservative baseline. Standard power draw and thermal limits.
 * **Intended Audience**: Handhelds on battery power (Steam Deck, ROG Ally), laptops, enterprise developer workstations, systems with marginal cooling.
 * **Mechanism**: Binds game threads strictly through CPU affinity (CCD0 or P-cores) and moves browser/Discord background processes to core 0 via cgroups v2. Leaves all `sysctl`, memory, and GPU power domains completely untouched.
 
 ---
 
-## 2. Balanced Profile (`balanced` — Default)
-* **Philosophy**: The sweet spot for 95% of desktop gaming systems. Maximizes frame-time consistency while maintaining rock-solid system stability.
-* **Intended Audience**: Modern desktop gaming rigs (AMD Ryzen 5000/7000/9000, Intel 12th–14th Gen, Core Ultra).
+## 2. Balanced Profile (`balanced` - Default)
+* **Philosophy**: Standard desktop profile. Balances frame pacing with system stability and energy efficiency.
+* **Intended Audience**: Modern desktop gaming rigs (AMD Ryzen 5000/7000/9000, Intel 12th-14th Gen, Core Ultra).
 * **Mechanism**: 
   - Engages full 3D V-Cache / P-Core affinity pinning.
   - Modulates virtual memory parameters (`vm.swappiness=10`, `vm.dirty_ratio=5`, `vm.compaction_proactiveness=0`) to eliminate background IO hitching.
@@ -46,8 +46,8 @@ Additionally, Zenith features an **Adaptive Controller with Hysteresis** that co
 ---
 
 ## 3. Aggressive Profile (`aggressive`)
-* **Philosophy**: Uncompromising competitive performance. Prioritizes 0.1% frame pacing above power consumption and thermal conservation.
-* **Intended Audience**: Esports players, competitive titles (CS2, Apex Legends, Overwatch), high-refresh displays (165Hz–360Hz+), systems with robust cooling.
+* **Philosophy**: Maximum performance profile. Prioritizes 0.1% frame pacing above power consumption and thermal conservation.
+* **Intended Audience**: Esports players, competitive titles (CS2, Apex Legends, Overwatch), high-refresh displays (165Hz-360Hz+), systems with robust cooling.
 * **Mechanism**:
   - Disables split-lock mitigation (`kernel.split_lock_mitigate=0`), eliminating atomic instruction stalls in DirectX/Wine.
   - Locks GPU memory and compute clocks to peak performance states, eliminating downclock latency.
@@ -67,15 +67,15 @@ Zenith avoids "fire-and-forget" instability by running an **Adaptive Monitoring 
                           └─────────────┬─────────────┘
                                         │
                          [ Every 2s Telemetry Check ]
-                         - /proc/pressure/memory
-                         - /proc/pressure/io
-                         - GPU & CPU Core Temperatures
+                        - /proc/pressure/memory
+                        - /proc/pressure/io
+                        - GPU & CPU Core Temperatures
                                         │
            ┌────────────────────────────┴────────────────────────────┐
            ▼                                                         ▼
 [ Spike: Memory PSI avg10 > 25%                           [ Metrics Nominal: ]
-  OR GPU Temp > 88°C ]                                    - Memory PSI < 5%
-           │                                              - Temperatures Safe
+  OR GPU Temp > 88°C ]                                   - Memory PSI < 5%
+           │                                             - Temperatures Safe
            ▼                                                         │
 ┌───────────────────────────┐                                        ▼
 │     DYNAMIC DOWNGRADE     │                             ┌────────────────────┐

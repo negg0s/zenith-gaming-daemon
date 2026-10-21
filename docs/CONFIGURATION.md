@@ -43,7 +43,7 @@ Profiles override location: `/etc/zenith/profiles.conf`
 * **Default**: `true`
 * **Participating Profiles**: `balanced`, `aggressive`
 * **Mechanism**: Integrates with the Linux 6.13+ `amd_x3d_vcache` driver via `/sys/bus/platform/drivers/amd_x3d_vcache/*/amd_x3d_mode` with fallback to kernel CPU cache index3 analysis (`/sys/devices/system/cpu/cpu*/cache/index3/`). Automatically detects 3D V-Cache CCD cores (Ryzen 7900X3D / 7950X3D) and pins game and Proton worker threads to the cache CCD.
-* **Performance Impact**: 15–30% improvement in 1% and 0.1% FPS lows in cache-sensitive titles; prevents cross-CCD latency penalties (~75ns inter-core transit).
+* **Performance Impact**: 15-30% improvement in 1% and 0.1% FPS lows in cache-sensitive titles; prevents cross-CCD latency penalties (~75ns inter-core transit).
 * **Failure Mode**: Automatically bypassed on monolithic CPUs (e.g. 7800X3D, 5600X, Steam Deck) without error.
 
 ---
@@ -70,8 +70,8 @@ Profiles override location: `/etc/zenith/profiles.conf`
 * **Default**: `false` (`true` in `aggressive` profile)
 * **Kernel Path**: `/proc/sys/kernel/split_lock_mitigate`
 * **Minimum Kernel**: 5.19+
-* **Mechanism**: Sets `split_lock_mitigate = 0` during active gameplay. The Linux kernel's default mitigation intentionally slows down processes that execute unaligned atomic instructions (widespread in DirectX 9–11 and Unreal Engine titles under Proton/Wine) by up to 100 milliseconds per event.
-* **Performance Impact**: Completely cures 50–100ms micro-stutters in affected Wine/Proton games.
+* **Mechanism**: Sets `split_lock_mitigate = 0` during active gameplay. The Linux kernel's default mitigation intentionally slows down processes that execute unaligned atomic instructions (widespread in DirectX 9-11 and Unreal Engine titles under Proton/Wine) by up to 100 milliseconds per event.
+* **Performance Impact**: Completely cures 50-100ms micro-stutters in affected Wine/Proton games.
 * **Risks**: Malicious user applications on multi-tenant servers could theoretically issue split locks to induce bus lock bus contention. Fully mitigated by reverting to `1` when games exit.
 
 ---
