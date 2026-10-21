@@ -50,6 +50,7 @@ inline void fuzz_one_socket(const uint8_t* data, size_t size) {
     std::string cmd = trim(input);
 
     ClientCredentials creds{ 1234, 1000, 1000 };
+    (void)creds;
     std::string response;
 
     if (cmd == "STATUS") {

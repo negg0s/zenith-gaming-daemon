@@ -132,13 +132,13 @@ bool NetworkTuner::revert() {
     if (!active_iface_.empty()) {
         // Restore original qdisc if we had recorded one
         if (!original_qdisc_.empty()) {
-            run_cmd("/usr/bin/tc", {"qdisc", "replace", "dev", active_iface_, "root", original_qdisc_});
+            (void)run_cmd("/usr/bin/tc", {"qdisc", "replace", "dev", active_iface_, "root", original_qdisc_});
             ZENITH_LOG_DEBUG("Restored original qdisc (" + original_qdisc_ + ") on " + active_iface_);
         }
 
         // Restore Wi-Fi power save if we disabled it
         if (wifi_power_save_disabled_) {
-            run_cmd("/usr/bin/iw", {"dev", active_iface_, "set", "power_save", "on"});
+            (void)run_cmd("/usr/bin/iw", {"dev", active_iface_, "set", "power_save", "on"});
             ZENITH_LOG_DEBUG("Restored Wi-Fi power save on " + active_iface_);
             wifi_power_save_disabled_ = false;
         }

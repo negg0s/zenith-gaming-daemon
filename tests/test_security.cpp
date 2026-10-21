@@ -116,7 +116,7 @@ void test_strict_config_validation() {
 void test_socket_server() {
     using namespace zenith;
 
-    fs::path test_sock_path = fs::current_path() / "test_run_sock" / "zenith_test.sock";
+    fs::path test_sock_path = fs::temp_directory_path() / "zenith_test_run_sock" / "zenith_test.sock";
     SocketServer server(test_sock_path, "root");
 
     assert(SocketServer::MAX_MESSAGE_SIZE == 4096);
@@ -133,7 +133,7 @@ void test_socket_server() {
     assert(server.is_running() == false);
 
     std::error_code ec;
-    fs::remove_all(fs::current_path() / "test_run_sock", ec);
+    fs::remove_all(fs::temp_directory_path() / "zenith_test_run_sock", ec);
 
     std::cout << "[PASS] test_socket_server\n";
 }

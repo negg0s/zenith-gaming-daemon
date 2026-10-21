@@ -49,7 +49,7 @@ bool PipewireTuner::apply(int quantum, int sample_rate) {
     write_dropin_config(quantum);
 
     // 2. Query/set live metadata via pw-metadata
-    run_cmd("/usr/bin/pw-metadata", {"-n", "settings", "0", "clock.force-quantum", std::to_string(quantum)});
+    (void)run_cmd("/usr/bin/pw-metadata", {"-n", "settings", "0", "clock.force-quantum", std::to_string(quantum)});
 
     // 3. Export process environment variable hint
     std::string env_val = std::to_string(quantum) + "/" + std::to_string(sample_rate);
@@ -81,7 +81,7 @@ bool PipewireTuner::handle_xrun_detected(uint64_t new_xrun_count) {
 
     current_quantum_ = elevated_quantum;
     write_dropin_config(elevated_quantum);
-    run_cmd("/usr/bin/pw-metadata", {"-n", "settings", "0", "clock.force-quantum", std::to_string(elevated_quantum)});
+    (void)run_cmd("/usr/bin/pw-metadata", {"-n", "settings", "0", "clock.force-quantum", std::to_string(elevated_quantum)});
 
     std::string env_val = std::to_string(elevated_quantum) + "/" + std::to_string(sample_rate_);
 #ifdef __linux__
@@ -98,7 +98,7 @@ bool PipewireTuner::revert() {
     fs_->remove_file(DROPIN_PATH);
 
     // Reset force-quantum to 0 (dynamic/unconstrained)
-    run_cmd("/usr/bin/pw-metadata", {"-n", "settings", "0", "clock.force-quantum", "0"});
+    (void)run_cmd("/usr/bin/pw-metadata", {"-n", "settings", "0", "clock.force-quantum", "0"});
 
 #ifdef __linux__
     unsetenv("PIPEWIRE_LATENCY");

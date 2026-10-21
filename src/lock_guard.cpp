@@ -74,10 +74,12 @@ bool DaemonLock::acquire() {
     }
 
     // Write current PID into lock file
-    (void)::ftruncate(fd_, 0);
-    std::string pid_str = std::to_string(::getpid()) + "\n";
-    (void)::write(fd_, pid_str.data(), pid_str.size());
-    (void)::fsync(fd_);
+    if (::ftruncate(fd_, 0) == 0) {
+        std::string pid_str = std::to_string(::getpid()) + "\n";
+        if (::write(fd_, pid_str.data(), pid_str.size()) > 0) {
+            (void)::fsync(fd_);
+        }
+    }
 #else
     fd_ = ::_open(lock_path_.string().c_str(), _O_RDWR | _O_CREAT | _O_BINARY, _S_IREAD | _S_IWRITE);
     if (fd_ < 0) return false;

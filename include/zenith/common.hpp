@@ -54,10 +54,18 @@ public:
     }
 };
 
+#ifndef ZENITH_LOG_DEBUG
 #define ZENITH_LOG_DEBUG(msg) ::zenith::Logger::log(::zenith::LogLevel::Debug, (msg))
+#endif
+#ifndef ZENITH_LOG_INFO
 #define ZENITH_LOG_INFO(msg)  ::zenith::Logger::log(::zenith::LogLevel::Info,  (msg))
+#endif
+#ifndef ZENITH_LOG_WARN
 #define ZENITH_LOG_WARN(msg)  ::zenith::Logger::log(::zenith::LogLevel::Warn,  (msg))
+#endif
+#ifndef ZENITH_LOG_ERROR
 #define ZENITH_LOG_ERROR(msg) ::zenith::Logger::log(::zenith::LogLevel::Error, (msg))
+#endif
 
 inline std::string trim(std::string_view str) {
     const auto first = str.find_first_not_of(" \t\r\n");

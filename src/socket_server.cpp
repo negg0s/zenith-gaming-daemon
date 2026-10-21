@@ -77,7 +77,7 @@ bool SocketServer::handle_connection(int client_fd) {
     if (!authenticate_peer(client_fd, creds)) {
 #ifdef __linux__
         const char* err_msg = "{\"status\":\"error\",\"message\":\"Unauthorized: access denied by SO_PEERCRED policy\"}\n";
-        (void)::write(client_fd, err_msg, std::strlen(err_msg));
+        if (::write(client_fd, err_msg, std::strlen(err_msg)) < 0) {}
         ::close(client_fd);
 #endif
         return false;
@@ -106,7 +106,7 @@ bool SocketServer::handle_connection(int client_fd) {
         if (!response.ends_with('\n')) response += '\n';
     }
 
-    (void)::write(client_fd, response.data(), response.size());
+    if (::write(client_fd, response.data(), response.size()) < 0) {}
     ::close(client_fd);
 #else
     (void)client_fd;
@@ -148,7 +148,7 @@ bool SocketServer::start() {
     // Set group ownership
     struct group* grp = ::getgrnam(group_name_.c_str());
     if (grp) {
-        (void)::chown(socket_path_.string().c_str(), 0, grp->gr_gid);
+        if (::chown(socket_path_.string().c_str(), 0, grp->gr_gid) != 0) { ZENITH_LOG_WARN("Could not set socket ownership"); }
     }
 
     if (::listen(server_fd_, 16) != 0) {
