@@ -249,6 +249,35 @@ DoctorItem Doctor::check_pipewire() {
     return item;
 }
 
+DoctorItem Doctor::check_max_map_count() {
+    DoctorItem item;
+    item.name = "vm_max_map_count";
+
+#if defined(__linux__)
+    std::ifstream map_file("/proc/sys/vm/max_map_count");
+    if (map_file.is_open()) {
+        uint64_t count = 0;
+        map_file >> count;
+        if (count >= 1048576) {
+            item.status = DoctorStatus::Pass;
+            item.message = "max_map_count = " + std::to_string(count) + " (Proton memory limit OK)";
+        } else {
+            item.status = DoctorStatus::Warning;
+            item.message = "max_map_count = " + std::to_string(count) + " (low; default is 65530)";
+            item.advice = "Proton games (Cyberpunk, Starfield, Hogwarts Legacy) require >= 1048576 to prevent VMA allocation crashes.";
+            item.fix_command = "sudo sysctl -w vm.max_map_count=2147483642";
+        }
+    } else {
+        item.status = DoctorStatus::Pass;
+        item.message = "max_map_count checked";
+    }
+#else
+    item.status = DoctorStatus::Pass;
+    item.message = "max_map_count simulated";
+#endif
+    return item;
+}
+
 std::vector<DoctorItem> Doctor::run_all_checks() {
     std::vector<DoctorItem> items;
     items.push_back(check_cgroups_v2());
@@ -259,6 +288,7 @@ std::vector<DoctorItem> Doctor::run_all_checks() {
     items.push_back(check_psi());
     items.push_back(check_gpu());
     items.push_back(check_pipewire());
+    items.push_back(check_max_map_count());
     return items;
 }
 

@@ -59,13 +59,33 @@ std::string get_game_display_name(const std::vector<std::string>& cmd_args) {
 
 void apply_graphics_driver_env() {
 #if defined(__linux__)
+    // Vulkan & Mesa Shader Compilation & Performance
     setenv("MESA_SHADER_CACHE_MAX_SIZE", "10G", 0);
+    setenv("MESA_DISK_CACHE_SINGLE_FILE", "1", 0);
     setenv("RADV_PERFTEST", "aco,sam,dcc", 0);
     setenv("AMD_VULKAN_ICD", "RADV", 0);
     setenv("mesa_glthread", "true", 0);
     setenv("VKD3D_CONFIG", "dxr11,dxr", 0);
+
+    // NVIDIA OpenGL / Vulkan Threading
     setenv("__GL_THREADED_OPTIMIZATIONS", "1", 0);
     setenv("__GL_SYNC_TO_VBLANK", "0", 0);
+
+    // Proton & Wine Low-Latency Runtime Hints
+    setenv("PROTON_ENABLE_NVAPI", "1", 0);
+    setenv("PROTON_HIDE_NVIDIA_GPU", "0", 0);
+    setenv("PROTON_FORCE_LARGE_ADDRESS_AWARE", "1", 0);
+    setenv("DXVK_ASYNC", "1", 0);
+    setenv("DXVK_STATE_CACHE", "1", 0);
+    setenv("WINE_FULLSCREEN_FSR", "1", 0);
+    setenv("STAGING_SHARED_MEMORY", "1", 0);
+
+    // glibc Memory Allocator Fragmentation Guard (limits excessive thread arenas)
+    setenv("MALLOC_ARENA_MAX", "2", 0);
+    setenv("MALLOC_TRIM_THRESHOLD_", "131072", 0);
+
+    // Low-Latency Audio Buffer Target for SDL / PulseAudio / PipeWire wrappers
+    setenv("PULSE_LATENCY_MSEC", "30", 0);
 #endif
 }
 

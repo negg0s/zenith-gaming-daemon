@@ -26,8 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Extended blk-mq I/O queue tuning to non-rotational SATA SSDs (`queue/rotational == 0`), applying `none` scheduler and elevated read-ahead.
 - **Complete Background Freeze Engine Lifecycle**:
   - `ZenithEngine::activate` and `deactivate` now natively manage `BackgroundManager`, automatically suspending blacklisted background applications in `Ultra` mode and thawing them upon exit.
-- **`zenith-run` CLI Flags & Graphics Environment Injection**:
+- **`zenith-run` CLI Flags & Low-Latency Runtime Environment Injection**:
   - Supports `--ultra` (`-u`) and `--profile <name>` directly in Steam launch options (`zenith-run --ultra %command%`), automatically dispatching profile changes to the running daemon.
+  - Automatically exports optimal runtime variables: `MALLOC_ARENA_MAX=2` (limits glibc arena virtual memory fragmentation), `PROTON_ENABLE_NVAPI=1`, `DXVK_ASYNC=1`, `DXVK_STATE_CACHE=1`, `WINE_FULLSCREEN_FSR=1`, and `PULSE_LATENCY_MSEC=30`.
+- **System Doctor Memory Limit Diagnostics**:
+  - Added `check_max_map_count()` to `zenithctl doctor` verifying system VMA limits with actionable remediation advice for heavy Proton titles.
 
 ---
 

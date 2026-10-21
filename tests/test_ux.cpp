@@ -40,6 +40,7 @@ void test_doctor_engine() {
     bool found_cgroups = false;
     bool found_kernel = false;
     bool found_psi = false;
+    bool found_max_map = false;
 
     for (const auto& it : items) {
         assert(!it.name.empty());
@@ -47,11 +48,13 @@ void test_doctor_engine() {
         if (it.name == "cgroups_v2") found_cgroups = true;
         if (it.name == "kernel_version") found_kernel = true;
         if (it.name == "pressure_stall_information") found_psi = true;
+        if (it.name == "vm_max_map_count") found_max_map = true;
     }
 
     assert(found_cgroups);
     assert(found_kernel);
     assert(found_psi);
+    assert(found_max_map);
 
     std::string json = zenith::Doctor::to_json(items);
     assert(json.front() == '[');

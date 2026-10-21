@@ -35,6 +35,7 @@ public:
     static DoctorItem check_psi();
     static DoctorItem check_gpu();
     static DoctorItem check_pipewire();
+    static DoctorItem check_max_map_count();
 };
 
 } // namespace zenith
