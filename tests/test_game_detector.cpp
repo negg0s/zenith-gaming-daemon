@@ -21,7 +21,7 @@ void test_steam_detection() {
     cyberpunk.pid = 4001;
     cyberpunk.comm = "Cyberpunk2077.e";
     cyberpunk.cmdline = "Z:\\SteamLibrary\\steamapps\\common\\Cyberpunk 2077\\bin\\x64\\Cyberpunk2077.exe";
-    cyberpunk.environ = "SteamAppId=1091500\0STEAM_COMPAT_DATA_PATH=/home/user/.steam/compat\0";
+    cyberpunk.environ = std::string("SteamAppId=1091500\0STEAM_COMPAT_DATA_PATH=/home/user/.steam/compat\0", 63);
     cyberpunk.open_fds = {"/dev/dri/renderD128", "/dev/null"};
     cyberpunk.tasks = {4001, 4002, 4003};
     cyberpunk.task_comms[4001] = "Cyberpunk2077.e";

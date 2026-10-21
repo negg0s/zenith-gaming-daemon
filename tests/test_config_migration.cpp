@@ -1,5 +1,5 @@
 // tests/test_config_migration.cpp
-// Unit tests for configuration schema versioning and seamless migration
+// Unit tests for configuration schema versioning and automatic migration
 
 #include "zenith/config_migration.hpp"
 #include <cassert>

@@ -141,14 +141,17 @@ DoctorItem Doctor::check_conflicting_services() {
         item.message = i18n::tr("conflicts_none");
     } else {
         std::string names;
+        std::string service_args;
         for (const auto& c : conflicts) {
             if (!names.empty()) names += ", ";
+            if (!service_args.empty()) service_args += " ";
             names += c.service_name;
+            service_args += c.service_name;
         }
         item.status = DoctorStatus::Warning;
         item.message = i18n::tr("conflicts_found") + ": " + names;
         item.advice = "Competing optimizers may override CPU governors, nice values, or cgroup isolation.";
-        item.fix_command = "sudo systemctl stop " + names + " && sudo systemctl disable " + names;
+        item.fix_command = "sudo systemctl stop " + service_args + " && sudo systemctl disable " + service_args;
     }
     return item;
 }

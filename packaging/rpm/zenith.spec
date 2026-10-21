@@ -1,5 +1,5 @@
 Name:           zenith-gaming-daemon
-Version:        1.0.0
+Version:        1.1.0
 Release:        1%{?dist}
 Summary:        Ultra-low latency Linux gaming optimizer daemon (C++20)
 
@@ -58,5 +58,5 @@ fi
 %{_unitdir}/zenith.service
 
 %changelog
-* Tue Oct 20 2026 Emir (NEGG0) <rokmit599@gmail.com> - 1.0.0-1
-- Initial production release v1.0.0 with full UX, TUI dashboard, and rollback guarantees.
+* Tue Oct 20 2026 Emir (NEGG0) <rokmit599@gmail.com> - 1.1.0-1
+- Production release v1.1.0 with full UX, TUI dashboard, and rollback guarantees.

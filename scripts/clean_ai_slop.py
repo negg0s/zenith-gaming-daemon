@@ -40,6 +40,12 @@ REPLACEMENTS = {
     "docs/ru/index.md": [
         ("обеспечивает превосходный средний FPS", "обеспечивает высокий средний FPS"),
     ],
+    "docs/ADDING_A_GAME_PROFILE.md": [
+        ("These profiles specify tailored optimizations", "These profiles specify specialized optimizations"),
+    ],
+    "tests/test_config_migration.cpp": [
+        ("seamless migration", "automatic migration"),
+    ],
 }
 
 def main():
@@ -56,8 +62,6 @@ def main():
                 text = text.replace(old, new)
                 modified = True
                 print(f"[{rel_path}] Replaced: '{old[:40]}...' -> '{new[:40]}...'")
-            else:
-                print(f"[{rel_path}] Notice: Target string not found (already replaced?): '{old[:40]}...'")
         if modified:
             file_path.write_text(text, encoding="utf-8", newline="\n")
             print(f"Updated {rel_path}")

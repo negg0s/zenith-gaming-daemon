@@ -30,7 +30,7 @@ mkdir -p "${DIST_DIR}"
 cp "${BUILD_DIR}"/*.tar.gz "${DIST_DIR}/" 2>/dev/null || true
 cp "${BUILD_DIR}"/*.deb "${DIST_DIR}/" 2>/dev/null || true
 cp "${BUILD_DIR}"/*.rpm "${DIST_DIR}/" 2>/dev/null || true
-cp packaging/sbom/cyclonedx.json "${DIST_DIR}/zenith-1.0.0-cyclonedx.sbom.json"
+cp packaging/sbom/cyclonedx.json "${DIST_DIR}/zenith-1.1.0-cyclonedx.sbom.json"
 
 echo "[*] Generating SHA256SUMS manifest..."
 (cd "${DIST_DIR}" && sha256sum * > SHA256SUMS)

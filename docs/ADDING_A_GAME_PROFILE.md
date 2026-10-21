@@ -1,6 +1,6 @@
 # Contributor Guide: Adding a Game Profile
 
-Zenith maintains a public database of game profiles located in `profiles/*.toml`. These profiles specify tailored optimizations for specific Steam AppIDs, Windows executables running under Proton, or native Linux games.
+Zenith maintains a public database of game profiles located in `profiles/*.toml`. These profiles specify specialized optimizations for specific Steam AppIDs, Windows executables running under Proton, or native Linux games.
 
 ---
 

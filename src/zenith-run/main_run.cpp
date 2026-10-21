@@ -24,8 +24,11 @@ void send_desktop_notification(const std::string& summary, const std::string& bo
 #if defined(__linux__)
     pid_t pid = fork();
     if (pid == 0) {
-        // Child: send notification without blocking game launch
-        execlp("notify-send", "notify-send", "-a", "Zenith", "-i", "input-gaming", summary.c_str(), body.c_str(), nullptr);
+        // Double-fork so notification never blocks game launch
+        if (fork() == 0) {
+            execlp("notify-send", "notify-send", "-a", "Zenith", "-i", "input-gaming", summary.c_str(), body.c_str(), nullptr);
+            std::exit(0);
+        }
         std::exit(0);
     } else if (pid > 0) {
         waitpid(pid, nullptr, 0);
@@ -100,6 +103,8 @@ int main(int argc, char* argv[]) {
         send_desktop_notification("⚡ Zenith Gaming Daemon", "Game exited. System restored to baseline.");
         if (WIFEXITED(status)) {
             return WEXITSTATUS(status);
+        } else if (WIFSIGNALED(status)) {
+            return 128 + WTERMSIG(status);
         }
         return 1;
 #else
