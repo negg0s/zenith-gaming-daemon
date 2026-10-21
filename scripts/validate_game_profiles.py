@@ -18,7 +18,7 @@ except ImportError:
     except ImportError:
         tomllib = None
 
-VALID_PROFILES = {"safe", "balanced", "aggressive"}
+VALID_PROFILES = {"safe", "balanced", "aggressive", "ultra"}
 VALID_CCD_PREFS = {"vcache", "frequency", "auto"}
 VALID_GPU_PERF = {"high", "auto", "standard"}
 VALID_IO_CLASSES = {"realtime", "best-effort", "idle"}

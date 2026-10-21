@@ -1,5 +1,5 @@
 Name:           zenith-gaming-daemon
-Version:        1.2.0
+Version:        1.5.0
 Release:        1%{?dist}
 Summary:        Ultra-low latency Linux gaming optimizer daemon (C++20)
 

@@ -1,4 +1,4 @@
-.TH ZENITH.CONF 5 "October 2026" "Zenith 1.2.0" "File Formats Manual"
+.TH ZENITH.CONF 5 "October 2026" "Zenith 1.5.0" "File Formats Manual"
 .SH NAME
 zenith.conf \- Configuration file for the Zenith Gaming Optimization Daemon
 .SH SYNOPSIS
@@ -21,6 +21,8 @@ Zero-risk optimizations only. No sysctl alterations, no GPU clock locks, conserv
 Default profile. Enables V-Cache/P-core pinning, mild VM tuning, and cgroups v2 background isolation.
 .IP \fBaggressive\fR
 Maximum performance. Enables split-lock disablement, GPU clock lock, real-time audio priority, and CAKE network queueing.
+.IP \fBultra\fR
+Hardcore competitive mode. Automatically freezes background processes (cgroup.freeze), eliminates disk paging (swappiness=0), zero C-state wakeup latency, and elevates GPU power limits.
 .RE
 .TP
 .BR cgroup_isolation_enabled " = \fIBOOLEAN\fR"

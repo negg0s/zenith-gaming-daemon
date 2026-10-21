@@ -3,7 +3,7 @@ name = "Counter-Strike 2"
 appid = 730
 executables = ["cs2", "cs2.exe"]
 
-profile = "aggressive"
+profile = "ultra"
 ccd_preference = "frequency"
 pin_render_threads = true
 

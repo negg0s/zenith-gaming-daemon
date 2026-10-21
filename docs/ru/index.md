@@ -53,13 +53,13 @@ yay -S zenith-gaming-daemon
 
 ### Debian / Ubuntu (`.deb`)
 ```bash
-wget https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.2.0-Linux.deb
-sudo dpkg -i zenith-gaming-daemon-1.2.0-Linux.deb
+wget https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.5.0/zenith-gaming-daemon-1.5.0-Linux.deb
+sudo dpkg -i zenith-gaming-daemon-1.5.0-Linux.deb
 ```
 
 ### Fedora / RHEL / Bazzite (`.rpm`)
 ```bash
-sudo dnf install https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.2.0-Linux.rpm
+sudo dnf install https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.5.0/zenith-gaming-daemon-1.5.0-Linux.rpm
 ```
 
 ### NixOS (`flake.nix`)
@@ -69,7 +69,7 @@ services.zenith-gaming-daemon.enable = true;
 
 ---
 
-## 🎮 Управление через `zenithctl`
+## 🎮 Управление через `zenithctl` и Steam
 
 ```bash
 # Запустить интерактивную живую TUI панель состояния:
@@ -78,8 +78,12 @@ zenithctl status --watch
 # Проверить здоровье системы и обнаружить конфликтующие сервисы:
 zenithctl doctor
 
-# Переключить профиль (safe / balanced / aggressive):
-zenithctl profile set aggressive
+# Переключить профиль (safe / balanced / aggressive / ultra):
+zenithctl profile set ultra
+
+# Параметры запуска в Steam для максимального FPS и заморозки фона:
+# В свойствах игры -> Параметры запуска (Launch Options):
+# zenith-run --ultra %command%
 
 # Аварийный откат всех настроек ядра к заводским значениям:
 zenithctl rollback

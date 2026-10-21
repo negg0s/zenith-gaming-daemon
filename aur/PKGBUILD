@@ -1,6 +1,6 @@
 # Maintainer: Emir (NEGG0) <rokmit599@gmail.com>
 pkgname=zenith-gaming-daemon
-pkgver=1.2.0
+pkgver=1.5.0
 pkgrel=1
 pkgdesc="Ultra-low latency Linux gaming optimizer daemon for Arch / CachyOS & SteamOS (C++20)"
 arch=('x86_64')
