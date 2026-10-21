@@ -11,7 +11,8 @@ namespace zenith {
 enum class Profile {
     Safe,
     Balanced,
-    Aggressive
+    Aggressive,
+    Ultra
 };
 
 inline std::string profile_to_string(Profile p) {
@@ -19,6 +20,7 @@ inline std::string profile_to_string(Profile p) {
         case Profile::Safe: return "safe";
         case Profile::Balanced: return "balanced";
         case Profile::Aggressive: return "aggressive";
+        case Profile::Ultra: return "ultra";
     }
     return "balanced";
 }
@@ -27,6 +29,7 @@ inline std::optional<Profile> string_to_profile(std::string_view s) {
     if (s == "safe" || s == "Safe") return Profile::Safe;
     if (s == "balanced" || s == "Balanced") return Profile::Balanced;
     if (s == "aggressive" || s == "Aggressive") return Profile::Aggressive;
+    if (s == "ultra" || s == "Ultra") return Profile::Ultra;
     return std::nullopt;
 }
 
@@ -34,8 +37,10 @@ namespace ProfileMask {
     constexpr uint32_t Safe = 1 << 0;
     constexpr uint32_t Balanced = 1 << 1;
     constexpr uint32_t Aggressive = 1 << 2;
-    constexpr uint32_t All = Safe | Balanced | Aggressive;
-    constexpr uint32_t Performance = Balanced | Aggressive;
+    constexpr uint32_t Ultra = 1 << 3;
+    constexpr uint32_t All = Safe | Balanced | Aggressive | Ultra;
+    constexpr uint32_t Performance = Balanced | Aggressive | Ultra;
+    constexpr uint32_t HighPerformance = Aggressive | Ultra;
 }
 
 inline uint32_t profile_to_mask(Profile p) {
@@ -43,6 +48,7 @@ inline uint32_t profile_to_mask(Profile p) {
         case Profile::Safe: return ProfileMask::Safe;
         case Profile::Balanced: return ProfileMask::Balanced;
         case Profile::Aggressive: return ProfileMask::Aggressive;
+        case Profile::Ultra: return ProfileMask::Ultra;
     }
     return ProfileMask::Balanced;
 }

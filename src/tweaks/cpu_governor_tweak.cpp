@@ -43,6 +43,7 @@ bool CpuGovernorTweak::apply(Profile profile) {
         case Profile::Balanced:
             target_epp = "performance";
             break;
+        case Profile::Ultra:
         case Profile::Aggressive:
             target_gov = "performance";
             target_epp = "performance";
@@ -126,6 +127,7 @@ std::string CpuGovernorTweak::get_target_value(Profile profile) const {
     switch (profile) {
         case Profile::Safe: return "gov=(untouched), epp=balance_performance";
         case Profile::Balanced: return "gov=(untouched), epp=performance";
+        case Profile::Ultra:
         case Profile::Aggressive: return "gov=performance, epp=performance";
     }
     return "gov=performance, epp=performance";

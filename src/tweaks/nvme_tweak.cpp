@@ -30,7 +30,7 @@ bool NvmeTweak::apply(Profile profile) {
     if (!probe()) return false;
 
     std::string target_sched = "none";
-    std::string target_readahead = (profile == Profile::Aggressive) ? "256" : "128";
+    std::string target_readahead = (profile == Profile::Ultra) ? "512" : ((profile == Profile::Aggressive) ? "256" : "128");
 
     bool any_applied = false;
     for (const auto& queue : nvme_queues_) {
@@ -103,7 +103,7 @@ std::string NvmeTweak::get_current_value() const {
 }
 
 std::string NvmeTweak::get_target_value(Profile profile) const {
-    std::string ra = (profile == Profile::Aggressive) ? "256" : "128";
+    std::string ra = (profile == Profile::Ultra) ? "512" : ((profile == Profile::Aggressive) ? "256" : "128");
     return "scheduler=none, read_ahead_kb=" + ra;
 }
 

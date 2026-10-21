@@ -29,7 +29,7 @@ bool CgroupWeightTweak::apply(Profile profile) {
     fs::path io_weight_path = bg_slice_ / "io.weight";
 
     // 1. cpu.weight (default 100, we lower background to 50 or 20)
-    std::string target_weight = (profile == Profile::Aggressive) ? "20" : "50";
+    std::string target_weight = (profile == Profile::Ultra) ? "10" : ((profile == Profile::Aggressive) ? "20" : "50");
     if (fs::exists(cpu_weight_path)) {
         if (!orig_cpu_weight_) orig_cpu_weight_ = read_file_string(cpu_weight_path);
         write_file_string(cpu_weight_path, target_weight);
@@ -47,6 +47,13 @@ bool CgroupWeightTweak::apply(Profile profile) {
         write_file_string(io_weight_path, target_weight);
     }
 
+    // 4. cgroup.freeze in Ultra profile
+    fs::path freeze_path = bg_slice_ / "cgroup.freeze";
+    if (profile == Profile::Ultra && fs::exists(freeze_path)) {
+        write_file_string(freeze_path, "1");
+        was_frozen_ = true;
+    }
+
     return true;
 }
 
@@ -62,6 +69,13 @@ bool CgroupWeightTweak::revert() {
     if (orig_io_weight_) {
         write_file_string(bg_slice_ / "io.weight", *orig_io_weight_);
         orig_io_weight_.reset();
+    }
+    if (was_frozen_) {
+        fs::path freeze_path = bg_slice_ / "cgroup.freeze";
+        if (fs::exists(freeze_path)) {
+            write_file_string(freeze_path, "0");
+        }
+        was_frozen_ = false;
     }
     return true;
 }
@@ -85,7 +99,7 @@ std::string CgroupWeightTweak::get_current_value() const {
 }
 
 std::string CgroupWeightTweak::get_target_value(Profile profile) const {
-    std::string w = (profile == Profile::Aggressive) ? "20" : "50";
+    std::string w = (profile == Profile::Ultra) ? "10 (frozen)" : ((profile == Profile::Aggressive) ? "20" : "50");
     return "cpu.weight=" + w + ", cpu.idle=1, io.weight=" + w;
 }
 

@@ -23,15 +23,18 @@ void test_profiles() {
     assert(string_to_profile("safe") == Profile::Safe);
     assert(string_to_profile("balanced") == Profile::Balanced);
     assert(string_to_profile("aggressive") == Profile::Aggressive);
+    assert(string_to_profile("ultra") == Profile::Ultra);
     assert(string_to_profile("invalid") == std::nullopt);
 
     assert(profile_to_string(Profile::Safe) == "safe");
     assert(profile_to_string(Profile::Balanced) == "balanced");
     assert(profile_to_string(Profile::Aggressive) == "aggressive");
+    assert(profile_to_string(Profile::Ultra) == "ultra");
 
     assert(profile_to_mask(Profile::Safe) == ProfileMask::Safe);
     assert(profile_to_mask(Profile::Balanced) == ProfileMask::Balanced);
     assert(profile_to_mask(Profile::Aggressive) == ProfileMask::Aggressive);
+    assert(profile_to_mask(Profile::Ultra) == ProfileMask::Ultra);
 
     std::cout << "[PASS] test_profiles\n";
 }

@@ -11,7 +11,7 @@ _zenithctl() {
     _init_completion || return
 
     local commands="status enable disable profile game dry-run explain rollback doctor suggest logs version completions report"
-    local profiles="safe balanced aggressive"
+    local profiles="safe balanced aggressive ultra"
 
     case "${prev}" in
         zenithctl)
@@ -118,7 +118,7 @@ complete -c zenithctl -n "__fish_use_subcommand" -a report -d "Generate anonymiz
 
 # Subcommands
 complete -c zenithctl -n "__fish_seen_subcommand_from profile" -a "list set"
-complete -c zenithctl -n "__fish_seen_subcommand_from profile; and __fish_seen_subcommand_from set" -a "safe balanced aggressive"
+complete -c zenithctl -n "__fish_seen_subcommand_from profile; and __fish_seen_subcommand_from set" -a "safe balanced aggressive ultra"
 complete -c zenithctl -n "__fish_seen_subcommand_from completions" -a "bash zsh fish"
 complete -c zenithctl -n "__fish_seen_subcommand_from status" -s w -l watch -d "Live watch dashboard"
 complete -c zenithctl -n "__fish_seen_subcommand_from status" -l json -d "Output raw JSON"

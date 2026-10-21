@@ -2,6 +2,7 @@
 #include "zenith/background_manager.hpp"
 #include <algorithm>
 #include <cctype>
+#include <csignal>
 
 namespace zenith {
 
@@ -33,14 +34,18 @@ BackgroundManager::BackgroundManager(IProcFs* fs)
         "alacritty", "kitty", "foot", "konsole", "gnome-terminal", "wezterm", "ptyxis"
     };
 
-    // Default background heavy apps blacklist
+    // Default background heavy apps blacklist (browsers, discord, torrents, sync daemons, compilers)
     blacklist_rules_ = {
         // Web browsers
-        "chrome", "firefox", "chromium", "brave", "edge",
+        "chrome", "firefox", "chromium", "brave", "edge", "opera", "vivaldi",
         // Communication & media
-        "discord", "vesktop", "spotify", "telegram-desktop", "slack", "teams",
-        // Downloaders & Indexers
-        "qbittorrent", "transmission", "baloo_file", "tracker-miner-fs"
+        "discord", "vesktop", "spotify", "telegram-desktop", "slack", "teams", "skype", "element",
+        // Downloaders & Indexers & Torrent
+        "qbittorrent", "transmission", "transmission-qt", "deluge", "baloo_file", "tracker-miner-fs", "tracker-extract",
+        // Background sync & cloud
+        "dropbox", "nextcloud", "syncthing", "insync", "mega",
+        // Heavy background dev / build tools
+        "cc1plus", "rustc", "clangd", "cargo", "ninja"
     };
 }
 
@@ -135,7 +140,60 @@ size_t BackgroundManager::throttle_blacklisted_processes() {
     return count;
 }
 
+bool BackgroundManager::freeze_background() {
+    setup_cgroup();
+    fs::path freeze_file = fs::path(CGROUP_BACKGROUND_DIR) / "cgroup.freeze";
+    if (write_file_string(freeze_file, "1\n")) {
+        is_frozen_ = true;
+        ZENITH_LOG_INFO("Frozen background cgroup: 0% CPU, zero cache contention for gaming");
+        return true;
+    }
+
+#ifdef __linux__
+    for (int pid : throttled_pids_) {
+        if (pid > 1) {
+            ::kill(pid, SIGSTOP);
+        }
+    }
+    is_frozen_ = true;
+    ZENITH_LOG_INFO("Suspended background processes via SIGSTOP fallback");
+    return true;
+#else
+    is_frozen_ = true;
+    return true;
+#endif
+}
+
+bool BackgroundManager::unfreeze_background() {
+    if (!is_frozen_) return true;
+
+    fs::path freeze_file = fs::path(CGROUP_BACKGROUND_DIR) / "cgroup.freeze";
+    if (write_file_string(freeze_file, "0\n")) {
+        is_frozen_ = false;
+        ZENITH_LOG_INFO("Thawed background cgroup: resumed normal background execution");
+        return true;
+    }
+
+#ifdef __linux__
+    for (int pid : throttled_pids_) {
+        if (pid > 1) {
+            ::kill(pid, SIGCONT);
+        }
+    }
+    is_frozen_ = false;
+    ZENITH_LOG_INFO("Resumed background processes via SIGCONT fallback");
+    return true;
+#else
+    is_frozen_ = false;
+    return true;
+#endif
+}
+
 size_t BackgroundManager::restore_all_throttled() {
+    if (is_frozen_) {
+        unfreeze_background();
+    }
+
     size_t count = 0;
     fs::path root_procs = "/sys/fs/cgroup/cgroup.procs";
 

@@ -94,7 +94,7 @@ std::string TransparentHugepageTweak::get_current_value() const {
 }
 
 std::string TransparentHugepageTweak::get_target_value(Profile profile) const {
-    if (profile == Profile::Aggressive || profile == Profile::Balanced) {
+    if (profile == Profile::Aggressive || profile == Profile::Balanced || profile == Profile::Ultra) {
         return "madvise (khugepaged defrag=0)";
     }
     return "distro default";

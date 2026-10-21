@@ -32,6 +32,7 @@ private:
     std::optional<std::string> orig_cpu_weight_;
     std::optional<std::string> orig_cpu_idle_;
     std::optional<std::string> orig_io_weight_;
+    bool was_frozen_ = false;
 };
 
 } // namespace zenith

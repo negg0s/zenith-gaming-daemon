@@ -45,7 +45,7 @@ bool TimerSlackTweak::apply(Profile profile) {
         fs::path p = "/proc/sys/kernel/sched_migration_cost_ns";
         if (!orig_migration_cost_) orig_migration_cost_ = read_file_string(p);
         // Set migration cost to 250,000 ns (250 µs) in aggressive, 500,000 ns in balanced
-        std::string val = (profile == Profile::Aggressive) ? "250000" : "500000";
+        std::string val = (profile == Profile::Aggressive || profile == Profile::Ultra) ? "250000" : "500000";
         write_file_string(p, val);
     }
 
@@ -87,6 +87,7 @@ std::string TimerSlackTweak::get_target_value(Profile profile) const {
     switch (profile) {
         case Profile::Safe: return "timer_slack=(untouched)";
         case Profile::Balanced: return "timer_slack=50ns, migration_cost=500us";
+        case Profile::Ultra:
         case Profile::Aggressive: return "timer_slack=50ns, migration_cost=250us";
     }
     return "timer_slack=50ns";

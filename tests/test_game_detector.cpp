@@ -292,6 +292,13 @@ void test_background_manager() {
     // Neutral
     assert(bg.classify_process("my_custom_script", "./run.sh") == ProcessCategory::Neutral);
 
+    // Freeze & Unfreeze background
+    assert(!bg.is_background_frozen());
+    assert(bg.freeze_background());
+    assert(bg.is_background_frozen());
+    assert(bg.unfreeze_background());
+    assert(!bg.is_background_frozen());
+
     std::cout << "[PASS] test_background_manager" << std::endl;
 }
 

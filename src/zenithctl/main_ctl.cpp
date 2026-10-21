@@ -147,11 +147,12 @@ int main(int argc, char* argv[]) {
             std::cout << "Available Zenith Performance Profiles:\n"
                       << "  • safe       (Near-zero risk, soft cgroups, default sysctls)\n"
                       << "  • balanced   (Default gaming profile: EPP, V-Cache/P-core pinning, THP madvise)\n"
-                      << "  • aggressive (Maximum FPS/minimal jitter: split-lock disabled, GPU clock lock, THP always)\n";
+                      << "  • aggressive (Maximum FPS/minimal jitter: split-lock disabled, GPU clock lock, THP always)\n"
+                      << "  • ultra      (Hardcore gaming: freezes background apps via cgroup.freeze, 0% CPU background, swappiness 0, DMA 0us)\n";
             return 0;
         } else if (sub == "set") {
             if (argc < 4) {
-                std::cerr << "Error: 'profile set' requires a profile name (safe, balanced, aggressive).\n";
+                std::cerr << "Error: 'profile set' requires a profile name (safe, balanced, aggressive, ultra).\n";
                 return 1;
             }
             std::string p = argv[3];

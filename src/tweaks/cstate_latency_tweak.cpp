@@ -27,7 +27,7 @@ bool CstateLatencyTweak::apply(Profile profile) {
         revert();
     }
 
-    target_latency_us_ = (profile == Profile::Aggressive) ? 0 : 50;
+    target_latency_us_ = (profile == Profile::Aggressive || profile == Profile::Ultra) ? 0 : 50;
 
 #ifdef __linux__
     int fd = ::open(dev_path_.c_str(), O_RDWR | O_CLOEXEC);
@@ -81,7 +81,7 @@ std::string CstateLatencyTweak::get_current_value() const {
 }
 
 std::string CstateLatencyTweak::get_target_value(Profile profile) const {
-    if (profile == Profile::Aggressive) return "0 us (lock C0/C1)";
+    if (profile == Profile::Aggressive || profile == Profile::Ultra) return "0 us (lock C0/C1)";
     if (profile == Profile::Balanced) return "50 us (limit C6/C8)";
     return "unconstrained";
 }

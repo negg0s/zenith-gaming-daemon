@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-10-21
+
+### Added
+- **New Performance Tier: Ultra Profile (`ultra`)**:
+  - Introduced the hardcore `Ultra` optimization profile dedicated to competitive esports and CPU-bound titles.
+  - **Zero Background Contention via cgroups v2 Freezer**: all non-essential background tasks are automatically frozen (`cgroup.freeze = 1`), consuming **0% CPU cycles, 0% memory bus bandwidth**, and causing zero L1/L2/L3 cache line pollution.
+  - **Paging Elimination (`vm.swappiness = 0`)**: completely eliminates anonymous memory swapping to disk while gaming.
+  - **Zero Wakeup Latency**: sets CPU DMA Latency PM QoS request to `0 us` (locks cores out of C6/C8 deep sleep).
+  - **DirectStorage & High Throughput I/O**: NVMe read-ahead set to 512 KB with queue scheduler bypassed (`none`).
+- **cgroups v2 Freezer & Automatic Process Suspension in `BackgroundManager`**:
+  - Implemented `freeze_background()` and `unfreeze_background()` with `SIGSTOP`/`SIGCONT` fallback.
+  - Expanded blacklist with 20+ resource-heavy applications (browsers, Discord, Spotify, Telegram, qBittorrent, Deluge, indexers, compilers).
+  - Instant automatic thawing when the game exits.
+- **Adaptive Controller Degradation & Promotion Ladder**:
+  - Integrated `Ultra` profile into the self-healing state machine: `Ultra` -> `Aggressive` -> `Balanced` -> `Safe` on thermal/PSI load, promoting back to `Ultra` after hysteresis cycles.
+- **UX & Tooling Enhancements**:
+  - `zenithctl profile set ultra` and updated `zenithctl profile list`.
+  - Shell autocompletion scripts (bash, zsh, fish) updated to support `ultra`.
+
+---
+
 ## [1.2.0] - 2026-10-21
 
 ### Added

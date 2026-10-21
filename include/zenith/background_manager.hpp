@@ -30,6 +30,14 @@ public:
     // Throttle a specific PID by moving to zenith_background cgroup
     bool throttle_pid(int pid);
 
+    // Freeze all demoted background processes in cgroup (0% CPU, 0 cache, 0 disk I/O)
+    bool freeze_background();
+
+    // Thaw/resume all demoted background processes
+    bool unfreeze_background();
+
+    [[nodiscard]] bool is_background_frozen() const { return is_frozen_; }
+
     // Restore all throttled processes back to default/root cgroup
     size_t restore_all_throttled();
 
@@ -45,6 +53,7 @@ private:
     std::vector<std::string> whitelist_rules_;
     std::vector<std::string> blacklist_rules_;
     std::unordered_set<int> throttled_pids_;
+    bool is_frozen_ = false;
 
     void setup_cgroup() const;
 };

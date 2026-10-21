@@ -10,13 +10,13 @@ AdaptiveController::AdaptiveController(Profile base_target_profile)
 Profile AdaptiveController::get_platform_clamped_profile(Profile requested) const {
     if (on_battery_) {
         // Force at most Balanced on battery power
-        if (requested == Profile::Aggressive) {
+        if (requested == Profile::Aggressive || requested == Profile::Ultra) {
             return Profile::Balanced;
         }
     }
     if (is_handheld_) {
         // Handheld ceiling: Balanced
-        if (requested == Profile::Aggressive) {
+        if (requested == Profile::Aggressive || requested == Profile::Ultra) {
             return Profile::Balanced;
         }
     }
@@ -34,7 +34,7 @@ void AdaptiveController::set_base_profile(Profile p) {
 
 void AdaptiveController::set_battery_mode(bool on_battery) {
     on_battery_ = on_battery;
-    if (on_battery_ && active_profile_ == Profile::Aggressive) {
+    if (on_battery_ && (active_profile_ == Profile::Aggressive || active_profile_ == Profile::Ultra)) {
         SystemPressure sp;
         transition_to(Profile::Balanced, "Battery mode engaged: clamped to Balanced", sp);
     }
@@ -42,7 +42,7 @@ void AdaptiveController::set_battery_mode(bool on_battery) {
 
 void AdaptiveController::set_handheld_mode(bool is_handheld) {
     is_handheld_ = is_handheld;
-    if (is_handheld_ && active_profile_ == Profile::Aggressive) {
+    if (is_handheld_ && (active_profile_ == Profile::Aggressive || active_profile_ == Profile::Ultra)) {
         SystemPressure sp;
         transition_to(Profile::Balanced, "Handheld form factor: clamped to Balanced", sp);
     }
@@ -97,8 +97,15 @@ void AdaptiveController::transition_to(Profile new_profile, const std::string& r
 bool AdaptiveController::evaluate(const SystemPressure& sp) {
     Profile target_clamped = get_platform_clamped_profile(base_target_profile_);
 
-    // 1. Degradation Evaluation (Aggressive -> Balanced -> Safe)
-    if (active_profile_ == Profile::Aggressive) {
+    // 1. Degradation Evaluation (Ultra -> Aggressive -> Balanced -> Safe)
+    if (active_profile_ == Profile::Ultra) {
+        if (is_moderate_pressure(sp) || is_severe_pressure(sp)) {
+            std::string reason = "System pressure or thermal load in Ultra; stepped down to Aggressive";
+            transition_to(Profile::Aggressive, reason, sp);
+            healthy_cycles_count_ = 0;
+            return true;
+        }
+    } else if (active_profile_ == Profile::Aggressive) {
         if (is_moderate_pressure(sp) || is_severe_pressure(sp)) {
             std::string reason;
             if (sp.cpu_max_temp_c >= max_temp_c_) {
@@ -140,7 +147,14 @@ bool AdaptiveController::evaluate(const SystemPressure& sp) {
             if (healthy_cycles_count_ >= recovery_hysteresis_cycles_ &&
                 elapsed_sec >= static_cast<int64_t>(cooldown_seconds_)) {
 
-                Profile next_profile = (active_profile_ == Profile::Safe) ? Profile::Balanced : Profile::Aggressive;
+                Profile next_profile = active_profile_;
+                if (active_profile_ == Profile::Safe) {
+                    next_profile = Profile::Balanced;
+                } else if (active_profile_ == Profile::Balanced) {
+                    next_profile = (target_clamped == Profile::Ultra) ? Profile::Aggressive : target_clamped;
+                } else if (active_profile_ == Profile::Aggressive) {
+                    next_profile = (target_clamped == Profile::Ultra) ? Profile::Ultra : Profile::Aggressive;
+                }
                 next_profile = get_platform_clamped_profile(next_profile);
 
                 if (next_profile != active_profile_) {

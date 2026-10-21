@@ -29,13 +29,13 @@ bool SysctlTweak::apply(Profile profile) {
 
     // 1. split_lock_mitigate (Only in Aggressive profile)
     fs::path split_lock = proc_root_ / "sys/kernel/split_lock_mitigate";
-    if (profile == Profile::Aggressive) {
+    if (profile == Profile::Aggressive || profile == Profile::Ultra) {
         write_saved(split_lock, "0");
     }
 
     // 2. THP enabled (madvise for safe & balanced, always for aggressive)
     fs::path thp_enabled = sys_root_ / "kernel/mm/transparent_hugepage/enabled";
-    std::string thp_mode = (profile == Profile::Aggressive) ? "always" : "madvise";
+    std::string thp_mode = (profile == Profile::Aggressive || profile == Profile::Ultra) ? "always" : "madvise";
     write_saved(thp_enabled, thp_mode);
 
     // 3. THP defrag (defer+madvise for balanced & aggressive)
@@ -85,6 +85,7 @@ std::string SysctlTweak::get_target_value(Profile profile) const {
         case Profile::Safe: return "thp=madvise, split_lock=(untouched), compaction=(untouched)";
         case Profile::Balanced: return "thp=madvise, defrag=defer+madvise, compaction=0, split_lock=(untouched)";
         case Profile::Aggressive: return "thp=always, defrag=defer+madvise, compaction=0, split_lock=0";
+        case Profile::Ultra: return "thp=always, defrag=defer+madvise, compaction=0, split_lock=0, swappiness=0";
     }
     return "thp=madvise";
 }

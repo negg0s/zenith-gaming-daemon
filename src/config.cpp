@@ -73,7 +73,9 @@ std::pair<Config, ConfigResult> Config::parse_string(std::string_view content) {
         "swappiness",
         "dirty_ratio",
         "compaction_proactiveness",
-        "poll_interval_ms"
+        "poll_interval_ms",
+        "background_freeze_enabled",
+        "background_freeze_enabled"
     };
 
     auto lines = split(content, '\n');
@@ -119,7 +121,7 @@ std::pair<Config, ConfigResult> Config::parse_string(std::string_view content) {
             auto prof = string_to_profile(val);
             if (!prof) {
                 res.success = false;
-                res.error_message = "Invalid profile: '" + val + "'. Expected 'safe', 'balanced', or 'aggressive'.";
+                res.error_message = "Invalid profile: '" + val + "'. Expected 'safe', 'balanced', 'aggressive', or 'ultra'.";
                 return { cfg, res };
             }
             cfg.active_profile = *prof;
@@ -141,6 +143,8 @@ std::pair<Config, ConfigResult> Config::parse_string(std::string_view content) {
             if (!parse_bool_strict(val, cfg.realtime_process_priority, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
         } else if (key == "pipewire_quantum_tuning") {
             if (!parse_bool_strict(val, cfg.pipewire_quantum_tuning, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
+        } else if (key == "background_freeze_enabled") {
+            if (!parse_bool_strict(val, cfg.background_freeze_enabled, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
         } else if (key == "pipewire_latency_numerator") {
             if (!parse_int_range(val, 16, 8192, cfg.pipewire_latency_numerator, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
         } else if (key == "pipewire_latency_denominator") {
@@ -153,6 +157,8 @@ std::pair<Config, ConfigResult> Config::parse_string(std::string_view content) {
             if (!parse_int_range(val, 0, 100, cfg.compaction_proactiveness, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
         } else if (key == "poll_interval_ms") {
             if (!parse_int_range(val, 50, 10000, cfg.poll_interval_ms, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
+        } else if (key == "background_freeze_enabled") {
+            if (!parse_bool_strict(val, cfg.background_freeze_enabled, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
         }
     }
 

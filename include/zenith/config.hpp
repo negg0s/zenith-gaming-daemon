@@ -15,7 +15,7 @@ struct Config {
     // Schema version
     std::string version = "1.1.0";
 
-    // Active Profile: safe, balanced (default), aggressive
+    // Active Profile: safe, balanced (default), aggressive, ultra
     Profile active_profile = Profile::Balanced;
 
     // Core features
@@ -28,6 +28,7 @@ struct Config {
     bool gpu_clock_lock_enabled = true;
     bool realtime_process_priority = true;
     bool pipewire_quantum_tuning = true;
+    bool background_freeze_enabled = false;
 
     // Advanced latency settings
     int pipewire_latency_numerator = 64;

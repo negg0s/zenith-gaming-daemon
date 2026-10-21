@@ -64,7 +64,7 @@ bool UclampTweak::probe() {
 bool UclampTweak::apply_to_pid(pid_t pid, Profile profile) {
     if (!uclamp_supported_) return false;
 
-    uint32_t util_min = (profile == Profile::Aggressive) ? 1024 : 512;
+    uint32_t util_min = (profile == Profile::Aggressive || profile == Profile::Ultra) ? 1024 : 512;
 
 #ifdef __linux__
 #ifdef SYS_sched_setattr
@@ -143,6 +143,7 @@ std::string UclampTweak::get_target_value(Profile profile) const {
     switch (profile) {
         case Profile::Safe: return "uclamp.min=(untouched)";
         case Profile::Balanced: return "uclamp.min=512 (50%)";
+        case Profile::Ultra:
         case Profile::Aggressive: return "uclamp.min=1024 (100%)";
     }
     return "uclamp.min=512";

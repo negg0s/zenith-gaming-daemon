@@ -318,7 +318,9 @@ std::string ZenithEngine::handle_socket_command(const std::string& cmd, const Cl
                profile_to_string(config_.active_profile) + "\"}";
     }
     if (cmd.find("SET_PROFILE") != std::string::npos) {
-        if (cmd.find("aggressive") != std::string::npos) {
+        if (cmd.find("ultra") != std::string::npos) {
+            config_.active_profile = Profile::Ultra;
+        } else if (cmd.find("aggressive") != std::string::npos) {
             config_.active_profile = Profile::Aggressive;
         } else if (cmd.find("safe") != std::string::npos) {
             config_.active_profile = Profile::Safe;

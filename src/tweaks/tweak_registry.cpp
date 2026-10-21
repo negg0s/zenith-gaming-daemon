@@ -119,6 +119,7 @@ void TweakRegistry::print_explain() const {
         if (tweak->is_supported_in(Profile::Safe)) std::cout << "safe ";
         if (tweak->is_supported_in(Profile::Balanced)) std::cout << "balanced ";
         if (tweak->is_supported_in(Profile::Aggressive)) std::cout << "aggressive ";
+        if (tweak->is_supported_in(Profile::Ultra)) std::cout << "ultra ";
         std::cout << "\n";
 
         std::cout << "  \033[36mMechanism & Details\033[0m: " << tweak->explain() << "\n";

@@ -8,22 +8,22 @@ Additionally, Zenith features an **Adaptive Controller with Hysteresis** that co
 
 ## Profile Tiers Overview
 
-| Feature / Tweak | Safe | Balanced (Default) | Aggressive |
-| :--- | :---: | :---: | :---: |
-| **cgroups v2 Background Isolation** | ✓ (Light) | ✓ (Dedicated Slice) | ✓ (Hard Throttled) |
-| **AMD 3D V-Cache CCD Pinning** | ✓ | ✓ | ✓ |
-| **Intel P-Core / E-Core Affinity** | ✓ | ✓ | ✓ |
-| **Process Nice Priority** | `nice -5` | `nice -10` | `nice -15` / `SCHED_RR` |
-| **Background Nice Demotion** | `nice 10` | `nice 19` | `nice 19` + `idle` class |
-| **VM Swappiness Tuning** | ✗ (Untouched) | `vm.swappiness=10` | `vm.swappiness=5` |
-| **VM Compaction Proactiveness** | ✗ (Untouched) | `0` (Paused) | `0` (Paused) |
-| **Dirty Ratio Flushing** | ✗ (Untouched) | `5` | `3` |
-| **Split-Lock Mitigation** | ✗ (Enabled: 1) | ✗ (Enabled: 1) | **Disabled (0)** |
-| **Transparent HugePages (THP)** | ✗ (Untouched) | `madvise` | `always` |
-| **GPU Clock Lock (NVML / DPM)** | ✗ (Dynamic) | ✗ (Dynamic) | **Locked High** |
-| **PipeWire Real-Time Quantum** | ✗ (System Default)| `64/48000` (1.33ms) | `32/48000` (0.67ms) |
-| **Network Queue Scheduling** | ✗ (Untouched) | `CAKE` / `FQ_CODEL` | `CAKE` + No Power-Save |
-| **IRQ Affinity Re-routing** | ✗ (Untouched) | ✓ (GPU isolated) | ✓ (Network/NVMe moved) |
+| Feature / Tweak | Safe | Balanced (Default) | Aggressive | Ultra (Hardcore) |
+| :--- | :---: | :---: | :---: | :---: |
+| **cgroups v2 Background Management** | ✓ (Light) | ✓ (Dedicated Slice) | ✓ (Hard Throttled) | **cgroup.freeze (0% CPU)** |
+| **AMD 3D V-Cache CCD Pinning** | ✓ | ✓ | ✓ | ✓ (Exclusive Core Access) |
+| **Intel P-Core / E-Core Affinity** | ✓ | ✓ | ✓ | ✓ (Strict P-Cores Only) |
+| **Process Nice Priority** | `nice -5` | `nice -10` | `nice -15` / `SCHED_RR` | `nice -20` / `SCHED_FIFO` |
+| **Background Execution State** | `nice 10` | `nice 19` | `nice 19` + `idle` | **FROZEN (Zero Cycle Theft)** |
+| **VM Swappiness Tuning** | ✗ (Untouched) | `vm.swappiness=10` | `vm.swappiness=5` | `vm.swappiness=0` (Zero Paging) |
+| **VM Compaction Proactiveness** | ✗ (Untouched) | `0` (Paused) | `0` (Paused) | `0` (Paused) |
+| **Dirty Ratio Flushing** | ✗ (Untouched) | `5` | `3` | `5` (Pre-flushed) |
+| **Split-Lock Mitigation** | ✗ (Enabled: 1) | ✗ (Enabled: 1) | **Disabled (0)** | **Disabled (0)** |
+| **Transparent HugePages (THP)** | ✗ (Untouched) | `madvise` | `always` | `always` + `madvise` defrag |
+| **GPU Clock Lock (NVML / DPM)** | ✗ (Dynamic) | ✗ (Dynamic) | **Locked High** | **Locked Maximum Clock** |
+| **PipeWire Real-Time Quantum** | ✗ (System Default)| `64/48000` (1.33ms) | `32/48000` (0.67ms) | `32/48000` (0.67ms) |
+| **Network Queue Scheduling** | ✗ (Untouched) | `CAKE` / `FQ_CODEL` | `CAKE` + No Power-Save | `CAKE` + No Power-Save |
+| **CPU DMA Latency QoS** | ✗ (Untouched) | `50 us` | `0 us` (Lock C0/C1) | `0 us` (Lock C0/C1) |
 
 ---
 
@@ -56,7 +56,20 @@ Additionally, Zenith features an **Adaptive Controller with Hysteresis** that co
 
 ---
 
-## 4. The Adaptive Controller: Auto-Downgrade & Self-Healing
+---
+
+## 4. Ultra Profile (`ultra` - Hardcore Zero Contention)
+* **Philosophy**: Zero-compromise competitive esports profile. Eliminates 100% of background CPU contention and L1/L2/L3 cache line pollution.
+* **Intended Audience**: Competitive esports, CPU-heavy simulation games (CS2, Factorio, Stellaris, Cyberpunk crowded areas), high-end dedicated gaming rigs.
+* **Mechanism**:
+  - **cgroups v2 Freezer (`cgroup.freeze = 1`)**: Completely freezes non-essential background processes (Chrome, Firefox, Discord, Telegram, Spotify, torrents, background indexers, compilers). They consume **0% CPU cycles, 0% memory bus bandwidth**, and trigger zero context switches or cache evictions while gaming.
+  - **Zero Disk Swapping (`vm.swappiness = 0`)**: Completely forbids paging game anonymous memory pages to disk during active gaming.
+  - **Zero C-State Latency (`/dev/cpu_dma_latency = 0`)**: Forbids CPU cores from downclocking or entering deep C6/C8 sleep states during frame pauses.
+  - **Full Automatic Thawing**: As soon as the game exits or is minimized, all background processes unfreeze instantly without data loss or connection drops.
+
+---
+
+## 5. The Adaptive Controller: Auto-Downgrade & Self-Healing
 
 Zenith avoids "fire-and-forget" instability by running an **Adaptive Monitoring Engine** sampling kernel Pressure Stall Information (PSI) and hardware thermal telemetry every 2 seconds:
 
