@@ -188,7 +188,10 @@ void test_gpu_amd_dpm_and_rollback() {
     mock_fs.dirs["/sys/class/drm"] = {fs::path("/sys/class/drm/card0")};
     mock_fs.dirs["/sys/class/drm/card0/device/hwmon"] = {fs::path("/sys/class/drm/card0/device/hwmon/hwmon0")};
     mock_fs.files["/sys/class/drm/card0/device/hwmon/hwmon0/temp1_input"] = "55000"; // 55 C
+    mock_fs.files["/sys/class/drm/card0/device/hwmon/hwmon0/power1_cap"] = "200000000"; // 200W
+    mock_fs.files["/sys/class/drm/card0/device/hwmon/hwmon0/power1_cap_max"] = "250000000"; // 250W
     mock_fs.files["/sys/class/drm/card0/device/power_dpm_force_performance_level"] = "auto";
+    mock_fs.files["/sys/class/drm/card0/device/pp_power_profile_mode"] = "0";
 
     auto mock_nvml = std::make_shared<MockNvmlDriver>();
     mock_nvml->available = false; // No NVIDIA
@@ -198,16 +201,20 @@ void test_gpu_amd_dpm_and_rollback() {
     assert(controller.get_gpus()[0].vendor == GpuVendor::Amd);
     assert(controller.get_gpus()[0].original_dpm_level == "auto");
 
-    // Lock AMD clocks
-    bool locked = controller.lock_clocks();
+    // Lock AMD clocks in Ultra mode
+    bool locked = controller.lock_clocks(Profile::Ultra);
     assert(locked);
     assert(controller.is_active());
     assert(mock_fs.files["/sys/class/drm/card0/device/power_dpm_force_performance_level"] == "high\n");
+    assert(mock_fs.files["/sys/class/drm/card0/device/pp_power_profile_mode"] == "1\n");
+    assert(mock_fs.files["/sys/class/drm/card0/device/hwmon/hwmon0/power1_cap"] == "250000000\n");
 
     // Rollback
     controller.rollback();
     assert(!controller.is_active());
     assert(mock_fs.files["/sys/class/drm/card0/device/power_dpm_force_performance_level"] == "auto\n");
+    assert(mock_fs.files["/sys/class/drm/card0/device/pp_power_profile_mode"] == "0\n");
+    assert(mock_fs.files["/sys/class/drm/card0/device/hwmon/hwmon0/power1_cap"] == "200000000\n");
 
     std::cout << "[PASS] test_gpu_amd_dpm_and_rollback" << std::endl;
 }
@@ -223,16 +230,23 @@ void test_gpu_nvidia_nvml_and_rollback() {
     assert(controller.get_gpus().size() == 1);
     assert(controller.get_gpus()[0].vendor == GpuVendor::Nvidia);
 
-    bool locked = controller.lock_clocks();
+    // Ultra mode: locks core, memory, and boosts power limit
+    bool locked = controller.lock_clocks(Profile::Ultra);
     assert(locked);
     assert(mock_nvml->persistence_mode == true);
     assert(mock_nvml->clocks_locked == true);
+    assert(mock_nvml->mem_clocks_locked == true);
     assert(mock_nvml->locked_min == GpuController::SAFE_NVIDIA_MIN_MHZ);
     assert(mock_nvml->locked_max == GpuController::SAFE_NVIDIA_MAX_MHZ);
+    assert(mock_nvml->mem_locked_min == GpuController::SAFE_NVIDIA_MEM_MIN_MHZ);
+    assert(mock_nvml->mem_locked_max == GpuController::SAFE_NVIDIA_MEM_MAX_MHZ);
+    assert(mock_nvml->current_power_limit == 320000);
 
     controller.rollback();
     assert(mock_nvml->clocks_locked == false);
+    assert(mock_nvml->mem_clocks_locked == false);
     assert(mock_nvml->persistence_mode == false);
+    assert(mock_nvml->current_power_limit == 250000);
 
     std::cout << "[PASS] test_gpu_nvidia_nvml_and_rollback" << std::endl;
 }

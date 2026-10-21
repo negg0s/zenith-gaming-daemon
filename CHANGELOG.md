@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-10-21
+
+### Added
+- **AMD Radeon PowerPlay 3D Full Screen Profile (`pp_power_profile_mode = 1`)**:
+  - Automatically configures the AMD SMU firmware into `3D_FULL_SCREEN` mode upon game launch.
+  - Fixes aggressive VRAM clock downscaling down to 400 MHz during scene transitions and UI pauses in Vulkan and DirectX 12 games.
+- **AMD Hardware Power Cap Maximization (`power1_cap_max`)**:
+  - In `Ultra` profile, detects vendor power headroom (`power1_cap_max`) and elevates the power limit from baseline to maximum hardware limit, eliminating power-target throttling under heavy shader/RT load.
+- **NVIDIA Dedicated Memory Clocks Lock & Max Power Limit via Native NVML**:
+  - Locks GDDR6/GDDR6X/GDDR7 memory clocks (`set_memory_locked_clocks`) to prevent VRAM downclocking.
+  - Dynamically queries hardware power constraints (`nvmlDeviceGetPowerManagementLimitConstraints`) and sets maximum sustained TDP headroom in `Ultra` mode.
+- **High-Performance Vulkan & Mesa Driver Optimization Hints**:
+  - Configures `MESA_SHADER_CACHE_MAX_SIZE=10G` to eliminate shader re-compilation stutter across multiple game installations.
+  - Enables `RADV_PERFTEST=aco,sam,dcc` (Smart Access Memory / Resizable BAR and Delta Color Compression for AMD RDNA).
+  - Enables `mesa_glthread=true`, `VKD3D_CONFIG=dxr11,dxr`, and `__GL_THREADED_OPTIMIZATIONS=1`.
+- **Full Reversible State Management**:
+  - Guaranteed recovery of original DPM levels, PowerPlay profiles, power caps, memory clocks, and persistence modes upon game exit or emergency journal rollback.
+
+---
+
 ## [1.3.0] - 2026-10-21
 
 ### Added

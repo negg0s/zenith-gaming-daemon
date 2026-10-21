@@ -141,7 +141,7 @@ bool ZenithEngine::activate(const DetectedGame& game) {
 
     // 3. GPU Clocks Lock
     if (config_.gpu_clock_lock_enabled) {
-        gpu_.lock_clocks();
+        gpu_.lock_clocks(config_.active_profile);
     }
 
     // 4. IRQ Affinity Steering
