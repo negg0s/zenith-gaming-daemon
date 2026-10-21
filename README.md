@@ -103,7 +103,7 @@ Start a game in Steam or another launcher. The daemon detects the process and ap
 
 ## Profiles
 
-The built-in profiles are `safe`, `balanced` and `aggressive`.
+The built-in profiles are `safe`, `balanced`, `aggressive` and `ultra`.
 
 ```bash
 zenithctl profile set balanced
@@ -112,11 +112,24 @@ zenithctl profile show
 
 | Profile | Intended use |
 | --- | --- |
-| `safe` | Default. Minimal system changes and no GPU clock lock. |
-| `balanced` | CPU affinity, background isolation and audio tuning. |
+| `safe` | Minimal system changes and no GPU clock lock. |
+| `balanced` | Default. CPU affinity, background isolation and audio tuning. |
 | `aggressive` | Adds kernel and GPU latency tuning. Higher power draw. |
+| `ultra` | Zero-contention mode. Freezes non-essential background processes (cgroup.freeze) and applies maximum GPU power headroom. |
 
 Per-game overrides live in `profiles/*.toml`. See [docs/PROFILES.md](docs/PROFILES.md).
+
+## Steam Launch Options (`zenith-run`)
+
+While the daemon auto-detects games via Netlink, you can also wrap commands explicitly or set the profile per-title in Steam:
+
+```bash
+# In Steam Game Properties -> Launch Options:
+zenith-run %command%
+
+# Force Ultra profile with background freeze for competitive play:
+zenith-run --ultra %command%
+```
 
 ## CLI
 
