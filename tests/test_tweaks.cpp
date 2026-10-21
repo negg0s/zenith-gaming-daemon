@@ -87,6 +87,49 @@ void test_cpu_governor_mock() {
     std::cout << "[PASS] test_cpu_governor_mock\n";
 }
 
+void test_cpu_governor_policy_mock() {
+    using namespace zenith;
+
+    fs::path mock_dir = fs::current_path() / "test_mock_cpu_policy";
+    std::error_code ec;
+    fs::remove_all(mock_dir, ec);
+    fs::create_directories(mock_dir, ec);
+
+    fs::path policy0 = mock_dir / "cpufreq" / "policy0";
+    fs::path policy1 = mock_dir / "cpufreq" / "policy1";
+    fs::create_directories(policy0, ec);
+    fs::create_directories(policy1, ec);
+
+    write_file_string(policy0 / "scaling_governor", "powersave");
+    write_file_string(policy0 / "energy_performance_preference", "balance_power");
+    write_file_string(policy1 / "scaling_governor", "powersave");
+    write_file_string(policy1 / "energy_performance_preference", "balance_power");
+
+    CpuGovernorTweak tweak(mock_dir);
+    assert(tweak.probe() == true);
+
+    // Apply Balanced
+    bool ok_bal = tweak.apply(Profile::Balanced);
+    assert(ok_bal == true);
+    assert(*read_file_string(policy0 / "energy_performance_preference") == "performance");
+    assert(*read_file_string(policy0 / "scaling_governor") == "powersave");
+
+    // Apply Aggressive
+    bool ok_agg = tweak.apply(Profile::Aggressive);
+    assert(ok_agg == true);
+    assert(*read_file_string(policy0 / "scaling_governor") == "performance");
+    assert(*read_file_string(policy0 / "energy_performance_preference") == "performance");
+
+    // Revert
+    bool reverted = tweak.revert();
+    assert(reverted == true);
+    assert(*read_file_string(policy0 / "scaling_governor") == "powersave");
+    assert(*read_file_string(policy0 / "energy_performance_preference") == "balance_power");
+
+    fs::remove_all(mock_dir, ec);
+    std::cout << "[PASS] test_cpu_governor_policy_mock\n";
+}
+
 void test_cgroup_weight_mock() {
     using namespace zenith;
 
@@ -419,6 +462,7 @@ int main() {
     std::cout << "Running Stage 3 Subsystem Tweaks, Profiles & Conflict Tests...\n";
     test_profiles();
     test_cpu_governor_mock();
+    test_cpu_governor_policy_mock();
     test_cgroup_weight_mock();
     test_nvme_mock();
     test_usb_mock();

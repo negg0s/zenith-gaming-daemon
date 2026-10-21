@@ -39,7 +39,7 @@ void print_ctl_help() {
 "  enable                           Enable dynamic background gaming optimizations\n"
 "  disable                          Disable dynamic gaming optimizations\n"
 "  profile list                     List available performance tuning profiles\n"
-"  profile set <safe|balanced|aggressive>  Switch active performance profile\n"
+"  profile set <safe|balanced|aggressive|ultra> Switch active performance profile\n"
 "  game list                        List per-game profile and tweak overrides\n"
 "  game add <name/appid> [profile]  Add custom per-game optimization profile\n"
 "  dry-run [profile]                Simulate tweak application with colorized diff\n"
@@ -49,7 +49,7 @@ void print_ctl_help() {
 "  logs [-f]                        Inspect daemon systemd/journald log stream\n"
 "  report                           Generate anonymized diagnostics report for GitHub issues\n"
 "  version                          Show version and build information\n"
-"  completions <bash|zsh|fish>      Generate shell autocompletion script\n\n"
+"  completions <bash|zsh|fish>      Generate shell autocompletion script (alias: completion)\n\n"
 "Examples:\n"
 "  zenithctl doctor\n"
 "  zenithctl status --watch\n"
@@ -238,9 +238,9 @@ int main(int argc, char* argv[]) {
     }
 
     // Shell Completions
-    if (cmd == "completions") {
+    if (cmd == "completions" || cmd == "completion") {
         if (argc < 3) {
-            std::cerr << "Usage: zenithctl completions <bash|zsh|fish>\n";
+            std::cerr << "Usage: zenithctl " << cmd << " <bash|zsh|fish>\n";
             return 1;
         }
         std::string sh = argv[2];

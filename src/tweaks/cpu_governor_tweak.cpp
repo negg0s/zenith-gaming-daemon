@@ -26,6 +26,20 @@ bool CpuGovernorTweak::probe() {
         }
     }
 
+    // AMD P-State (amd_pstate=active) and modern cpufreq expose policies under cpufreq/policy*
+    if (cpu_dirs_.empty()) {
+        fs::path cpufreq_dir = sysfs_root_ / "cpufreq";
+        if (fs::exists(cpufreq_dir, ec) && fs::is_directory(cpufreq_dir, ec)) {
+            for (const auto& entry : fs::directory_iterator(cpufreq_dir, ec)) {
+                if (!entry.is_directory()) continue;
+                std::string filename = entry.path().filename().string();
+                if (filename.starts_with("policy") && filename.size() > 6 && std::isdigit(filename[6])) {
+                    cpu_dirs_.push_back(entry.path());
+                }
+            }
+        }
+    }
+
     available_ = !cpu_dirs_.empty();
     return available_;
 }

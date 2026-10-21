@@ -122,6 +122,20 @@ bool NetworkTuner::apply() {
         }
     }
 
+    // 3. Socket buffer & TCP low-latency tuning
+    if (auto tfo = fs_->read_file("/proc/sys/net/ipv4/tcp_fastopen")) {
+        if (!orig_tcp_fastopen_) orig_tcp_fastopen_ = *tfo;
+        fs_->write_file("/proc/sys/net/ipv4/tcp_fastopen", "3");
+    }
+    if (auto backlog = fs_->read_file("/proc/sys/net/core/netdev_max_backlog")) {
+        if (!orig_netdev_max_backlog_) orig_netdev_max_backlog_ = *backlog;
+        fs_->write_file("/proc/sys/net/core/netdev_max_backlog", "16384");
+    }
+    if (auto ssaidle = fs_->read_file("/proc/sys/net/ipv4/tcp_slow_start_after_idle")) {
+        if (!orig_tcp_slow_start_) orig_tcp_slow_start_ = *ssaidle;
+        fs_->write_file("/proc/sys/net/ipv4/tcp_slow_start_after_idle", "0");
+    }
+
     applied_ = true;
     return true;
 }
@@ -144,12 +158,26 @@ bool NetworkTuner::revert() {
         }
     }
 
+    // Restore TCP & socket buffer settings
+    if (orig_tcp_fastopen_) {
+        fs_->write_file("/proc/sys/net/ipv4/tcp_fastopen", *orig_tcp_fastopen_);
+        orig_tcp_fastopen_.reset();
+    }
+    if (orig_netdev_max_backlog_) {
+        fs_->write_file("/proc/sys/net/core/netdev_max_backlog", *orig_netdev_max_backlog_);
+        orig_netdev_max_backlog_.reset();
+    }
+    if (orig_tcp_slow_start_) {
+        fs_->write_file("/proc/sys/net/ipv4/tcp_slow_start_after_idle", *orig_tcp_slow_start_);
+        orig_tcp_slow_start_.reset();
+    }
+
     applied_ = false;
     return true;
 }
 
 std::string NetworkTuner::describe() const {
-    return "Network QoS & Bufferbloat Mitigation (CAKE/FQ_CODEL & Wi-Fi Power Save)";
+    return "Network QoS & Low-Latency Tuning (CAKE/FQ_CODEL, TCP Fast Open, Backlog & Wi-Fi Power Save)";
 }
 
 } // namespace zenith

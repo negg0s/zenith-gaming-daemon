@@ -78,6 +78,9 @@ void test_network_active_interface_and_qdisc() {
 
     mock_fs.files["/proc/net/route"] = route_data;
     mock_fs.files["/sys/class/net/wlan0/wireless"] = "";
+    mock_fs.files["/proc/sys/net/ipv4/tcp_fastopen"] = "1";
+    mock_fs.files["/proc/sys/net/core/netdev_max_backlog"] = "1000";
+    mock_fs.files["/proc/sys/net/ipv4/tcp_slow_start_after_idle"] = "1";
 
     NetworkTuner tuner(&mock_fs);
     assert(tuner.probe());
@@ -103,6 +106,12 @@ void test_network_active_interface_and_qdisc() {
     assert(tuner.is_applied());
     assert(tuner.original_qdisc() == "fq_codel");
     assert(tuner.wifi_power_save_disabled());
+    assert(tuner.tcp_fastopen_tuned());
+    assert(tuner.netdev_backlog_tuned());
+    assert(tuner.tcp_slow_start_tuned());
+    assert(mock_fs.files["/proc/sys/net/ipv4/tcp_fastopen"] == "3");
+    assert(mock_fs.files["/proc/sys/net/core/netdev_max_backlog"] == "16384");
+    assert(mock_fs.files["/proc/sys/net/ipv4/tcp_slow_start_after_idle"] == "0");
 
     // Verify CAKE replacement command was issued
     bool found_cake = false;
@@ -119,6 +128,12 @@ void test_network_active_interface_and_qdisc() {
     bool rev_ok = tuner.revert();
     assert(rev_ok);
     assert(!tuner.is_applied());
+    assert(!tuner.tcp_fastopen_tuned());
+    assert(!tuner.netdev_backlog_tuned());
+    assert(!tuner.tcp_slow_start_tuned());
+    assert(mock_fs.files["/proc/sys/net/ipv4/tcp_fastopen"] == "1");
+    assert(mock_fs.files["/proc/sys/net/core/netdev_max_backlog"] == "1000");
+    assert(mock_fs.files["/proc/sys/net/ipv4/tcp_slow_start_after_idle"] == "1");
 
     bool found_fq_restore = false;
     bool found_wifi_on = false;
