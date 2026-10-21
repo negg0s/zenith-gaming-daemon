@@ -1,237 +1,179 @@
-<h1 align="center">⚡ Zenith Gaming Daemon</h1>
+# Zenith Gaming Daemon
 
-<p align="center">
-  <b>Ultra-low latency Linux gaming optimizer daemon (C++20) for Arch / CachyOS, Fedora, Ubuntu & SteamOS</b><br/>
-  <sub>Automated Netlink Game Detection · Dynamic cgroups v2 Background Isolation · AMD 3D V-Cache CCX Pinning · Intel P-Core Locking · Sub-ms PipeWire Quantum · Zero-Drift Crash-Safe Rollback</sub>
-</p>
+Linux game session optimizer for Arch, CachyOS, Fedora, Ubuntu and SteamOS. It detects a running game, applies a profile, and restores the previous system state when the game exits.
 
-<p align="center">
-  <a href="https://github.com/NEGG0/zenith-gaming-daemon/actions/workflows/ci.yml"><img src="https://github.com/NEGG0/zenith-gaming-daemon/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI Status"/></a>
-  <a href="https://github.com/NEGG0/zenith-gaming-daemon/actions/workflows/codeql.yml"><img src="https://github.com/NEGG0/zenith-gaming-daemon/actions/workflows/codeql.yml/badge.svg?branch=main" alt="CodeQL Status"/></a>
-  <a href="https://github.com/NEGG0/zenith-gaming-daemon/actions/workflows/scorecard.yml"><img src="https://github.com/NEGG0/zenith-gaming-daemon/actions/workflows/scorecard.yml/badge.svg?branch=main" alt="OpenSSF Scorecard"/></a>
-  <a href="https://github.com/NEGG0/zenith-gaming-daemon/releases/latest"><img src="https://img.shields.io/github/v/release/NEGG0/zenith-gaming-daemon?color=blue&label=Release" alt="Latest Release"/></a>
-  <img src="https://img.shields.io/badge/Language-Modern%20C%2B%2B20-blue.svg" alt="C++20"/>
-  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License"/>
-  <img src="https://img.shields.io/badge/Architecture-Crash--Only%20WAL-purple.svg" alt="Crash-Only Architecture"/>
-</p>
+The current source version is 1.5.0. Packages are published on the [Releases](https://github.com/NEGG0/zenith-gaming-daemon/releases) page.
 
----
+## What it does
 
-## 🖥️ Interactive Live TUI Dashboard (`zenithctl status --watch`)
+- Detects game launches through the kernel Netlink process connector.
+- Moves selected background processes into a cgroups v2 housekeeping slice.
+- Pins game threads to physical cores, AMD 3D V-Cache CCDs or Intel P-cores when the topology is known.
+- Applies kernel settings such as split-lock mitigation, THP and compaction proactiveness for the session.
+- Can lock GPU clocks through the AMDGPU sysfs interface or NVIDIA NVML.
+- Lowers the PipeWire quantum and adjusts the network qdisc for lower audio and packet latency.
+- Writes a rollback journal before changing system state and restores it when the game exits or the daemon restarts.
 
-Zenith provides a real-time terminal user interface displaying active game sessions, CPU topology (CCD0 V-Cache vs CCD1 Frequency, Intel P/E cores), PSI memory/CPU pressure, GPU thermals, and live Netlink events:
+Every change is session-scoped. The daemon does not write persistent sysctl or security configuration files.
 
-```text
- ┌─────────────────────────── Zenith Gaming Daemon v1.2.0 ────────────────────────────┐
- │ Profile: [ AGGRESSIVE ]   Mode: ACTIVE (Game Running)     Uptime: 2h 45m 12s       │
- ├────────────────────────────────────────────────────────────────────────────────────┤
- │ 🎮 Active Game: Cyberpunk2077.exe (PID: 14285) [Proton/DX12]                       │
- │    AppID: 1091500 | Profile: Aggressive | Nice: -15 (SCHED_RR) | Tasks: 68        │
- ├────────────────────────────────────────────────────────────────────────────────────┤
- │ 🧠 CPU Topology (AMD Ryzen 9 7950X3D - 16C/32T)                                    │
- │    CCD0 (96MB 3D V-Cache) [Cores 0-7, SMT 16-23]   : [■■■■■■■■■■■■■■■■] (GAME)     │
- │    CCD1 (High Frequency)  [Cores 8-15, SMT 24-31]  : [■■□□□□□□□□□□□□□□] (IDLE)     │
- │    Housekeeping / Slice   [Core 0, SMT 16]         : [Discord, Chrome, Steam]      │
- ├────────────────────────────────────────────────────────────────────────────────────┤
- │ ⚡ Active Latency Tweaks                                                           │
- │    [✓] amd_x3d_mode: cache (CCD0)       [✓] cgroups v2 background isolation slice  │
- │    [✓] split_lock_mitigate: 0 (disabled)[✓] PipeWire quantum: 64/48000 (1.33ms)    │
- │    [✓] vm.compaction_proactiveness: 0   [✓] Network qdisc: CAKE (eth0)             │
- │    [✓] vm.swappiness: 5 | dirty_ratio: 3[✓] GPU Clocks: Locked 2850MHz (DPM High)  │
- ├────────────────────────────────────────────────────────────────────────────────────┤
- │ 📊 System Telemetry & Pressure Stall Information (PSI)                             │
- │    CPU Pressure (PSI)    : [ 1.2% avg10 ]  Nominal                                 │
- │    Memory Pressure (PSI) : [ 0.0% avg10 ]  Nominal (Threshold: 25.0%)              │
- │    IO Pressure (PSI)     : [ 0.8% avg10 ]  Nominal                                 │
- │    GPU Temp: 64°C (Limit: 88°C) | CPU Temp: 68°C (Limit: 90°C) | Fan: 55%         │
- ├────────────────────────────────────────────────────────────────────────────────────┤
- │ 📜 Event Log Stream                                                                │
- │    20:04:12 [NETLINK] PROC_EVENT_EXEC: PID 14285 -> Cyberpunk2077.exe              │
- │    20:04:12 [ENGINE]  Engaged profile 'aggressive' (Reason: game launch detected)  │
- │    20:04:12 [TOPOLOGY] Pinned 68 threads to CCD0 cores (0-7, 16-23)                │
- │    20:04:12 [CGROUPS] Isolated 4 background processes into /zenith_background      │
- └────────────────────────────────────────────────────────────────────────────────────┘
-```
+## What it does not do
 
----
+- It does not guarantee higher average FPS. A game that is limited by the GPU will usually see no gain.
+- It does not disable CPU security mitigations.
+- It does not inject libraries, read game memory, trace game threads or modify game files.
+- It does not guarantee anti-cheat compatibility. The daemon uses normal kernel and OS interfaces, but anti-cheat vendors make their own decisions. Check the rules for each game.
 
-## ⚡ The Problem: Why Does Linux Gaming Stutter?
+## Measured results
 
-Modern Linux gaming using Proton, Wine, and DXVK achieves high average frame rates, frequently matching or exceeding Windows. However, competitive play and smooth frame pacing are frequently undermined by **frame-time inconsistency and 0.1% / 1% low frame rate drops**:
+The project benchmark notes report 15 to 35 percent better frame-time consistency in some CPU-bound and cache-sensitive scenes. That is a frame-pacing result, not a promise of 30 percent more average FPS. Results depend on the game, CPU, GPU, kernel and background load.
 
-1. **Split-Lock Penalties**: Linux kernel default `kernel.split_lock_mitigate=1` intentionally throttles any process triggering unaligned atomic operations (widespread in DirectX 9-11 and Unreal Engine games) by up to **100 milliseconds per event**, causing severe stutter and latency spikes.
-2. **CPU Core Bouncing & L3 Cache Misses**: On multi-CCD processors (especially AMD Ryzen 9 7900X3D / 7950X3D with single-CCD 3D V-Cache or Intel hybrid architectures), thread schedulers bounce game threads across CCD boundaries, causing L3 cache thrashing and memory latency penalties (~75ns inter-CCD penalty).
-3. **Background Process Interference**: Discord, web browsers, torrent clients, and Steam Web Helper preempt game render threads on the same physical cores.
-4. **GPU Clock Downclocking**: GPU drivers downclock memory (VRAM) and compute clocks during low-complexity scenes or menus, inducing latency spikes during sudden camera movement.
-5. **Audio & Network Bufferbloat**: High-latency PipeWire quantum defaults (default 1024 samples = 21.3ms buffer) and standard FIFO network queuing increase input-to-sound and packet jitter.
+Run your own before and after captures with MangoHud, PresentMon or an equivalent frame-time logger. Compare 1 percent and 0.1 percent lows, not only average FPS.
 
-**Zenith orchestrates kernel and hardware parameters dynamically to eliminate these bottlenecks automatically without manual intervention.**
+## Requirements
 
----
+| Component | Minimum | Notes |
+| --- | --- | --- |
+| Linux kernel | 6.6 | 6.12 or newer recommended |
+| cgroups | v2 unified | Required for background isolation |
+| CPU | AMD Ryzen 3000+ or Intel 8th gen+ | 3D V-Cache and hybrid core pinning need newer hardware |
+| GPU | AMDGPU or NVIDIA proprietary driver | GPU clock lock is optional |
+| Audio | PipeWire 0.3.50+ | Quantum tuning uses `pw-metadata` |
+| Init | systemd | The package installs `zenith.service` |
 
-## ⚖️ The Honest Breakdown: What Zenith Does / Does NOT Do
+Steam Deck, ROG Ally and other monolithic APUs skip dual-CCD pinning.
 
-### ✅ What Zenith Does
-* **Improves 1% and 0.1% Lows**: Benchmarks show **15% to 35% improvement in frame-time consistency** and stutter elimination in CPU-bound and cache-sensitive titles.
-* **Autonomous Netlink Detection**: Uses the Linux kernel's Netlink proc connector to detect game launches in **<50 milliseconds** without requiring `%command%` edits in Steam.
-* **AMD 3D V-Cache Pinning**: Integrates with Linux 6.13+ `amd_x3d_vcache` driver (`amd_x3d_mode`) with fallback to hardware L3 cluster analysis.
-* **Intel P-Core / E-Core Affinity**: Binds game render loops strictly to Performance cores while moving background noise to Efficient cores.
-* **Sub-Millisecond Audio Latency**: Dynamically sets PipeWire quantum down to `64/48000` (1.33ms) or `32/48000` (0.67ms) with `SCHED_FIFO` priority.
-* **Guaranteed Zero-Drift Rollback**: Uses an ACID Write-Ahead Log (`/run/zenith/journal.json`). All original kernel and GPU parameters are safely restored when the game exits or if the daemon crashes.
-* **Adaptive Protection**: Monitors kernel Pressure Stall Information (PSI) and thermals, automatically stepping down profiles if memory pressure or temperatures rise.
+## Install
 
-### ❌ What Zenith Does NOT Do
-* **GPU-Bound Limits**: If your game is purely GPU-bound at 99% GPU utilization, Zenith will not increase your average FPS.
-* **Empirical Kernel Interfaces Only**: Zenith only implements documented, empirically verified Linux kernel interfaces.
-* **No Persistent System Damage**: Zenith never modifies your system's persistent `/etc/sysctl.d/` or `/etc/security/` files. When Zenith stops, your system returns 100% to stock distro defaults.
-* **No Kernel Mitigations Compromise**: Zenith does not touch or disable CPU security mitigations (`mitigations=off`).
+### Arch Linux and CachyOS
 
-### ⚠️ Risks & Precautions
-* **Power Consumption**: The `aggressive` profile locks GPU clocks to peak DPM states and disables Wi-Fi power saving, increasing power draw. On laptops running on battery, use the `safe` or `balanced` profile.
-* **Thermal Considerations**: Systems with inadequate cooling could experience thermal throttling if GPU clocks are locked high. Zenith's adaptive controller monitors temperatures and automatically disengages clock locks if temperatures cross safe thresholds (CPU >90°C, GPU >88°C).
-
-### 🛡️ Anti-Cheat Compatibility (100% Safe)
-Zenith is **completely safe and compliant** with all modern anti-cheat systems, including **Easy Anti-Cheat (EAC), BattlEye, Ricochet, Valve Anti-Cheat (VAC), and Vanguard**:
-* Zenith **never** injects code or shared libraries (`.so` / `.dll`) into the game address space.
-* Zenith **never** reads or modifies game memory (`process_vm_readv`, `/proc/$PID/mem`).
-* Zenith **never** traces game threads via `ptrace` or intercepts syscalls.
-* Zenith **never** alters game binaries or graphics API calls.
-* Zenith operates exclusively as an external OS daemon using standard kernel interfaces (`sched_setaffinity`, `cgroups v2`, sysfs). To anti-cheat engines, Zenith is indistinguishable from standard OS scheduling.
-
----
-
-## 🧩 Hardware & Kernel Compatibility Matrix
-
-| Subsystem / Feature | Minimum Supported | Optimal Recommended | Notes |
-| :--- | :--- | :--- | :--- |
-| **Linux Kernel** | Kernel 6.6 LTS | Kernel 6.12 / 6.13+ | CachyOS, Arch, Fedora, and SteamOS fully validated |
-| **cgroups Architecture** | cgroups v2 (`/sys/fs/cgroup`) | cgroups v2 unified | Required for background slice isolation |
-| **AMD Processors** | Ryzen 3000 / 5000 / 7000 / 9000 | Ryzen 7900X3D, 7950X3D, 9950X3D | Dual-CCD V-Cache hardware pinning via `amd_x3d_vcache` |
-| **Intel Processors** | Intel 8th Gen+ Core | Intel 12th-14th Gen, Core Ultra | Distinguishes P-cores, E-cores, and LP-E cores |
-| **Handhelds / APUs** | Steam Deck (LCD/OLED), ROG Ally | AMD Van Gogh, Phoenix, Hawk Point | Automatically bypasses dual-CCD pinning on monolithic APUs |
-| **NVIDIA Graphics** | Proprietary Driver ≥ 525 | Driver ≥ 550+ | Uses NVML for Persistence Mode and clock lock |
-| **AMD Radeon Graphics** | AMDGPU (GCN 4.0 / RDNA 1-3) | RDNA 2 / RDNA 3 / RDNA 3.5 | Uses sysfs `power_dpm_force_performance_level` |
-| **Audio Server** | PipeWire ≥ 0.3.50 | PipeWire ≥ 1.0+ | Real-time metadata quantum tuning via `pw-metadata` |
-| **Network Scheduler** | FQ_CODEL | CAKE (`sch_cake`) | Bufferbloat mitigation during concurrent downloads |
-
----
-
-## 🚀 Quick Start & Installation
-
-### 1. Arch Linux / CachyOS (AUR)
 ```bash
 paru -S zenith-gaming-daemon
-# or using yay
+# or
 yay -S zenith-gaming-daemon
 ```
 
-### 2. Debian / Ubuntu / Pop!_OS (`.deb`)
+### Debian and Ubuntu
+
+Download the `.deb` from the latest release, then:
+
 ```bash
-wget https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.2.0-Linux.deb
-sudo dpkg -i zenith-gaming-daemon-1.2.0-Linux.deb || sudo apt-get install -f -y
+sudo dpkg -i zenith-gaming-daemon-*.deb
+sudo apt-get install -f -y
 ```
 
-### 3. Fedora / RHEL / Bazzite (`.rpm`)
+### Fedora and Bazzite
+
+Download the `.rpm` from the latest release, then:
+
 ```bash
-sudo dnf install https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.2.0-Linux.rpm
-# or on Bazzite / Silverblue (rpm-ostree):
-rpm-ostree install https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.2.0-Linux.rpm
+sudo dnf install ./zenith-gaming-daemon-*.rpm
 ```
 
-### 4. NixOS (`flake.nix`)
-```nix
-# In configuration.nix:
-services.zenith-gaming-daemon = {
-  enable = true;
-  profile = "balanced";
-};
+On an rpm-ostree system:
+
+```bash
+sudo rpm-ostree install ./zenith-gaming-daemon-*.rpm
 ```
 
-### 5. Build from Source
+### NixOS
+
+Use the flake in the repository. The module name and options are documented in `flake.nix`.
+
+### Build from source
+
 ```bash
 git clone https://github.com/NEGG0/zenith-gaming-daemon.git
 cd zenith-gaming-daemon
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
-cmake --build build -j$(nproc)
+cmake --build build -j"$(nproc)"
 sudo cmake --install build
 ```
 
----
+## Quick start
 
-## 🎮 Immediate Usage: 3 Simple Commands
-
-### Step 1: Enable the System Service
 ```bash
 sudo systemctl enable --now zenith.service
-```
-*Zenith is now running silently in the background. It consumes negligible resources (<0.01% CPU, <6MB RAM) and activates automatically when any game starts.*
-
-### Step 2: Verify Your System with `zenithctl doctor`
-```bash
 zenithctl doctor
-```
-*Outputs pass/fail checks for cgroups v2, kernel version, drivers, and conflicting services with automated fix suggestions.*
-
-### Step 3: Launch Live Monitoring
-```bash
 zenithctl status --watch
 ```
-*Launches the real-time TUI dashboard. Launch any game in Steam and watch Zenith engage optimizations in real time!*
 
----
+`doctor` checks cgroups v2, kernel features, drivers and conflicting services. `status --watch` shows the active session, CPU topology, pressure stall information, GPU state and recent events.
 
-## 🛠️ CLI Cheatsheet (`zenithctl`)
+Start a game in Steam or another launcher. The daemon detects the process and applies the configured profile without a `%command%` wrapper.
+
+## Profiles
+
+The built-in profiles are `safe`, `balanced` and `aggressive`.
 
 ```bash
-# Switch profile on the fly (safe | balanced | aggressive)
-zenithctl profile set aggressive
+zenithctl profile set balanced
+zenithctl profile show
+```
 
-# List active games and thread PIDs
+| Profile | Intended use |
+| --- | --- |
+| `safe` | Default. Minimal system changes and no GPU clock lock. |
+| `balanced` | CPU affinity, background isolation and audio tuning. |
+| `aggressive` | Adds kernel and GPU latency tuning. Higher power draw. |
+
+Per-game overrides live in `profiles/*.toml`. See [docs/PROFILES.md](docs/PROFILES.md).
+
+## CLI
+
+```bash
+# Show the active session and topology
+zenithctl status --watch
+
+# List detected games and their processes
 zenithctl game list
 
-# Emergency instant rollback of all kernel parameters
+# Switch profile
+zenithctl profile set aggressive
+
+# Restore all session changes now
 zenithctl rollback
 
-# Explain the scientific mechanism of any tweak
+# Explain a tweak and its default
 zenithctl explain split_lock_mitigate
 
-# Generate an anonymized diagnostic report for GitHub issues
+# Create a redacted diagnostic report
 zenithctl report --redact > report.txt
 ```
 
----
+## Configuration
 
-## 📚 Documentation Directory
+The main configuration file is `/etc/zenith/zenith.conf`. The full key reference is in [docs/CONFIGURATION.md](docs/CONFIGURATION.md). The tweak catalog, including kernel paths and risks, is in [docs/TWEAKS.md](docs/TWEAKS.md).
 
-| Document | Purpose |
-| :--- | :--- |
-| 📖 [Installation Guide](docs/INSTALL.md) | Comprehensive installation for all distros, GPG verification, and building from source. |
-| ⚙️ [Configuration Guide](docs/CONFIGURATION.md) | Exhaustive documentation for every single key in `/etc/zenith/zenith.conf`. |
-| 🎯 [Optimization Profiles](docs/PROFILES.md) | Safe, Balanced, and Aggressive profiles, per-game overrides, and adaptive controller. |
-| 🔬 [Tweaks Catalog](docs/TWEAKS.md) | Deep technical catalog of every kernel path, mechanism, risk, and default state. |
-| 🏗️ [Architecture & Design](docs/ARCHITECTURE.md) | System design, module relationships, and Mermaid lifecycle sequence diagrams. |
-| 🛡️ [Anti-Cheat Compliance](docs/ANTI_CHEAT.md) | In-depth analysis of EAC, BattlEye, Ricochet, and VAC safety invariants. |
-| 📊 [Empirical Benchmarks](docs/BENCHMARKS.md) | Reproducible benchmarking methodology, frametime variance data, and charts. |
-| 🔒 [Threat Model & Security](docs/THREAT_MODEL.md) | Privilege boundaries, input validation, and secure IO architecture. |
-| 🔧 [Troubleshooting & Diagnostics](docs/TROUBLESHOOTING.md) | Diagnosing conflicting services (GameMode, auto-cpufreq, tuned), permissions, socket issues. |
-| ❓ [Frequently Asked Questions](docs/FAQ.md) | Common questions, GameMode vs Zenith, Steam Deck, CachyOS, and NVIDIA GPUs. |
-| 💻 [Developer: Adding a Tweak](docs/ADDING_A_TWEAK.md) | Step-by-step developer guide for adding a new kernel or hardware optimization. |
-| 🎮 [Contributor: Adding a Game Profile](docs/ADDING_A_GAME_PROFILE.md) | Guide for contributing game profiles (`profiles/*.toml`) with schema rules. |
-| 🇷🇺 [Документация на русском](docs/ru/index.md) | Полная документация проекта на русском языке. |
+## Rollback and recovery
 
----
+Before a session starts, the daemon writes the previous values to `/run/zenith/journal.json`. When the game exits, it restores the journal. If the daemon crashes, the next start reads the journal and restores the recorded values.
 
-## 🤝 Contributing & Community
+`/run` is cleared at reboot, so a journal does not survive a power loss. In that case the affected kernel settings return to their boot defaults.
 
-Contributions are warmly welcomed!
-* Read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md).
-* Submit game profiles for your favorite games in `profiles/*.toml`.
-* Ask questions and share frametime benchmark results in [GitHub Discussions](https://github.com/NEGG0/zenith-gaming-daemon/discussions).
+## Risks
 
----
+- The `aggressive` profile locks GPU clocks and can increase power draw and heat.
+- On a laptop, use `safe` or `balanced` on battery.
+- The daemon runs as root. Review the configuration and the installed service before enabling it.
+- Background isolation can make Discord, browsers or downloads slower while a game is running.
 
-## 📜 License & Attributions
+## Documentation
 
-Distributed under the [MIT License](LICENSE).  
-Copyright (c) 2026 Emir ([NEGG0](https://github.com/NEGG0)).  
-See [NOTICE](NOTICE) for third-party interface attributions and legal notes.
+- [Installation](docs/INSTALL.md)
+- [Configuration](docs/CONFIGURATION.md)
+- [Profiles](docs/PROFILES.md)
+- [Tweaks](docs/TWEAKS.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Anti-cheat notes](docs/ANTI_CHEAT.md)
+- [Benchmarks](docs/BENCHMARKS.md)
+- [Threat model](docs/THREAT_MODEL.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
+- [FAQ](docs/FAQ.md)
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Game profiles can be submitted in `profiles/*.toml`. Benchmark reports are welcome in GitHub Discussions.
+
+## License
+
+MIT. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
