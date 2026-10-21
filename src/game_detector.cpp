@@ -107,8 +107,12 @@ std::string GameDetector::extract_steam_appid(int pid) const {
         size_t pos = env_sv.find("SteamAppId=");
         if (pos != std::string_view::npos) {
             size_t val_start = pos + 11;
-            size_t val_end = env_sv.find_first_of("\0\n\r;", val_start);
-            std::string appid(env_sv.substr(val_start, (val_end == std::string_view::npos) ? val_end : (val_end - val_start)));
+            size_t val_end = val_start;
+            while (val_end < env_sv.size() && env_sv[val_end] != '\0' &&
+                   env_sv[val_end] != '\n' && env_sv[val_end] != '\r' && env_sv[val_end] != ';') {
+                val_end++;
+            }
+            std::string appid(env_sv.substr(val_start, val_end - val_start));
             if (!appid.empty() && std::all_of(appid.begin(), appid.end(), ::isdigit) && appid != "0") {
                 return appid;
             }
@@ -122,8 +126,12 @@ std::string GameDetector::extract_steam_appid(int pid) const {
         size_t pos = cmd_sv.find("AppId=");
         if (pos != std::string_view::npos) {
             size_t val_start = pos + 6;
-            size_t val_end = cmd_sv.find_first_of(" \0\n\r", val_start);
-            std::string appid(cmd_sv.substr(val_start, (val_end == std::string_view::npos) ? val_end : (val_end - val_start)));
+            size_t val_end = val_start;
+            while (val_end < cmd_sv.size() && cmd_sv[val_end] != ' ' && cmd_sv[val_end] != '\0' &&
+                   cmd_sv[val_end] != '\n' && cmd_sv[val_end] != '\r') {
+                val_end++;
+            }
+            std::string appid(cmd_sv.substr(val_start, val_end - val_start));
             if (!appid.empty() && std::all_of(appid.begin(), appid.end(), ::isdigit) && appid != "0") {
                 return appid;
             }
