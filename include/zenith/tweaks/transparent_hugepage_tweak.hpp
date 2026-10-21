@@ -30,9 +30,11 @@ private:
     fs::path thp_root_;
     fs::path defrag_path_;
     fs::path khugepaged_defrag_path_;
+    fs::path shmem_enabled_path_;
 
     std::string saved_defrag_;
     std::string saved_khugepaged_defrag_;
+    std::string saved_shmem_enabled_;
     bool applied_ = false;
 };
 

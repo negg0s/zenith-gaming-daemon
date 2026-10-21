@@ -245,7 +245,8 @@ bool ProcessTuner::tune_process_fine_grained(
                     set_cpu_affinity(thread.tid, perf_cores);
                 }
                 set_nice(thread.tid, -10);
-                set_uclamp_min(thread.tid, 512);
+                set_uclamp_min(thread.tid, 1024);
+                set_realtime_ioprio(thread.tid);
                 break;
 
             case ThreadRole::Audio:
@@ -253,6 +254,7 @@ bool ProcessTuner::tune_process_fine_grained(
                     set_cpu_affinity(thread.tid, perf_cores);
                 }
                 set_nice(thread.tid, -11);
+                set_realtime_ioprio(thread.tid);
                 break;
 
             case ThreadRole::ShaderCompile:
@@ -264,6 +266,13 @@ bool ProcessTuner::tune_process_fine_grained(
                 break;
 
             case ThreadRole::IoWorker:
+                if (!perf_cores.empty()) {
+                    set_cpu_affinity(thread.tid, perf_cores);
+                }
+                set_nice(thread.tid, -5);
+                set_realtime_ioprio(thread.tid);
+                break;
+
             case ThreadRole::Unknown:
             default:
                 if (!perf_cores.empty()) {

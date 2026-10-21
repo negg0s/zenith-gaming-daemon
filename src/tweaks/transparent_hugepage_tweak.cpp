@@ -19,7 +19,8 @@ std::string extract_bracketed_token(std::string_view s) {
 TransparentHugepageTweak::TransparentHugepageTweak(fs::path thp_root)
     : thp_root_(std::move(thp_root)),
       defrag_path_(thp_root_ / "defrag"),
-      khugepaged_defrag_path_(thp_root_ / "khugepaged" / "defrag") {}
+      khugepaged_defrag_path_(thp_root_ / "khugepaged" / "defrag"),
+      shmem_enabled_path_(thp_root_ / "shmem_enabled") {}
 
 bool TransparentHugepageTweak::probe() {
     std::error_code ec;
@@ -45,8 +46,19 @@ bool TransparentHugepageTweak::apply(Profile profile) {
         }
     }
 
+    // 3. Save and tune shmem_enabled for DXVK/VKD3D shared memory
+    if (fs::exists(shmem_enabled_path_)) {
+        if (auto cur_shmem = read_file_string(shmem_enabled_path_)) {
+            if (saved_shmem_enabled_.empty()) {
+                saved_shmem_enabled_ = extract_bracketed_token(*cur_shmem);
+            }
+        }
+        std::string target_shmem = (profile == Profile::Ultra) ? "advise" : "advise";
+        write_file_string(shmem_enabled_path_, target_shmem);
+    }
+
     // Target values
-    std::string target_defrag = (profile == Profile::Aggressive) ? "madvise" : "madvise";
+    std::string target_defrag = (profile == Profile::Aggressive || profile == Profile::Ultra) ? "madvise" : "madvise";
     write_file_string(defrag_path_, target_defrag);
 
     if (fs::exists(khugepaged_defrag_path_)) {
@@ -68,6 +80,11 @@ bool TransparentHugepageTweak::revert() {
     if (!saved_khugepaged_defrag_.empty() && fs::exists(khugepaged_defrag_path_)) {
         write_file_string(khugepaged_defrag_path_, saved_khugepaged_defrag_);
         saved_khugepaged_defrag_.clear();
+    }
+
+    if (!saved_shmem_enabled_.empty() && fs::exists(shmem_enabled_path_)) {
+        write_file_string(shmem_enabled_path_, saved_shmem_enabled_);
+        saved_shmem_enabled_.clear();
     }
 
     applied_ = false;

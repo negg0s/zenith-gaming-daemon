@@ -4,6 +4,12 @@
 #include <cctype>
 #include <csignal>
 
+#ifdef __linux__
+#include <sys/resource.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#endif
+
 namespace zenith {
 
 namespace {
@@ -114,6 +120,13 @@ bool BackgroundManager::throttle_pid(int pid) {
     fs::path procs_file = fs::path(CGROUP_BACKGROUND_DIR) / "cgroup.procs";
     if (write_file_string(procs_file, std::to_string(pid) + "\n")) {
         throttled_pids_.insert(pid);
+#ifdef __linux__
+        setpriority(PRIO_PROCESS, pid, 19);
+#ifdef SYS_ioprio_set
+        int idle_ioprio = (3 << 13) | 0; // IOPRIO_CLASS_IDLE
+        syscall(SYS_ioprio_set, 1 /* IOPRIO_WHO_PROCESS */, pid, idle_ioprio);
+#endif
+#endif
         ZENITH_LOG_DEBUG("Demoted PID " + std::to_string(pid) + " (" + comm + ") to zenith_background cgroup");
         return true;
     }

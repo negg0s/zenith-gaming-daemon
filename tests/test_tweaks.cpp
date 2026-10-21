@@ -50,11 +50,15 @@ void test_cpu_governor_mock() {
     fs::path cpu1 = mock_dir / "cpu1" / "cpufreq";
     fs::create_directories(cpu0, ec);
     fs::create_directories(cpu1, ec);
+    fs::create_directories(mock_dir / "cpu0" / "power", ec);
+    fs::create_directories(mock_dir / "cpu1" / "power", ec);
 
     write_file_string(cpu0 / "scaling_governor", "powersave");
     write_file_string(cpu0 / "energy_performance_preference", "balance_power");
+    write_file_string(mock_dir / "cpu0" / "power" / "energy_perf_bias", "6");
     write_file_string(cpu1 / "scaling_governor", "powersave");
     write_file_string(cpu1 / "energy_performance_preference", "balance_power");
+    write_file_string(mock_dir / "cpu1" / "power" / "energy_perf_bias", "6");
 
     CpuGovernorTweak tweak(mock_dir);
     assert(tweak.probe() == true);
@@ -64,6 +68,7 @@ void test_cpu_governor_mock() {
     assert(ok_bal == true);
     assert(*read_file_string(cpu0 / "energy_performance_preference") == "performance");
     assert(*read_file_string(cpu0 / "scaling_governor") == "powersave");
+    assert(*read_file_string(mock_dir / "cpu0" / "power" / "energy_perf_bias") == "0");
 
     // 2. Apply Aggressive (changes both governor and EPP to performance)
     bool ok_agg = tweak.apply(Profile::Aggressive);
@@ -76,6 +81,7 @@ void test_cpu_governor_mock() {
     assert(reverted == true);
     assert(*read_file_string(cpu0 / "scaling_governor") == "powersave");
     assert(*read_file_string(cpu0 / "energy_performance_preference") == "balance_power");
+    assert(*read_file_string(mock_dir / "cpu0" / "power" / "energy_perf_bias") == "6");
 
     fs::remove_all(mock_dir, ec);
     std::cout << "[PASS] test_cpu_governor_mock\n";
@@ -128,16 +134,25 @@ void test_nvme_mock() {
     write_file_string(queue_dir / "scheduler", "[mq-deadline] none bfq");
     write_file_string(queue_dir / "read_ahead_kb", "128");
 
+    // Also test SATA SSD with rotational == 0
+    fs::path sda_queue = mock_dir / "sda" / "queue";
+    fs::create_directories(sda_queue, ec);
+    write_file_string(sda_queue / "rotational", "0\n");
+    write_file_string(sda_queue / "scheduler", "[bfq] none mq-deadline");
+    write_file_string(sda_queue / "read_ahead_kb", "128");
+
     NvmeTweak tweak(mock_dir);
     assert(tweak.probe() == true);
 
     // Apply
     assert(tweak.apply(Profile::Balanced) == true);
     assert(*read_file_string(queue_dir / "scheduler") == "none");
+    assert(*read_file_string(sda_queue / "scheduler") == "none");
 
     // Revert
     assert(tweak.revert() == true);
     assert(*read_file_string(queue_dir / "scheduler") == "mq-deadline");
+    assert(*read_file_string(sda_queue / "scheduler") == "bfq");
 
     fs::remove_all(mock_dir, ec);
     std::cout << "[PASS] test_nvme_mock\n";
@@ -344,9 +359,11 @@ void test_thp_tweak_mock() {
 
     fs::path defrag_p = mock_thp / "defrag";
     fs::path khp_defrag_p = mock_thp / "khugepaged" / "defrag";
+    fs::path shmem_p = mock_thp / "shmem_enabled";
 
     write_file_string(defrag_p, "[always] madvise never");
     write_file_string(khp_defrag_p, "1");
+    write_file_string(shmem_p, "[never] always advise");
 
     TransparentHugepageTweak tweak(mock_thp);
     assert(tweak.probe() == true);
@@ -358,12 +375,14 @@ void test_thp_tweak_mock() {
     assert(ok_apply == true);
     assert(*read_file_string(defrag_p) == "madvise");
     assert(*read_file_string(khp_defrag_p) == "0");
+    assert(*read_file_string(shmem_p) == "advise");
 
     // Revert
     bool ok_revert = tweak.revert();
     assert(ok_revert == true);
     assert(*read_file_string(defrag_p) == "always");
     assert(*read_file_string(khp_defrag_p) == "1");
+    assert(*read_file_string(shmem_p) == "never");
 
     fs::remove_all(mock_thp, ec);
     std::cout << "[PASS] test_thp_tweak_mock\n";

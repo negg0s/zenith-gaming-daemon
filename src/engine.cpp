@@ -139,6 +139,15 @@ bool ZenithEngine::activate(const DetectedGame& game) {
         }
     }
 
+    // 2.1. Ultra Profile: Zero-Contention Background Freeze and Memory Compaction
+    if (config_.active_profile == Profile::Ultra) {
+        size_t frozen = background_manager_.throttle_blacklisted_processes();
+        background_manager_.freeze_background();
+        ZENITH_LOG_INFO("Ultra profile active: suspended " + std::to_string(frozen) +
+                        " background processes (cgroup frozen, 0% CPU & I/O contention).");
+        write_file_string("/proc/sys/vm/compact_memory", "1\n");
+    }
+
     // 3. GPU Clocks Lock
     if (config_.gpu_clock_lock_enabled) {
         gpu_.lock_clocks(config_.active_profile);
@@ -172,6 +181,12 @@ void ZenithEngine::deactivate() {
     std::cout << "\n=======================================================\n";
     ZENITH_LOG_INFO("<<< Game exited (" + active_game_->name + "). Restoring original system state...");
     std::cout << "=======================================================\n";
+
+    if (background_manager_.is_background_frozen()) {
+        background_manager_.unfreeze_background();
+        size_t restored = background_manager_.restore_all_throttled();
+        ZENITH_LOG_INFO("Thawed and restored " + std::to_string(restored) + " background processes to normal priority.");
+    }
 
     irq_.revert();
     network_.revert();
@@ -314,7 +329,7 @@ std::string ZenithEngine::handle_socket_command(const std::string& cmd, const Cl
     }
     if (cmd == "GET_PROFILES" || cmd.find("\"command\":\"GET_PROFILES\"") != std::string::npos ||
         cmd.find("\"command\": \"GET_PROFILES\"") != std::string::npos) {
-        return "{\"version\":1,\"status\":\"ok\",\"profiles\":[\"safe\",\"balanced\",\"aggressive\"],\"active\":\"" +
+        return "{\"version\":1,\"status\":\"ok\",\"profiles\":[\"safe\",\"balanced\",\"aggressive\",\"ultra\"],\"active\":\"" +
                profile_to_string(config_.active_profile) + "\"}";
     }
     if (cmd.find("SET_PROFILE") != std::string::npos) {

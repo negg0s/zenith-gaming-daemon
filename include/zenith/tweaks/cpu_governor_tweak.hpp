@@ -28,6 +28,7 @@ private:
     bool available_ = false;
     std::unordered_map<std::string, std::string> saved_governors_;
     std::unordered_map<std::string, std::string> saved_epp_;
+    std::unordered_map<std::string, std::string> saved_epb_;
     std::vector<fs::path> cpu_dirs_;
 };
 

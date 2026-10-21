@@ -20,6 +20,15 @@ bool NvmeTweak::probe() {
             if (fs::exists(queue_dir, ec)) {
                 nvme_queues_.push_back(queue_dir);
             }
+        } else if (name.starts_with("sd")) {
+            fs::path rot_file = entry.path() / "queue" / "rotational";
+            auto rot = read_file_string(rot_file);
+            if (rot && trim(*rot) == "0") {
+                fs::path queue_dir = entry.path() / "queue";
+                if (fs::exists(queue_dir, ec)) {
+                    nvme_queues_.push_back(queue_dir);
+                }
+            }
         }
     }
 

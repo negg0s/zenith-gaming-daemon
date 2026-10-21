@@ -20,6 +20,7 @@
 #include "zenith/lock_guard.hpp"
 #include "zenith/safe_mode.hpp"
 #include "zenith/socket_server.hpp"
+#include "zenith/background_manager.hpp"
 
 namespace zenith {
 
@@ -48,6 +49,7 @@ public:
     LocalLearner& learner() { return local_learner_; }
     SchedExtTuner& sched_ext() { return sched_ext_; }
     PressureMonitor& pressure() { return pressure_monitor_; }
+    BackgroundManager& background() { return background_manager_; }
 
     StateJournal& get_journal() { return journal_; }
 
@@ -71,6 +73,7 @@ private:
     SchedExtTuner sched_ext_;
     GameDetector detector_;
     SocketServer socket_server_;
+    BackgroundManager background_manager_;
 
     std::optional<DetectedGame> active_game_;
     bool initialized_ = false;

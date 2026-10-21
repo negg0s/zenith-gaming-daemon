@@ -70,12 +70,14 @@ bool SysctlTuner::apply(bool disable_split_lock, bool enable_thp, int swappiness
     if (enable_thp) {
         set_param("/sys/kernel/mm/transparent_hugepage/enabled", "always", MutationType::SysfsToken, 2);
         set_param("/sys/kernel/mm/transparent_hugepage/defrag", "defer+madvise", MutationType::SysfsToken, 3);
+        set_param("/sys/kernel/mm/transparent_hugepage/shmem_enabled", "advise", MutationType::SysfsToken, 8);
     }
 
     set_param("/proc/sys/vm/swappiness", std::to_string(swappiness), MutationType::SysctlInt, 4);
     set_param("/proc/sys/vm/dirty_ratio", std::to_string(dirty_ratio), MutationType::SysctlInt, 5);
     set_param("/proc/sys/vm/compaction_proactiveness", std::to_string(compaction), MutationType::SysctlInt, 6);
     set_param("/proc/sys/kernel/sched_autogroup_enabled", "0", MutationType::SysctlInt, 7);
+    set_param("/proc/sys/vm/max_map_count", "2147483642", MutationType::SysctlInt, 9);
 
     active_ = !entries_.empty();
     if (active_) {

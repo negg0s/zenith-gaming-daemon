@@ -79,6 +79,18 @@ bool CpuGovernorTweak::apply(Profile profile) {
                 }
             }
         }
+
+        // Intel Energy Performance Bias (EPB)
+        fs::path epb_path = cpufreq.parent_path() / "power" / "energy_perf_bias";
+        if (fs::exists(epb_path)) {
+            auto cur = read_file_string(epb_path);
+            if (cur && saved_epb_.find(epb_path.string()) == saved_epb_.end()) {
+                saved_epb_[epb_path.string()] = *cur;
+            }
+            if (write_file_string(epb_path, "0")) {
+                any_applied = true;
+            }
+        }
     }
 
     return any_applied;
@@ -96,6 +108,11 @@ bool CpuGovernorTweak::revert() {
         if (!write_file_string(path, original)) all_ok = false;
     }
     saved_epp_.clear();
+
+    for (const auto& [path, original] : saved_epb_) {
+        if (!write_file_string(path, original)) all_ok = false;
+    }
+    saved_epb_.clear();
 
     return all_ok;
 }

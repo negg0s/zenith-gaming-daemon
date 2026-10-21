@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2026-10-21
+
+### Added
+- **DirectStorage & Real-Time I/O Priority Acceleration**:
+  - Game Main, Render, and I/O worker threads are now automatically assigned real-time I/O priority (`set_realtime_ioprio`), guaranteeing asset streaming and shader disk reads bypass standard OS I/O queues.
+  - Background processes throttled by `BackgroundManager` are simultaneously demoted to `IOPRIO_CLASS_IDLE` and nice 19, eliminating disk bandwidth contention during texture streaming.
+- **Proton / DXVK Shared Memory Transparent HugePages (`shmem_enabled`)**:
+  - Automatically tunes `/sys/kernel/mm/transparent_hugepage/shmem_enabled` to `advise` (and restores baseline on revert).
+  - Accelerates DXVK/VKD3D staging buffers and shared memory pools with 2MB hugepages, reducing TLB miss overhead.
+- **VMA Memory Space Expansion (`vm.max_map_count = 2147483642`)**:
+  - Tunes kernel maximum memory map count with WAL state journal restoration, preventing out-of-memory crashes and stutter in heavy Proton titles (Cyberpunk 2077, Starfield, Hogwarts Legacy).
+- **Proactive Pre-Game Memory Compaction**:
+  - Upon entering `Ultra` profile, triggers `/proc/sys/vm/compact_memory` to defragment physical RAM pages before heavy game launch allocations occur.
+- **Intel Hardware Energy Performance Bias (EPB) Tuning**:
+  - Inspects and sets `/sys/devices/system/cpu/cpu*/power/energy_perf_bias` to `0` (performance), eliminating hardware frequency ramp delays on Intel Core processors.
+- **Non-Rotational SATA SSD Optimization**:
+  - Extended blk-mq I/O queue tuning to non-rotational SATA SSDs (`queue/rotational == 0`), applying `none` scheduler and elevated read-ahead.
+- **Complete Background Freeze Engine Lifecycle**:
+  - `ZenithEngine::activate` and `deactivate` now natively manage `BackgroundManager`, automatically suspending blacklisted background applications in `Ultra` mode and thawing them upon exit.
+- **`zenith-run` CLI Flags & Graphics Environment Injection**:
+  - Supports `--ultra` (`-u`) and `--profile <name>` directly in Steam launch options (`zenith-run --ultra %command%`), automatically dispatching profile changes to the running daemon.
+
+---
+
 ## [1.4.0] - 2026-10-21
 
 ### Added
