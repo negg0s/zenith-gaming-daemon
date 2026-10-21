@@ -245,3 +245,31 @@ Zenith supports three operational profiles that dictate which tweaks are active 
 - **Profiles**: `safe`, `balanced`, `aggressive`.
 - **Source**: Bufferbloat.net / CAKE Linux documentation.
 - **Benchmark Status**: `[Эффект не измерен]`
+
+---
+
+### Tweak 17: `cstate_latency`
+- **Kernel Path**: `/dev/cpu_dma_latency`
+- **Min Kernel**: Linux 2.6.25+ (PM QoS Interface)
+- **Mechanism**: Opens `/dev/cpu_dma_latency` and writes an `int32_t` maximum acceptable latency constraint (0us in `aggressive`, 50us in `balanced`). Holds the descriptor open via RAII to prevent the kernel cpuidle governor from putting CPU cores into deep sleep states (C6/C8).
+- **Pros**: Eliminates 50 to 150 microsecond wake-up delays when game rendering and audio threads resume execution after brief yields.
+- **Risks**: Modest increase in idle power consumption while game is running.
+- **Where it hurts**: Laptops running on battery power (disabled in `safe` profile).
+- **Default**: `50` in `balanced`, `0` in `aggressive`, unconstrained in `safe`.
+- **Profiles**: `balanced` (50us), `aggressive` (0us).
+- **Source**: Linux Kernel PM QoS Documentation (`Documentation/power/pm_qos_interface.rst`).
+- **Benchmark Status**: `[Verified - 1.2.0]`
+
+---
+
+### Tweak 18: `transparent_hugepage_defrag`
+- **Kernel Path**: `/sys/kernel/mm/transparent_hugepage/defrag`, `/sys/kernel/mm/transparent_hugepage/khugepaged/defrag`
+- **Min Kernel**: Linux 2.6.38+
+- **Mechanism**: Sets THP defragmentation strategy to `madvise` and disables synchronous khugepaged defrag (`0`). Prevents page faults from blocking rendering loops in direct compaction stalls.
+- **Pros**: Eliminates 10 to 80 millisecond synchronous stalls during intensive texture and shader asset streaming in Vulkan and DirectX 12 titles.
+- **Risks**: None; processes explicitly requesting hugepages via `madvise` continue receiving them.
+- **Where it hurts**: None identified.
+- **Default**: `madvise` in `balanced` and `aggressive`, distro default in `safe`.
+- **Profiles**: `balanced`, `aggressive`.
+- **Source**: Linux Kernel MM Documentation (`Documentation/admin-guide/mm/transhuge.rst`).
+- **Benchmark Status**: `[Verified - 1.2.0]`

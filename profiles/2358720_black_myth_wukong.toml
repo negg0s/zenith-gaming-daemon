@@ -1,0 +1,15 @@
+# Black Myth: Wukong Zenith Game Profile
+name = "Black Myth: Wukong"
+appid = 2358720
+executables = ["b1-Win64-Shipping.exe"]
+
+profile = "aggressive"
+ccd_preference = "vcache"
+pin_render_threads = true
+
+realtime_priority = true
+io_class = "realtime"
+
+gpu_performance = "high"
+pipewire_quantum = 64
+network_cake = false

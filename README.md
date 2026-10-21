@@ -22,7 +22,7 @@
 Zenith provides a real-time terminal user interface displaying active game sessions, CPU topology (CCD0 V-Cache vs CCD1 Frequency, Intel P/E cores), PSI memory/CPU pressure, GPU thermals, and live Netlink events:
 
 ```text
- ┌─────────────────────────── Zenith Gaming Daemon v1.1.0 ────────────────────────────┐
+ ┌─────────────────────────── Zenith Gaming Daemon v1.2.0 ────────────────────────────┐
  │ Profile: [ AGGRESSIVE ]   Mode: ACTIVE (Game Running)     Uptime: 2h 45m 12s       │
  ├────────────────────────────────────────────────────────────────────────────────────┤
  │ 🎮 Active Game: Cyberpunk2077.exe (PID: 14285) [Proton/DX12]                       │
@@ -127,15 +127,15 @@ yay -S zenith-gaming-daemon
 
 ### 2. Debian / Ubuntu / Pop!_OS (`.deb`)
 ```bash
-wget https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.1.0-Linux.deb
-sudo dpkg -i zenith-gaming-daemon-1.1.0-Linux.deb || sudo apt-get install -f -y
+wget https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.2.0-Linux.deb
+sudo dpkg -i zenith-gaming-daemon-1.2.0-Linux.deb || sudo apt-get install -f -y
 ```
 
 ### 3. Fedora / RHEL / Bazzite (`.rpm`)
 ```bash
-sudo dnf install https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.1.0-Linux.rpm
+sudo dnf install https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.2.0-Linux.rpm
 # or on Bazzite / Silverblue (rpm-ostree):
-rpm-ostree install https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.1.0-Linux.rpm
+rpm-ostree install https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.2.0-Linux.rpm
 ```
 
 ### 4. NixOS (`flake.nix`)

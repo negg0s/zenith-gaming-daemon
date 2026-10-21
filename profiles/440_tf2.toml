@@ -1,0 +1,15 @@
+# Team Fortress 2 Zenith Game Profile
+name = "Team Fortress 2"
+appid = 440
+executables = ["tf_linux64", "hl2_linux"]
+
+profile = "aggressive"
+ccd_preference = "frequency"
+pin_render_threads = true
+
+realtime_priority = true
+io_class = "realtime"
+
+gpu_performance = "high"
+pipewire_quantum = 32
+network_cake = true

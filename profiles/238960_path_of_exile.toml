@@ -1,0 +1,15 @@
+# Path of Exile Zenith Game Profile
+name = "Path of Exile"
+appid = 238960
+executables = ["PathOfExile.exe", "PathOfExile_x64.exe", "PathOfExileSteam.exe"]
+
+profile = "aggressive"
+ccd_preference = "vcache"
+pin_render_threads = true
+
+realtime_priority = true
+io_class = "best-effort"
+
+gpu_performance = "high"
+pipewire_quantum = 64
+network_cake = true

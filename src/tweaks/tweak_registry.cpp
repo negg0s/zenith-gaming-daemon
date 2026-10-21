@@ -8,6 +8,8 @@
 #include "zenith/tweaks/usb_autosuspend_tweak.hpp"
 #include "zenith/tweaks/zram_swap_tweak.hpp"
 #include "zenith/tweaks/sysctl_tweak.hpp"
+#include "zenith/tweaks/cstate_latency_tweak.hpp"
+#include "zenith/tweaks/transparent_hugepage_tweak.hpp"
 #include <iostream>
 #include <iomanip>
 
@@ -32,6 +34,8 @@ void TweakRegistry::register_defaults() {
     register_tweak(std::make_shared<UsbAutosuspendTweak>());
     register_tweak(std::make_shared<ZramSwapTweak>());
     register_tweak(std::make_shared<SysctlTweak>());
+    register_tweak(std::make_shared<CstateLatencyTweak>());
+    register_tweak(std::make_shared<TransparentHugepageTweak>());
 }
 
 bool TweakRegistry::apply_all(Profile profile, const std::unordered_set<std::string>& blacklist) {

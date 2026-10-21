@@ -1,0 +1,15 @@
+# Grand Theft Auto V Zenith Game Profile
+name = "Grand Theft Auto V"
+appid = 271590
+executables = ["GTA5.exe"]
+
+profile = "balanced"
+ccd_preference = "vcache"
+pin_render_threads = true
+
+realtime_priority = true
+io_class = "best-effort"
+
+gpu_performance = "high"
+pipewire_quantum = 64
+network_cake = false

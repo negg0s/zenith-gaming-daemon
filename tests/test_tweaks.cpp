@@ -7,6 +7,8 @@
 #include "zenith/tweaks/usb_autosuspend_tweak.hpp"
 #include "zenith/tweaks/zram_swap_tweak.hpp"
 #include "zenith/tweaks/sysctl_tweak.hpp"
+#include "zenith/tweaks/cstate_latency_tweak.hpp"
+#include "zenith/tweaks/transparent_hugepage_tweak.hpp"
 #include "zenith/conflict_detector.hpp"
 #include "zenith/per_game_profile.hpp"
 #include <cassert>
@@ -301,6 +303,69 @@ void test_per_game_profile() {
     std::cout << "[PASS] test_per_game_profile\n";
 }
 
+
+void test_cstate_latency_mock() {
+    using namespace zenith;
+
+    fs::path mock_cstate = fs::current_path() / "test_mock_cstate";
+    std::error_code ec;
+    fs::remove(mock_cstate, ec);
+    write_file_string(mock_cstate, "999");
+
+    CstateLatencyTweak tweak(mock_cstate);
+    assert(tweak.probe() == true);
+    assert(tweak.name() == "cstate_latency");
+    assert(tweak.is_supported_in(Profile::Balanced) == true);
+    assert(tweak.is_supported_in(Profile::Aggressive) == true);
+    assert(tweak.is_supported_in(Profile::Safe) == false);
+
+    bool ok_apply = tweak.apply(Profile::Balanced);
+    assert(ok_apply == true);
+    assert(tweak.get_current_value().find("50 us") != std::string::npos);
+
+    bool ok_revert = tweak.revert();
+    assert(ok_revert == true);
+    assert(tweak.get_current_value().find("unconstrained") != std::string::npos);
+
+    fs::remove(mock_cstate, ec);
+    std::cout << "[PASS] test_cstate_latency_mock\n";
+}
+
+void test_thp_tweak_mock() {
+    using namespace zenith;
+
+    fs::path mock_thp = fs::current_path() / "test_mock_thp";
+    std::error_code ec;
+    fs::remove_all(mock_thp, ec);
+    fs::create_directories(mock_thp / "khugepaged", ec);
+
+    fs::path defrag_p = mock_thp / "defrag";
+    fs::path khp_defrag_p = mock_thp / "khugepaged" / "defrag";
+
+    write_file_string(defrag_p, "[always] madvise never");
+    write_file_string(khp_defrag_p, "1");
+
+    TransparentHugepageTweak tweak(mock_thp);
+    assert(tweak.probe() == true);
+    assert(tweak.name() == "transparent_hugepage");
+    assert(tweak.get_current_value() == "always");
+
+    // Apply
+    bool ok_apply = tweak.apply(Profile::Aggressive);
+    assert(ok_apply == true);
+    assert(*read_file_string(defrag_p) == "madvise");
+    assert(*read_file_string(khp_defrag_p) == "0");
+
+    // Revert
+    bool ok_revert = tweak.revert();
+    assert(ok_revert == true);
+    assert(*read_file_string(defrag_p) == "always");
+    assert(*read_file_string(khp_defrag_p) == "1");
+
+    fs::remove_all(mock_thp, ec);
+    std::cout << "[PASS] test_thp_tweak_mock\n";
+}
+
 void test_conflict_detector() {
     using namespace zenith;
 
@@ -338,6 +403,8 @@ int main() {
     test_zram_swap_mock();
     test_sysctl_tweak_mock();
     test_uclamp_and_timer_slack();
+    test_cstate_latency_mock();
+    test_thp_tweak_mock();
     test_dry_run_and_registry();
     test_per_game_profile();
     test_conflict_detector();

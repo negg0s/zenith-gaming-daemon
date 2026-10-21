@@ -1,0 +1,15 @@
+# Helldivers 2 Zenith Game Profile
+name = "Helldivers 2"
+appid = 553850
+executables = ["helldivers2.exe"]
+
+profile = "aggressive"
+ccd_preference = "vcache"
+pin_render_threads = true
+
+realtime_priority = true
+io_class = "realtime"
+
+gpu_performance = "high"
+pipewire_quantum = 64
+network_cake = true

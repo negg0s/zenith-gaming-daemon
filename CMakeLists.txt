@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(zenith-gaming-daemon VERSION 1.1.0 LANGUAGES CXX)
+project(zenith-gaming-daemon VERSION 1.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -59,6 +59,8 @@ set(ZENITH_SOURCES
     src/tweaks/usb_autosuspend_tweak.cpp
     src/tweaks/zram_swap_tweak.cpp
     src/tweaks/sysctl_tweak.cpp
+    src/tweaks/cstate_latency_tweak.cpp
+    src/tweaks/transparent_hugepage_tweak.cpp
     src/tweaks/tweak_registry.cpp
     src/conflict_detector.cpp
     src/per_game_profile.cpp
@@ -197,9 +199,9 @@ set(CPACK_PACKAGE_NAME "zenith-gaming-daemon")
 set(CPACK_PACKAGE_VENDOR "Zenith Project")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ultra-low latency Linux gaming optimizer daemon (C++20)")
 set(CPACK_PACKAGE_VERSION_MAJOR 1)
-set(CPACK_PACKAGE_VERSION_MINOR 1)
+set(CPACK_PACKAGE_VERSION_MINOR 2)
 set(CPACK_PACKAGE_VERSION_PATCH 0)
-set(CPACK_PACKAGE_VERSION "1.1.0")
+set(CPACK_PACKAGE_VERSION "1.2.0")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 

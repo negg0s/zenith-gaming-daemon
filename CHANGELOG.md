@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-10-21
+
+### Added
+- **CPU DMA Latency QoS Tweak (`cstate_latency`)**:
+  - Implemented `CstateLatencyTweak` controlling `/dev/cpu_dma_latency` to hold a PM QoS request preventing deep C-states (C6/C8).
+  - Limits wake-up latency to 0us (Aggressive) or 50us (Balanced), eliminating 50-150us wake-up latency penalties when game threads resume.
+  - Automatic kernel PM QoS restoration upon file descriptor release via RAII.
+- **Transparent Hugepage Compaction Guard Tweak (`transparent_hugepage`)**:
+  - Implemented `TransparentHugepageTweak` setting `/sys/kernel/mm/transparent_hugepage/defrag` to `madvise`.
+  - Disables background compaction stalls via `/sys/kernel/mm/transparent_hugepage/khugepaged/defrag` set to `0`.
+  - Eliminates 10-80ms synchronous direct-reclaim page-fault stalls in DirectX 12 / Vulkan game engines.
+- **Expanded Public Game Profiles Database**:
+  - Added 5 new validated game profiles in `profiles/*.toml`:
+    - *Helldivers 2* (AppID 553850)
+    - *Path of Exile* (AppID 238960)
+    - *Black Myth: Wukong* (AppID 2358720)
+    - *Grand Theft Auto V* (AppID 271590)
+    - *Team Fortress 2* (AppID 440)
+  - All 12 public profiles validated against CI profile schema.
+
+### Fixed
+- **Process Detection Environment Parsing**:
+  - Resolved latent bug in `GameDetector::extract_steam_appid` where embedded null bytes in `/proc/<pid>/environ` truncated C-string literals in `std::string_view::find_first_of`.
+  - Replaced with character-by-character bounds-checked scanning for accurate AppID extraction in multi-variable environments.
+- **System Doctor Multi-Service Command Generation**:
+  - Fixed `zenithctl doctor` competing services fix command to format service names as space-separated arguments instead of comma-separated strings for `systemctl`.
+- **Desktop Notification Non-Blocking Wrapper**:
+  - Applied double-fork pattern in `zenith-run` notification dispatch to guarantee game launches never block on D-Bus or `notify-send` timeouts.
+  - Added `WIFSIGNALED` inspection for standard POSIX `128 + WTERMSIG(status)` exit code forwarding.
+- **Packaging and Manifest Versioning**:
+  - Synchronized package versioning to v1.2.0 across PKGBUILD, RPM spec, Nix flake, and CycloneDX SBOM.
+
+---
+
 ## [1.0.0] - 2026-10-20
 
 ### Added

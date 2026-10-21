@@ -53,13 +53,13 @@ yay -S zenith-gaming-daemon
 
 ### Debian / Ubuntu (`.deb`)
 ```bash
-wget https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.1.0-Linux.deb
-sudo dpkg -i zenith-gaming-daemon-1.1.0-Linux.deb
+wget https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.2.0-Linux.deb
+sudo dpkg -i zenith-gaming-daemon-1.2.0-Linux.deb
 ```
 
 ### Fedora / RHEL / Bazzite (`.rpm`)
 ```bash
-sudo dnf install https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.1.0-Linux.rpm
+sudo dnf install https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.2.0-Linux.rpm
 ```
 
 ### NixOS (`flake.nix`)
