@@ -1,5 +1,10 @@
 # Zenith Gaming Daemon
 
+[![CI](https://github.com/negg0s/zenith-gaming-daemon/actions/workflows/ci.yml/badge.svg)](https://github.com/negg0s/zenith-gaming-daemon/actions/workflows/ci.yml)
+[![CodeQL Analysis](https://github.com/negg0s/zenith-gaming-daemon/actions/workflows/codeql.yml/badge.svg)](https://github.com/negg0s/zenith-gaming-daemon/actions/workflows/codeql.yml)
+[![Release](https://img.shields.io/github/v/release/negg0s/zenith-gaming-daemon?include_prereleases&color=blue)](https://github.com/negg0s/zenith-gaming-daemon/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Linux game session optimizer for Arch, CachyOS, Fedora, Ubuntu and SteamOS. It detects a running game, applies a profile, and restores the previous system state when the game exits.
 
 The current source version is 1.6.0. Packages are published on the [Releases](https://github.com/negg0s/zenith-gaming-daemon/releases) page.
