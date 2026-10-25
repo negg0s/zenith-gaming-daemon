@@ -231,7 +231,15 @@ DoctorItem Doctor::check_pipewire() {
 
 #if defined(__linux__)
     const char* xdg_run = std::getenv("XDG_RUNTIME_DIR");
-    std::string pw_socket = (xdg_run ? std::string(xdg_run) : "/run/user/1000") + "/pipewire-0";
+    std::string runtime_dir = "/run/user/1000";
+    if (xdg_run) {
+        std::string candidate(xdg_run);
+        if (candidate.find("..") == std::string::npos &&
+            (candidate.rfind("/run/", 0) == 0 || candidate.rfind("/tmp/", 0) == 0)) {
+            runtime_dir = candidate;
+        }
+    }
+    std::string pw_socket = runtime_dir + "/pipewire-0";
     std::ifstream socket_test(pw_socket);
     if (socket_test.good()) {
         item.status = DoctorStatus::Pass;
