@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-10-25
+
+### Added
+- **AMD P-State Policy Support**: added AMD P-State performance policy tuning.
+- **Network Low-Latency Sysctls**: tuned network stack for low latency.
+- **Completion Alias**: added shell completion alias support.
+- **zenith-run Enhancements**: inject glibc/Proton low-latency runtime hints and add `vm.max_map_count` check in doctor.
+
+### Changed
+- Updated documentation (README) with ultra profile and Steam launch options.
+
+---
+
 ## [1.5.0] - 2026-10-21
 
 ### Added
