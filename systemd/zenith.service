@@ -1,6 +1,6 @@
 [Unit]
 Description=Zenith Gaming Daemon - Ultra-low Latency Game Optimizer
-Documentation=https://github.com/NEGG0/zenith-gaming-daemon
+Documentation=https://github.com/negg0s/zenith-gaming-daemon
 After=multi-user.target pipewire.service
 
 [Service]

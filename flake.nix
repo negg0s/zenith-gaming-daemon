@@ -37,7 +37,7 @@
 
           meta = with pkgs.lib; {
             description = "Ultra-low latency Linux gaming optimizer daemon (C++20)";
-            homepage = "https://github.com/NEGG0/zenith-gaming-daemon";
+            homepage = "https://github.com/negg0s/zenith-gaming-daemon";
             license = licenses.mit;
             platforms = platforms.linux;
             maintainers = [ ];

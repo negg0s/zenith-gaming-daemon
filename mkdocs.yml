@@ -1,9 +1,9 @@
 site_name: Zenith Gaming Daemon
-site_url: https://negg0.github.io/zenith-gaming-daemon/
+site_url: https://negg0s.github.io/zenith-gaming-daemon/
 site_description: Ultra-low latency Linux gaming optimizer daemon (C++20)
-site_author: Emir (NEGG0)
-repo_name: NEGG0/zenith-gaming-daemon
-repo_url: https://github.com/NEGG0/zenith-gaming-daemon
+site_author: Emir (negg0s)
+repo_name: negg0s/zenith-gaming-daemon
+repo_url: https://github.com/negg0s/zenith-gaming-daemon
 edit_uri: edit/main/docs/
 
 theme:

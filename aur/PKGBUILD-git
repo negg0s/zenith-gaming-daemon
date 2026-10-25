@@ -1,10 +1,10 @@
-# Maintainer: Emir (NEGG0) <rokmit599@gmail.com>
+# Maintainer: Emir (negg0s) <rokmit599@gmail.com>
 pkgname=zenith-gaming-daemon-git
 pkgver=1.2.0.r0.g1234567
 pkgrel=1
 pkgdesc="Ultra-low latency Linux gaming optimizer daemon (VCS / Development branch) (C++20)"
 arch=('x86_64')
-url="https://github.com/NEGG0/zenith-gaming-daemon"
+url="https://github.com/negg0s/zenith-gaming-daemon"
 license=('MIT')
 depends=('glibc' 'gcc-libs')
 optdepends=(
@@ -17,7 +17,7 @@ provides=('zenith-gaming-daemon')
 conflicts=('zenith-gaming-daemon')
 backup=('etc/zenith/zenith.conf' 'etc/zenith/profiles.conf')
 install="zenith.install"
-source=("git+https://github.com/NEGG0/zenith-gaming-daemon.git")
+source=("git+https://github.com/negg0s/zenith-gaming-daemon.git")
 sha256sums=('SKIP')
 
 pkgver() {

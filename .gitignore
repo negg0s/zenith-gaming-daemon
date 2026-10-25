@@ -1,5 +1,7 @@
 build/
+build-release/
 bin/
+dist/
 *.o
 *.obj
 *.a

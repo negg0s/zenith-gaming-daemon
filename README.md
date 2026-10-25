@@ -2,7 +2,7 @@
 
 Linux game session optimizer for Arch, CachyOS, Fedora, Ubuntu and SteamOS. It detects a running game, applies a profile, and restores the previous system state when the game exits.
 
-The current source version is 1.5.0. Packages are published on the [Releases](https://github.com/NEGG0/zenith-gaming-daemon/releases) page.
+The current source version is 1.6.0. Packages are published on the [Releases](https://github.com/negg0s/zenith-gaming-daemon/releases) page.
 
 ## What it does
 
@@ -23,11 +23,9 @@ Every change is session-scoped. The daemon does not write persistent sysctl or s
 - It does not inject libraries, read game memory, trace game threads or modify game files.
 - It does not guarantee anti-cheat compatibility. The daemon uses normal kernel and OS interfaces, but anti-cheat vendors make their own decisions. Check the rules for each game.
 
-## Measured results
+## Benchmarks
 
-The project benchmark notes report 15 to 35 percent better frame-time consistency in some CPU-bound and cache-sensitive scenes. That is a frame-pacing result, not a promise of 30 percent more average FPS. Results depend on the game, CPU, GPU, kernel and background load.
-
-Run your own before and after captures with MangoHud, PresentMon or an equivalent frame-time logger. Compare 1 percent and 0.1 percent lows, not only average FPS.
+Benchmark notes and methodology are documented in [docs/BENCHMARKS.md](docs/BENCHMARKS.md). Results vary by game, hardware, kernel and background load. Run your own before and after captures with MangoHud, PresentMon or an equivalent frame-time logger.
 
 ## Requirements
 
@@ -82,7 +80,7 @@ Use the flake in the repository. The module name and options are documented in `
 ### Build from source
 
 ```bash
-git clone https://github.com/NEGG0/zenith-gaming-daemon.git
+git clone https://github.com/negg0s/zenith-gaming-daemon.git
 cd zenith-gaming-daemon
 cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
 cmake --build build -j"$(nproc)"

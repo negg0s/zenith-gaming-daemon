@@ -47,7 +47,7 @@ This anonymizes your username and hostname while providing vital CPU topology, k
 ### Building & Running Tests
 ```bash
 # Clone repository
-git clone https://github.com/NEGG0/zenith-gaming-daemon.git
+git clone https://github.com/negg0s/zenith-gaming-daemon.git
 cd zenith-gaming-daemon
 
 # Configure with Clang and Sanitizers (ASan + UBSan)

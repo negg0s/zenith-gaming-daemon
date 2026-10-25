@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        Ultra-low latency Linux gaming optimizer daemon (C++20)
 
 License:        MIT
-URL:            https://github.com/NEGG0/zenith-gaming-daemon
+URL:            https://github.com/negg0s/zenith-gaming-daemon
 Source0:        %{name}-%{version}.tar.gz
 
 BuildRequires:  cmake >= 3.22
@@ -58,8 +58,8 @@ fi
 %{_unitdir}/zenith.service
 
 %changelog
-* Wed Oct 21 2026 Emir (NEGG0) <rokmit599@gmail.com> - 1.2.0-1
+* Wed Oct 21 2026 Emir (negg0s) <rokmit599@gmail.com> - 1.2.0-1
 - Feature release v1.2.0: CPU DMA latency QoS, THP compaction guard, expanded game profiles.
 
-* Tue Oct 20 2026 Emir (NEGG0) <rokmit599@gmail.com> - 1.1.0-1
+* Tue Oct 20 2026 Emir (negg0s) <rokmit599@gmail.com> - 1.1.0-1
 - Production release v1.1.0 with full UX, TUI dashboard, and rollback guarantees.

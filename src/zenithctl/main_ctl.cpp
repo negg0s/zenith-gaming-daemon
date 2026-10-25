@@ -76,8 +76,8 @@ int main(int argc, char* argv[]) {
 
     if (cmd == "version" || cmd == "--version" || cmd == "-v") {
         std::cout << "zenithctl version " << zenith::ZENITH_VERSION << " (C++20 Linux Ultra-Low Latency Daemon)\n"
-                  << "Repository: https://github.com/NEGG0/zenith-gaming-daemon\n"
-                  << "Docs: https://github.com/NEGG0/zenith-gaming-daemon/blob/main/docs/ARCHITECTURE.md\n";
+                  << "Repository: https://github.com/negg0s/zenith-gaming-daemon\n"
+                  << "Docs: https://github.com/negg0s/zenith-gaming-daemon/blob/main/docs/ARCHITECTURE.md\n";
         return 0;
     }
 

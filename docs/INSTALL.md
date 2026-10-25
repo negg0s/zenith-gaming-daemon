@@ -11,7 +11,7 @@ Zenith Gaming Daemon provides native pre-compiled packages for all major Linux d
 | **Arch Linux / CachyOS** | AUR (paru / yay) | `paru -S zenith-gaming-daemon` | Tier 1 (Recommended) |
 | **Debian / Ubuntu / Pop!_OS** | Native `.deb` | `sudo dpkg -i zenith-gaming-daemon-*.deb` | Tier 1 (Validated LTS) |
 | **Fedora / RHEL / Bazzite** | Native `.rpm` | `sudo rpm -ivh zenith-gaming-daemon-*.rpm` | Tier 1 (Validated F40+) |
-| **NixOS** | Nix Flake | `nix profile install github:NEGG0/zenith-gaming-daemon` | Tier 1 (Flake Module) |
+| **NixOS** | Nix Flake | `nix profile install github:negg0s/zenith-gaming-daemon` | Tier 1 (Flake Module) |
 | **Any Linux (Kernel ≥ 6.6)** | Build from Source | `cmake -B build && cmake --build build` | Supported |
 
 ---
@@ -44,14 +44,14 @@ paru -S zenith-gaming-daemon-git
 
 ## 3. Debian, Ubuntu & Pop!_OS (`.deb`)
 
-Download the latest `.deb` release package from [GitHub Releases](https://github.com/NEGG0/zenith-gaming-daemon/releases):
+Download the latest `.deb` release package from [GitHub Releases](https://github.com/negg0s/zenith-gaming-daemon/releases):
 
 ```bash
 # Download latest release
-wget https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.1.0-Linux.deb
+wget https://github.com/negg0s/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.1.0-Linux.deb
 
 # Verify checksum
-wget https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/SHA256SUMS
+wget https://github.com/negg0s/zenith-gaming-daemon/releases/download/v1.1.0/SHA256SUMS
 sha256sum --ignore-missing -c SHA256SUMS
 
 # Install package and resolve dependencies
@@ -66,10 +66,10 @@ Download the latest `.rpm` release package:
 
 ```bash
 # Download latest release
-wget https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.1.0-Linux.rpm
+wget https://github.com/negg0s/zenith-gaming-daemon/releases/download/v1.1.0/zenith-gaming-daemon-1.1.0-Linux.rpm
 
 # Verify checksum
-wget https://github.com/NEGG0/zenith-gaming-daemon/releases/download/v1.1.0/SHA256SUMS
+wget https://github.com/negg0s/zenith-gaming-daemon/releases/download/v1.1.0/SHA256SUMS
 sha256sum --ignore-missing -c SHA256SUMS
 
 # Install using dnf or rpm
@@ -91,7 +91,7 @@ Add Zenith to your flake inputs:
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    zenith.url = "github:NEGG0/zenith-gaming-daemon";
+    zenith.url = "github:negg0s/zenith-gaming-daemon";
   };
 
   outputs = { self, nixpkgs, zenith, ... }: {
@@ -115,7 +115,7 @@ Add Zenith to your flake inputs:
 
 ### Ad-hoc CLI Run
 ```bash
-nix run github:NEGG0/zenith-gaming-daemon -- status
+nix run github:negg0s/zenith-gaming-daemon -- status
 ```
 
 ---
@@ -131,7 +131,7 @@ nix run github:NEGG0/zenith-gaming-daemon -- status
 ### Build & Installation Steps
 ```bash
 # Clone the repository
-git clone https://github.com/NEGG0/zenith-gaming-daemon.git
+git clone https://github.com/negg0s/zenith-gaming-daemon.git
 cd zenith-gaming-daemon
 
 # Configure with CMake (Release mode)
