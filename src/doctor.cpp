@@ -5,12 +5,14 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <cstdio>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 
 #if defined(__linux__)
 #include <sys/utsname.h>
+#include <unistd.h>
 #include <unistd.h>
 #endif
 
@@ -230,16 +232,10 @@ DoctorItem Doctor::check_pipewire() {
     item.name = "pipewire_audio";
 
 #if defined(__linux__)
-    const char* xdg_run = std::getenv("XDG_RUNTIME_DIR");
-    std::string runtime_dir = "/run/user/1000";
-    if (xdg_run) {
-        std::string candidate(xdg_run);
-        if (candidate.find("..") == std::string::npos &&
-            (candidate.rfind("/run/", 0) == 0 || candidate.rfind("/tmp/", 0) == 0)) {
-            runtime_dir = candidate;
-        }
-    }
-    std::string pw_socket = runtime_dir + "/pipewire-0";
+    uid_t uid = ::getuid();
+    char runtime_dir[64];
+    std::snprintf(runtime_dir, sizeof(runtime_dir), "/run/user/%u", static_cast<unsigned>(uid));
+    std::string pw_socket = std::string(runtime_dir) + "/pipewire-0";
     std::ifstream socket_test(pw_socket);
     if (socket_test.good()) {
         item.status = DoctorStatus::Pass;
