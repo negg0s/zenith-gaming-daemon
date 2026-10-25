@@ -55,7 +55,7 @@ bool DaemonLock::acquire() {
     }
 
 #ifdef __linux__
-    fd_ = ::open(lock_path_.string().c_str(), O_RDWR | O_CREAT | O_CLOEXEC, 0644);
+    fd_ = ::open(lock_path_.string().c_str(), O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW, 0600);
     if (fd_ < 0) {
         ZENITH_LOG_ERROR("Unable to open lock file: " + lock_path_.string());
         return false;

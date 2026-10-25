@@ -293,6 +293,28 @@ void ZenithEngine::print_status() const {
     std::cout << "==========================================================\n\n";
 }
 
+static std::string json_escape(const std::string& input) {
+    std::string out;
+    out.reserve(input.size() + 8);
+    for (char c : input) {
+        switch (c) {
+            case '"': out += "\\\""; break;
+            case '\\': out += "\\\\"; break;
+            case '\n': out += "\\n"; break;
+            case '\r': out += "\\r"; break;
+            case '\t': out += "\\t"; break;
+            default:
+                if (static_cast<unsigned char>(c) < 0x20) {
+                    out += '?';
+                } else {
+                    out += c;
+                }
+                break;
+        }
+    }
+    return out;
+}
+
 std::string ZenithEngine::build_status_json() const {
     auto sp = const_cast<PressureMonitor&>(pressure_monitor_).sample();
 
@@ -303,7 +325,7 @@ std::string ZenithEngine::build_status_json() const {
        << "  \"profile\": \"" << profile_to_string(config_.active_profile) << "\",\n"
        << "  \"safe_mode\": " << (safe_mode_.is_safe_mode_active() ? "true" : "false") << ",\n"
        << "  \"is_game_active\": " << (active_game_.has_value() ? "true" : "false") << ",\n"
-       << "  \"game_name\": \"" << (active_game_.has_value() ? active_game_->name : "None") << "\",\n"
+       << "  \"game_name\": \"" << (active_game_.has_value() ? json_escape(active_game_->name) : "None") << "\",\n"
        << "  \"game_pid\": " << (active_game_.has_value() ? active_game_->pid : 0) << ",\n"
        << "  \"total_cores\": " << topology_.total_cores() << ",\n"
        << "  \"gaming_cores\": \"" << topology_.to_cpuset_string(topology_.get_gaming_cores()) << "\",\n"

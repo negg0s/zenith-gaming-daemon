@@ -47,18 +47,18 @@ std::pair<fs::path, std::string> SecureIo::split_trusted_path(const fs::path& ab
     };
 
     std::string raw_str = absolute_path.string();
-    if (raw_str.find("..") != std::string::npos) {
+    if (raw_str.find('\0') != std::string::npos || raw_str.find("..") != std::string::npos) {
         return { "", "" };
     }
 
     std::string abs_str = absolute_path.lexically_normal().string();
-    if (abs_str.find("..") != std::string::npos) {
+    if (abs_str.find('\0') != std::string::npos || abs_str.find("..") != std::string::npos) {
         return { "", "" };
     }
 
     for (const auto& base : TRUSTED_BASES) {
         std::string base_str = base.string();
-        if (abs_str.starts_with(base_str)) {
+        if (abs_str == base_str || abs_str.starts_with(base_str + "/")) {
             std::string sub = abs_str.substr(base_str.size());
             while (!sub.empty() && (sub.front() == '/' || sub.front() == '\\')) {
                 sub.erase(0, 1);
@@ -67,16 +67,18 @@ std::pair<fs::path, std::string> SecureIo::split_trusted_path(const fs::path& ab
         }
     }
 
-    // Default fallback: parent directory as base, filename as subpath
-    return { absolute_path.parent_path(), absolute_path.filename().string() };
+    // Reject untrusted paths instead of falling back to an arbitrary base.
+    return { "", "" };
 }
 
 int SecureIo::open_beneath(const fs::path& base_dir,
                            const std::string& relative_path,
                            int flags,
                            mode_t mode) {
-    if (relative_path.empty() || relative_path.find("..") != std::string::npos) {
-        ZENITH_LOG_ERROR("Security violation: path traversal rejected in relative path: " + relative_path);
+    if (relative_path.empty() || relative_path.find('\0') != std::string::npos ||
+        relative_path.find("..") != std::string::npos ||
+        relative_path.front() == '/' || relative_path.front() == '\\') {
+        ZENITH_LOG_ERROR("Security violation: unsafe relative path rejected: " + relative_path);
         return -1;
     }
 

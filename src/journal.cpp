@@ -118,9 +118,22 @@ std::string StateJournal::serialize_json() const {
         ss << "    {\n";
         ss << "      \"id\": " << e.id << ",\n";
         ss << "      \"type\": \"" << mutation_type_to_string(e.type) << "\",\n";
-        ss << "      \"target_path\": \"" << e.target_path << "\",\n";
-        ss << "      \"original_value\": \"" << e.original_value << "\",\n";
-        ss << "      \"target_value\": \"" << e.target_value << "\",\n";
+        auto escape = [](const std::string& s) {
+            std::string out;
+            for (char c : s) {
+                if (c == '"') out += "\\\"";
+                else if (c == '\\') out += "\\\\";
+                else if (c == '\n') out += "\\n";
+                else if (c == '\r') out += "\\r";
+                else if (c == '\t') out += "\\t";
+                else if (static_cast<unsigned char>(c) < 0x20) out += '?';
+                else out += c;
+            }
+            return out;
+        };
+        ss << "      \"target_path\": \"" << escape(e.target_path) << "\",\n";
+        ss << "      \"original_value\": \"" << escape(e.original_value) << "\",\n";
+        ss << "      \"target_value\": \"" << escape(e.target_value) << "\",\n";
         ss << "      \"state\": \"" << entry_state_to_string(e.state) << "\",\n";
         ss << "      \"timestamp\": \"" << e.timestamp << "\"\n";
         ss << "    }" << (i + 1 < entries_.size() ? "," : "") << "\n";
@@ -176,6 +189,11 @@ bool StateJournal::deserialize_json(std::string_view json_str) {
 
         entry.type = mutation_type_from_string(extract_json_field(block, "type"));
         entry.target_path = extract_json_field(block, "target_path");
+        if (entry.target_path.find("..") != std::string::npos ||
+            entry.target_path.find('\0') != std::string::npos) {
+            // Reject tampered journal entries with traversal attempts.
+            continue;
+        }
         entry.original_value = extract_json_field(block, "original_value");
         entry.target_value = extract_json_field(block, "target_value");
         entry.state = entry_state_from_string(extract_json_field(block, "state"));

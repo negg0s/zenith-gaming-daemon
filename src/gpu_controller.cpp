@@ -13,9 +13,22 @@ namespace zenith {
 
 RealNvmlDriver::RealNvmlDriver() {
 #ifdef __linux__
-    lib_handle_ = dlopen("libnvidia-ml.so.1", RTLD_NOW);
+    const char* nvml_paths[] = {
+        "/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1",
+        "/usr/lib64/libnvidia-ml.so.1",
+        "/usr/lib/libnvidia-ml.so.1",
+        "/usr/lib/x86_64-linux-gnu/libnvidia-ml.so",
+        "/usr/lib64/libnvidia-ml.so",
+        "/usr/lib/libnvidia-ml.so"
+    };
+    for (const char* path : nvml_paths) {
+        lib_handle_ = dlopen(path, RTLD_NOW | RTLD_NOLOAD);
+        if (!lib_handle_) lib_handle_ = dlopen(path, RTLD_NOW);
+        if (lib_handle_) break;
+    }
     if (!lib_handle_) {
-        lib_handle_ = dlopen("libnvidia-ml.so", RTLD_NOW);
+        // Fall back to the system loader only if no absolute path matched.
+        lib_handle_ = dlopen("libnvidia-ml.so.1", RTLD_NOW);
     }
 
     if (lib_handle_) {

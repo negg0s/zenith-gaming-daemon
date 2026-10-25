@@ -91,7 +91,7 @@ bool SocketServer::handle_connection(int client_fd) {
         return false;
     }
 
-    if (static_cast<size_t>(bytes_read) > MAX_MESSAGE_SIZE) {
+    if (static_cast<size_t>(bytes_read) >= MAX_MESSAGE_SIZE) {
         ZENITH_LOG_WARN("Payload exceeded MAX_MESSAGE_SIZE (4KB). Dropping connection.");
         ::close(client_fd);
         return false;
@@ -132,6 +132,13 @@ bool SocketServer::start() {
     }
 
     struct sockaddr_un addr{};
+    if (socket_path_.string().size() >= sizeof(addr.sun_path)) {
+        ZENITH_LOG_ERROR("UNIX socket path too long: " + socket_path_.string());
+        ::close(server_fd_);
+        server_fd_ = -1;
+        return false;
+    }
+
     addr.sun_family = AF_UNIX;
     std::strncpy(addr.sun_path, socket_path_.string().c_str(), sizeof(addr.sun_path) - 1);
 
