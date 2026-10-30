@@ -158,6 +158,11 @@ bool ZenithEngine::activate(const DetectedGame& game) {
     if (config_.sched_ext_enabled) {
         if (sched_ext_.start_scheduler(config_.sched_ext_scheduler)) {
             ZENITH_LOG_INFO("sched_ext scheduler active: " + config_.sched_ext_scheduler);
+        } else if (sched_ext_.is_active()) {
+            // Someone already loaded a scheduler (scx_loader or a manual run).
+            // That is a healthy state, not a failure, so do not warn.
+            ZENITH_LOG_INFO("sched_ext already active (" + sched_ext_.get_active_scheduler() +
+                            "); leaving it untouched.");
         } else {
             ZENITH_LOG_WARN("sched_ext scheduler was not started; continuing without it.");
         }

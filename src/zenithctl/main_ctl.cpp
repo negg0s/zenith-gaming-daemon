@@ -238,11 +238,16 @@ int main(int argc, char* argv[]) {
         }
 
         if (sub == "stop") {
-            if (!tuner.stop_scheduler()) {
-                std::cerr << "Could not stop the scheduler.\n";
+            std::string name = tuner.get_active_scheduler();
+            if (name == "disabled" || name.empty()) {
+                std::cout << "No sched_ext scheduler is active.\n";
+                return 0;
+            }
+            if (!tuner.stop_scheduler(name)) {
+                std::cerr << "Could not stop " << name << ".\n";
                 return 1;
             }
-            std::cout << "Scheduler stopped\n";
+            std::cout << "Stopped " << name << "\n";
             return 0;
         }
 
