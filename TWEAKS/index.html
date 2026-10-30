@@ -1,0 +1,1922 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Ultra-low latency Linux gaming optimizer daemon (C++20)">
+      
+      
+        <meta name="author" content="Emir (negg0s)">
+      
+      
+        <link rel="canonical" href="https://negg0s.github.io/zenith-gaming-daemon/TWEAKS/">
+      
+      
+        <link rel="prev" href="../PROFILES/">
+      
+      
+        <link rel="next" href="../ARCHITECTURE/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Tweaks Catalog - Zenith Gaming Daemon</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#zenith-gaming-daemon-kernel-subsystem-tweaks-registry" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Zenith Gaming Daemon" class="md-header__button md-logo" aria-label="Zenith Gaming Daemon" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Zenith Gaming Daemon
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Tweaks Catalog
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/negg0s/zenith-gaming-daemon" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    negg0s/zenith-gaming-daemon
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../INSTALL/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../CONFIGURATION/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Configuration
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../PROFILES/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Profiles & Tuning
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Tweaks Catalog
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../ARCHITECTURE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../ANTI_CHEAT/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Anti-Cheat Safety
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../BENCHMARKS/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Benchmarks
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../THREAT_MODEL/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Threat Model
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../TROUBLESHOOTING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Troubleshooting
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../FAQ/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ADDING_A_TWEAK/" class="md-tabs__link">
+          
+  
+  
+  Developer Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ru/" class="md-tabs__link">
+          
+  
+  
+  Документация (RU)
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Zenith Gaming Daemon" class="md-nav__button md-logo" aria-label="Zenith Gaming Daemon" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Zenith Gaming Daemon
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/negg0s/zenith-gaming-daemon" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    negg0s/zenith-gaming-daemon
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../INSTALL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONFIGURATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PROFILES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiles & Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tweaks Catalog
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tweaks Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-profiles-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Profiles Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-exhaustive-tweaks-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Exhaustive Tweaks Registry
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Exhaustive Tweaks Registry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tweak-01-split_lock_mitigate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 01: split_lock_mitigate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-02-transparent_hugepage_mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 02: transparent_hugepage_mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-03-transparent_hugepage_defrag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 03: transparent_hugepage_defrag
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-04-compaction_proactiveness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 04: compaction_proactiveness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-05-watermark_boost_factor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 05: watermark_boost_factor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-06-swappiness_and_page_cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 06: swappiness_and_page_cluster
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-07-cpu_energy_performance_preference-epp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 07: cpu_energy_performance_preference (EPP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-08-cgroup_soft_prioritization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 08: cgroup_soft_prioritization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-09-sched_uclamp_min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 09: sched_uclamp_min
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-10-timer_slack_ns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 10: timer_slack_ns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-11-nvme_io_scheduler_and_readahead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 11: nvme_io_scheduler_and_readahead
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-12-usb_autosuspend_inhibitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 12: usb_autosuspend_inhibitor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-13-rt_priority_and_watchdog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 13: rt_priority_and_watchdog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-14-pipewire_quantum_tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 14: pipewire_quantum_tuning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-15-gpu_performance_mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 15: gpu_performance_mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-16-network_qdisc_cake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 16: network_qdisc_cake
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-17-cstate_latency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 17: cstate_latency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-18-transparent_hugepage_defrag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 18: transparent_hugepage_defrag
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ANTI_CHEAT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Anti-Cheat Safety
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../BENCHMARKS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../THREAT_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Threat Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TROUBLESHOOTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FAQ/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ADDING_A_TWEAK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to Add a Tweak
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ADDING_A_GAME_PROFILE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Game Profiles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Документация (RU)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Документация (RU)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Главная
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-profiles-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Profiles Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-exhaustive-tweaks-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Exhaustive Tweaks Registry
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Exhaustive Tweaks Registry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tweak-01-split_lock_mitigate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 01: split_lock_mitigate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-02-transparent_hugepage_mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 02: transparent_hugepage_mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-03-transparent_hugepage_defrag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 03: transparent_hugepage_defrag
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-04-compaction_proactiveness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 04: compaction_proactiveness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-05-watermark_boost_factor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 05: watermark_boost_factor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-06-swappiness_and_page_cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 06: swappiness_and_page_cluster
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-07-cpu_energy_performance_preference-epp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 07: cpu_energy_performance_preference (EPP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-08-cgroup_soft_prioritization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 08: cgroup_soft_prioritization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-09-sched_uclamp_min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 09: sched_uclamp_min
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-10-timer_slack_ns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 10: timer_slack_ns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-11-nvme_io_scheduler_and_readahead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 11: nvme_io_scheduler_and_readahead
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-12-usb_autosuspend_inhibitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 12: usb_autosuspend_inhibitor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-13-rt_priority_and_watchdog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 13: rt_priority_and_watchdog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-14-pipewire_quantum_tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 14: pipewire_quantum_tuning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-15-gpu_performance_mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 15: gpu_performance_mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-16-network_qdisc_cake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 16: network_qdisc_cake
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-17-cstate_latency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 17: cstate_latency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tweak-18-transparent_hugepage_defrag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tweak 18: transparent_hugepage_defrag
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="zenith-gaming-daemon-kernel-subsystem-tweaks-registry">Zenith Gaming Daemon: Kernel &amp; Subsystem Tweaks Registry</h1>
+<blockquote>
+<p><strong>Document Version</strong>: 1.0.0<br />
+<strong>Status</strong>: Living Architectural Specification<br />
+<strong>Rule</strong>: Every tweak must be justified, documented with kernel paths, evaluated for risks, scoped to profiles, and tagged <code>[Эффект не измерен]</code> until empirical benchmark verification in Stage 9.</p>
+</blockquote>
+<hr />
+<h2 id="1-profiles-architecture">1. Profiles Architecture</h2>
+<p>Zenith supports three operational profiles that dictate which tweaks are active and their tuning bounds:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Profile</th>
+<th style="text-align: left;">Philosophy</th>
+<th style="text-align: left;">Risk Profile</th>
+<th style="text-align: left;">Target Systems</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>safe</code></strong></td>
+<td style="text-align: left;">Near-zero risk; zero hardware clock overrides; soft cgroup prioritization; latency-tolerant defaults.</td>
+<td style="text-align: left;">Near-zero risk of crashes, overheating, or starvation.</td>
+<td style="text-align: left;">Battery devices, laptops, daily workstations, unstable hardware.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>balanced</code></strong> (Default)</td>
+<td style="text-align: left;">High-performance latency optimization without destructive overrides; soft cgroups; EPP <code>balance_performance</code>; THP <code>madvise</code>; NVMe <code>none</code>.</td>
+<td style="text-align: left;">Low risk; tested across standard desktop environments.</td>
+<td style="text-align: left;">Primary desktop gaming rigs running Arch Linux, CachyOS, or SteamOS.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>aggressive</code></strong></td>
+<td style="text-align: left;">Maximum throughput and minimum frame latency; split-lock penalty disabled; GPU clock lock; <code>SCHED_RR</code> priority with hardware watchdog; aggressive PipeWire quantum (32/64).</td>
+<td style="text-align: left;">Elevated thermals, power consumption, potential stutter if misconfigured.</td>
+<td style="text-align: left;">Dedicated competitive gaming desktop PCs with adequate cooling.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-exhaustive-tweaks-registry">2. Exhaustive Tweaks Registry</h2>
+<h3 id="tweak-01-split_lock_mitigate">Tweak 01: <code>split_lock_mitigate</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/proc/sys/kernel/split_lock_mitigate</code></li>
+<li><strong>Min Kernel</strong>: Linux 5.19+ (introduced via x86 bus lock detection patchsets)</li>
+<li><strong>Mechanism</strong>: The Linux kernel intentionally penalizes (slows down via sleeping/signals) threads that execute unaligned atomic operations crossing cache line boundaries ("split locks"), which would otherwise lock the entire memory bus. Setting this to <code>0</code> disables kernel-induced latency penalties.</li>
+<li><strong>Pros</strong>: Eliminates micro-stutters and frame drops in legacy Windows games running under Proton/Wine that execute split locks.</li>
+<li><strong>Risks</strong>: An application executing split locks at scale can saturate memory bus bandwidth, hurting overall system throughput.</li>
+<li><strong>Where it hurts</strong>: Multi-threaded production servers or systems running adversarial code.</li>
+<li><strong>Default</strong>: <code>0</code> in <code>aggressive</code>, <code>1</code> (untouched) in <code>safe</code> and <code>balanced</code>.</li>
+<li><strong>Profiles</strong>: <code>aggressive</code> only.</li>
+<li><strong>Source</strong>: Linux Kernel Documentation (<code>Documentation/admin-guide/sysctl/kernel.rst</code>).</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-02-transparent_hugepage_mode">Tweak 02: <code>transparent_hugepage_mode</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/sys/kernel/mm/transparent_hugepage/enabled</code></li>
+<li><strong>Min Kernel</strong>: Linux 2.6.38+</li>
+<li><strong>Mechanism</strong>: Controls whether the kernel allocates 2MB memory pages instead of standard 4KB pages. Values: <code>always</code>, <code>madvise</code>, <code>never</code>.</li>
+<li><strong>Pros</strong>: Drastically reduces TLB (Translation Lookaside Buffer) misses for memory-intensive modern game engines (Unreal Engine 5, Frostbite, Cyberpunk 2077).</li>
+<li><strong>Risks</strong>: <code>always</code> can cause memory bloating (internal fragmentation) and latency spikes during page compaction if free contiguous 2MB blocks are scarce.</li>
+<li><strong>Where it hurts</strong>: Systems with limited RAM (&lt;16 GB), apps that frequently allocate small scattered buffers.</li>
+<li><strong>Default</strong>: <code>madvise</code> in <code>safe</code> and <code>balanced</code>; <code>always</code> in <code>aggressive</code>.</li>
+<li><strong>Profiles</strong>: <code>safe</code> (<code>madvise</code>), <code>balanced</code> (<code>madvise</code>), <code>aggressive</code> (<code>always</code>).</li>
+<li><strong>Source</strong>: Linux Kernel Documentation (<code>Documentation/admin-guide/mm/transhuge.rst</code>).</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-03-transparent_hugepage_defrag">Tweak 03: <code>transparent_hugepage_defrag</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/sys/kernel/mm/transparent_hugepage/defrag</code></li>
+<li><strong>Min Kernel</strong>: Linux 2.6.38+</li>
+<li><strong>Mechanism</strong>: Controls whether memory allocation synchronously stalls to compact memory when a huge page is requested but unavailable. Values: <code>always</code>, <code>defer</code>, <code>defer+madvise</code>, <code>madvise</code>, <code>never</code>.</li>
+<li><strong>Pros</strong>: Setting to <code>defer+madvise</code> prevents memory allocations in the critical game rendering loop from blocking on direct compaction, offloading compaction to <code>kcompactd</code> in the background.</li>
+<li><strong>Risks</strong>: If background compaction cannot keep up, allocations fall back to 4KB pages.</li>
+<li><strong>Where it hurts</strong>: None in gaming; strictly superior to synchronous <code>always</code>.</li>
+<li><strong>Default</strong>: <code>defer+madvise</code> in <code>balanced</code> and <code>aggressive</code>; untouched in <code>safe</code>.</li>
+<li><strong>Profiles</strong>: <code>balanced</code>, <code>aggressive</code>.</li>
+<li><strong>Source</strong>: Red Hat Performance Tuning Guide / Kernel transhuge docs.</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-04-compaction_proactiveness">Tweak 04: <code>compaction_proactiveness</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/proc/sys/vm/compaction_proactiveness</code></li>
+<li><strong>Min Kernel</strong>: Linux 5.9+</li>
+<li><strong>Mechanism</strong>: Controls how aggressively the kernel proactive compaction daemon (<code>kcompactd</code>) defragments memory before allocations happen (0 to 100).</li>
+<li><strong>Pros</strong>: Setting to <code>0</code> disables proactive background compaction during gaming, eliminating periodic background CPU thread wakeups that cause frametime jitter.</li>
+<li><strong>Risks</strong>: When THP is set to <code>always</code>, setting compaction proactiveness to 0 can increase the probability that future 2MB allocations fall back to 4KB.</li>
+<li><strong>Where it hurts</strong>: Long-running background processes requiring hugepages over days.</li>
+<li><strong>Default</strong>: <code>0</code> in <code>balanced</code> and <code>aggressive</code>; untouched in <code>safe</code>.</li>
+<li><strong>Profiles</strong>: <code>balanced</code>, <code>aggressive</code>.</li>
+<li><strong>Source</strong>: Linux Kernel commit <code>c89511ab2f8f</code> ("mm: proactive compaction").</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-05-watermark_boost_factor">Tweak 05: <code>watermark_boost_factor</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/proc/sys/vm/watermark_boost_factor</code></li>
+<li><strong>Min Kernel</strong>: Linux 5.0+</li>
+<li><strong>Mechanism</strong>: Directs <code>kswapd</code> to boost memory watermarks when memory fragmentation is detected, causing aggressive memory reclaiming. Setting to <code>0</code> disables memory watermark boosting.</li>
+<li><strong>Pros</strong>: Eliminates erratic <code>kswapd</code> spikes and memory reclaiming jitter during gameplay when loading new assets or textures into RAM.</li>
+<li><strong>Risks</strong>: Under severe memory pressure, direct reclaim may occur earlier.</li>
+<li><strong>Where it hurts</strong>: Systems with less than 8 GB RAM experiencing extreme memory pressure.</li>
+<li><strong>Default</strong>: <code>0</code> in <code>balanced</code> and <code>aggressive</code>; untouched in <code>safe</code>.</li>
+<li><strong>Profiles</strong>: <code>balanced</code>, <code>aggressive</code>.</li>
+<li><strong>Source</strong>: Linux Kernel Documentation (<code>Documentation/admin-guide/sysctl/vm.rst</code>).</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-06-swappiness_and_page_cluster">Tweak 06: <code>swappiness_and_page_cluster</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/proc/sys/vm/swappiness</code>, <code>/proc/sys/vm/page-cluster</code></li>
+<li><strong>Min Kernel</strong>: Linux 2.6+</li>
+<li><strong>Mechanism</strong>: <code>swappiness</code> controls relative preference for swapping anonymous memory vs reclaiming page cache. <code>page-cluster</code> controls the number of pages read/written in a single swap I/O chunk ($2^{\text{page_cluster}}$). For zram (compressed in-RAM swap), sequential disk clusters are counterproductive.</li>
+<li><strong>Pros</strong>: For zram systems, <code>page-cluster = 0</code> (1 page per swap read/write) avoids decompressing unneeded adjacent pages, dramatically reducing zram CPU latency. Lowering <code>swappiness</code> to 10 on disk swap prevents paging active game working sets.</li>
+<li><strong>Risks</strong>: Setting <code>page-cluster = 0</code> on spinning mechanical hard disks (HDD) causes severe performance degradation due to lack of sequential read clustering. Zenith probes whether swap is zram before applying.</li>
+<li><strong>Where it hurts</strong>: Mechanical hard disk swap partitions.</li>
+<li><strong>Default</strong>: <code>swappiness = 10</code>, <code>page-cluster = 0</code> (only if zram detected).</li>
+<li><strong>Profiles</strong>: <code>safe</code>, <code>balanced</code>, <code>aggressive</code>.</li>
+<li><strong>Source</strong>: CachyOS Kernel Documentation &amp; zram Linux documentation.</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-07-cpu_energy_performance_preference-epp">Tweak 07: <code>cpu_energy_performance_preference</code> (EPP)</h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference</code></li>
+<li><strong>Min Kernel</strong>: Linux 5.17+ (AMD P-State / Intel P-State)</li>
+<li><strong>Mechanism</strong>: Hardware autonomous performance hinting register (MSR / CPPC). Informs CPU core firmware whether to ramp clocks aggressively at the first hint of load.</li>
+<li><strong>Pros</strong>: Setting to <code>performance</code> or <code>balance_performance</code> eliminates the 5-15ms clock ramp-up latency when frame rendering threads experience brief bursty spikes.</li>
+<li><strong>Risks</strong>: Higher idle power draw and higher operating temperatures.</li>
+<li><strong>Where it hurts</strong>: Battery life on laptops.</li>
+<li><strong>Default</strong>: <code>balance_performance</code> in <code>safe</code>, <code>performance</code> in <code>balanced</code> and <code>aggressive</code>.</li>
+<li><strong>Profiles</strong>: <code>safe</code> (<code>balance_performance</code>), <code>balanced</code> (<code>performance</code>), <code>aggressive</code> (<code>performance</code>).</li>
+<li><strong>Source</strong>: AMD P-State EPP Kernel Documentation.</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-08-cgroup_soft_prioritization">Tweak 08: <code>cgroup_soft_prioritization</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/sys/fs/cgroup/zenith_background/cpu.weight</code>, <code>cpu.idle</code>, <code>io.weight</code>, <code>memory.high</code></li>
+<li><strong>Min Kernel</strong>: Linux 5.10+ (cgroups v2 unified hierarchy)</li>
+<li><strong>Mechanism</strong>: Instead of strictly hard-pinning background apps (Chrome, Discord, Spotify) to 1 CPU core (which causes audio crackle and IPC freezes), background apps are assigned <code>cpu.weight = 50</code> (vs default 100), <code>cpu.idle = 1</code> (SCHED_IDLE semantics), and <code>io.weight = 50</code>.</li>
+<li><strong>Pros</strong>: Gives 100% CPU priority to games when they need it, while allowing background apps to run smoothly when game threads are idle or waiting on GPU/V-Sync.</li>
+<li><strong>Risks</strong>: None. Eliminates the audio-stutter risks associated with hard cpuset eviction.</li>
+<li><strong>Where it hurts</strong>: Heavy background compilation running simultaneously with games.</li>
+<li><strong>Default</strong>: Enabled across all profiles.</li>
+<li><strong>Profiles</strong>: <code>safe</code>, <code>balanced</code>, <code>aggressive</code>.</li>
+<li><strong>Source</strong>: Linux cgroups v2 Kernel Documentation (<code>Documentation/admin-guide/cgroup-v2.rst</code>).</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-09-sched_uclamp_min">Tweak 09: <code>sched_uclamp_min</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: Syscall <code>sched_setattr</code> with <code>SCHED_FLAG_UTIL_CLAMP_MIN</code></li>
+<li><strong>Min Kernel</strong>: Linux 5.3+ (CONFIG_UCLAMP_TASK)</li>
+<li><strong>Mechanism</strong>: Utilization clamping (uclamp) informs the kernel scheduler (CFS / EEVDF) of the minimum compute capacity that should be allocated to a thread, preventing the frequency governor from downclocking cores during frame delivery.</li>
+<li><strong>Pros</strong>: Guarantees game render threads operate above a floor frequency without locking CPU frequency globally to maximum.</li>
+<li><strong>Risks</strong>: Uncalibrated uclamp values on low-tier CPUs can cause thermal throttling.</li>
+<li><strong>Where it hurts</strong>: Thermal-constrained laptops.</li>
+<li><strong>Default</strong>: <code>uclamp.min = 512</code> (50%) in <code>balanced</code>, <code>1024</code> (100%) in <code>aggressive</code>; untouched in <code>safe</code>.</li>
+<li><strong>Profiles</strong>: <code>balanced</code>, <code>aggressive</code>.</li>
+<li><strong>Source</strong>: Linux Scheduler Utilization Clamping Architecture (<code>Documentation/scheduler/sched-util-clamping.rst</code>).</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-10-timer_slack_ns">Tweak 10: <code>timer_slack_ns</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: Syscall <code>prctl(PR_SET_TIMERSLACK, ...)</code></li>
+<li><strong>Min Kernel</strong>: Linux 2.6.28+</li>
+<li><strong>Mechanism</strong>: Configures the allowable delay the kernel may group timers together to save power. Default is 50,000 ns (50 µs).</li>
+<li><strong>Pros</strong>: Setting timer slack to <code>50 ns</code> for game processes ensures microsecond-accurate sleeps (<code>nanosleep</code>, <code>epoll_wait</code>, SDL frame pacers), minimizing frame pacing jitter.</li>
+<li><strong>Risks</strong>: Marginally higher timer interrupt rate.</li>
+<li><strong>Where it hurts</strong>: Power consumption on battery.</li>
+<li><strong>Default</strong>: <code>50 ns</code> in <code>balanced</code> and <code>aggressive</code>; untouched in <code>safe</code>.</li>
+<li><strong>Profiles</strong>: <code>balanced</code>, <code>aggressive</code>.</li>
+<li><strong>Source</strong>: <code>prctl(2)</code> man page.</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-11-nvme_io_scheduler_and_readahead">Tweak 11: <code>nvme_io_scheduler_and_readahead</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/sys/block/nvme*/queue/scheduler</code>, <code>/sys/block/nvme*/queue/read_ahead_kb</code></li>
+<li><strong>Min Kernel</strong>: Linux 4.12+ (blk-mq)</li>
+<li><strong>Mechanism</strong>: NVMe devices have massive hardware command queues (64K queues with 64K commands). Software elevator schedulers (<code>mq-deadline</code>, <code>bfq</code>) introduce CPU locking overhead. Setting scheduler to <code>none</code> allows direct hardware queue submission.</li>
+<li><strong>Pros</strong>: Reduces I/O latency by up to 20% during game asset streaming (DirectStorage / fast load times).</li>
+<li><strong>Risks</strong>: None on modern NVMe drives.</li>
+<li><strong>Where it hurts</strong>: Mechanical spinning hard disks or slow SATA drives (where BFQ is beneficial). Zenith strictly targets <code>nvme*</code> block devices.</li>
+<li><strong>Default</strong>: <code>none</code> for NVMe block queues; <code>read_ahead_kb = 128</code> (or 256).</li>
+<li><strong>Profiles</strong>: <code>safe</code>, <code>balanced</code>, <code>aggressive</code>.</li>
+<li><strong>Source</strong>: Linux Block MQ Documentation (<code>Documentation/block/blk-mq.rst</code>).</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-12-usb_autosuspend_inhibitor">Tweak 12: <code>usb_autosuspend_inhibitor</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/sys/bus/usb/devices/*/power/control</code></li>
+<li><strong>Min Kernel</strong>: Linux 2.6.35+</li>
+<li><strong>Mechanism</strong>: Linux power management autosuspends idle USB devices. Setting <code>power/control</code> to <code>on</code> disables power autosuspend for USB Human Interface Devices (HID mice, keyboards, controllers).</li>
+<li><strong>Pros</strong>: Eliminates "first movement" input latency and mouse wake-up lag caused by USB power sleep transitions.</li>
+<li><strong>Risks</strong>: Very minor increase in idle power consumption (milliwatts).</li>
+<li><strong>Where it hurts</strong>: Battery life when computer is left idle for hours.</li>
+<li><strong>Default</strong>: Enabled for USB HID devices in <code>balanced</code> and <code>aggressive</code>.</li>
+<li><strong>Profiles</strong>: <code>balanced</code>, <code>aggressive</code>.</li>
+<li><strong>Source</strong>: Linux USB Power Management (<code>Documentation/driver-api/usb/power-management.rst</code>).</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-13-rt_priority_and_watchdog">Tweak 13: <code>rt_priority_and_watchdog</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: Syscall <code>sched_setscheduler(pid, SCHED_RR, &amp;param)</code></li>
+<li><strong>Min Kernel</strong>: Linux 2.6+</li>
+<li><strong>Mechanism</strong>: Elevates main rendering thread to Round-Robin Real-Time scheduling (<code>SCHED_RR</code>).</li>
+<li><strong>Safety Safeguards</strong>:</li>
+<li>Respects <code>kernel.sched_rt_runtime_us</code> (default: 950,000 µs out of 1,000,000 µs reserved for RT, guaranteeing 5% CPU for system processes to prevent total machine freeze).</li>
+<li>Priority ceiling: capped strictly at <code>rt_priority = 20</code> (never max 99, preventing starvation of kernel RT threads like PipeWire audio server or display compositor).</li>
+<li>Built-in Watchdog: Zenith monitors the RT thread; if the thread does not yield within 3 seconds, Zenith demotes it back to <code>SCHED_OTHER</code> with <code>nice = -20</code>.</li>
+<li><strong>Pros</strong>: Guarantees the frame delivery thread is never preempted by background desktop processes.</li>
+<li><strong>Risks</strong>: Misbehaved non-yielding game loops could cause audio or input dropouts without our watchdog.</li>
+<li><strong>Where it hurts</strong>: Single-core CPUs or CPU-starved environments.</li>
+<li><strong>Default</strong>: Disabled in <code>safe</code> and <code>balanced</code> (uses <code>nice = -10</code>); enabled in <code>aggressive</code> with watchdog.</li>
+<li><strong>Profiles</strong>: <code>aggressive</code> only.</li>
+<li><strong>Source</strong>: Linux Real-Time Scheduling Documentation.</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-14-pipewire_quantum_tuning">Tweak 14: <code>pipewire_quantum_tuning</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/usr/bin/pw-metadata -n settings 0 clock.quantum &lt;quantum&gt;</code></li>
+<li><strong>Min Kernel / App</strong>: PipeWire 0.3+</li>
+<li><strong>Mechanism</strong>: Adjusts the audio buffer quantum size (samples per buffer).</li>
+<li><strong>Pros</strong>: Drastically reduces sound effect latency (gunshots, footsteps) in competitive FPS titles.</li>
+<li><strong>Risks</strong>: Setting quantum too low (e.g. 32 on USB audio interfaces without low-latency DACs) causes audible buffer underruns ("xruns"), clicks, and popping.</li>
+<li><strong>Where it hurts</strong>: High-latency USB DACs, complex audio routing chains with DSP plugins.</li>
+<li><strong>Default</strong>: <code>128</code> in <code>safe</code>, <code>64</code> in <code>balanced</code>, <code>32</code> in <code>aggressive</code>.</li>
+<li><strong>Profiles</strong>: <code>safe</code> (128), <code>balanced</code> (64), <code>aggressive</code> (32).</li>
+<li><strong>Source</strong>: PipeWire Documentation (<code>https://gitlab.freedesktop.org/pipewire/pipewire/-/wikis/Config-PipeWire</code>).</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-15-gpu_performance_mode">Tweak 15: <code>gpu_performance_mode</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/sys/class/drm/card*/device/power_dpm_force_performance_level</code>, <code>nvidia-smi -pm 1 -lgc</code></li>
+<li><strong>Min Kernel</strong>: Linux 4.10+ (AMD DRM) / Proprietary NVIDIA Driver</li>
+<li><strong>Mechanism</strong>: Locks GPU core and memory clocks to maximum performance states to prevent downclocking during light scenes.</li>
+<li><strong>Pros</strong>: Eliminates stutter when transitioning from low-complexity scenes (menus, indoor) to high-complexity outdoor rendering.</li>
+<li><strong>Risks</strong>: High GPU power consumption, increased fan noise, elevated temperatures.</li>
+<li><strong>Where it hurts</strong>: Laptops, thermal-limited SFF (Small Form Factor) cases, energy bills.</li>
+<li><strong>Default</strong>: Disabled in <code>safe</code>, dynamic in <code>balanced</code>, locked in <code>aggressive</code>.</li>
+<li><strong>Profiles</strong>: <code>aggressive</code> (locked), <code>balanced</code> (<code>auto</code> or high without lock), <code>safe</code> (<code>auto</code>).</li>
+<li><strong>Source</strong>: AMDGPU Driver Documentation (<code>Documentation/gpu/amdgpu/thermal.rst</code>).</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-16-network_qdisc_cake">Tweak 16: <code>network_qdisc_cake</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>net.core.default_qdisc = cake</code>, <code>tc qdisc replace dev &lt;iface&gt; root cake</code></li>
+<li><strong>Min Kernel</strong>: Linux 4.19+ (SCHED_CAKE)</li>
+<li><strong>Mechanism</strong>: Common Applications Kept Enhanced (CAKE) replaces FIFO/pfifo_fast with smart deficit round-robin and active queue management (AQM), preventing bufferbloat.</li>
+<li><strong>Pros</strong>: Reduces ping spikes when background downloads or updates occur concurrently with online multiplayer gaming.</li>
+<li><strong>Risks</strong>: Incompatible with certain enterprise traffic shaping setups.</li>
+<li><strong>Where it hurts</strong>: Virtual interfaces, VPN tap adapters.</li>
+<li><strong>Default</strong>: <code>cake</code> if supported, fallback to <code>fq_codel</code>.</li>
+<li><strong>Profiles</strong>: <code>safe</code>, <code>balanced</code>, <code>aggressive</code>.</li>
+<li><strong>Source</strong>: Bufferbloat.net / CAKE Linux documentation.</li>
+<li><strong>Benchmark Status</strong>: <code>[Эффект не измерен]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-17-cstate_latency">Tweak 17: <code>cstate_latency</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/dev/cpu_dma_latency</code></li>
+<li><strong>Min Kernel</strong>: Linux 2.6.25+ (PM QoS Interface)</li>
+<li><strong>Mechanism</strong>: Opens <code>/dev/cpu_dma_latency</code> and writes an <code>int32_t</code> maximum acceptable latency constraint (0us in <code>aggressive</code>, 50us in <code>balanced</code>). Holds the descriptor open via RAII to prevent the kernel cpuidle governor from putting CPU cores into deep sleep states (C6/C8).</li>
+<li><strong>Pros</strong>: Eliminates 50 to 150 microsecond wake-up delays when game rendering and audio threads resume execution after brief yields.</li>
+<li><strong>Risks</strong>: Modest increase in idle power consumption while game is running.</li>
+<li><strong>Where it hurts</strong>: Laptops running on battery power (disabled in <code>safe</code> profile).</li>
+<li><strong>Default</strong>: <code>50</code> in <code>balanced</code>, <code>0</code> in <code>aggressive</code>, unconstrained in <code>safe</code>.</li>
+<li><strong>Profiles</strong>: <code>balanced</code> (50us), <code>aggressive</code> (0us).</li>
+<li><strong>Source</strong>: Linux Kernel PM QoS Documentation (<code>Documentation/power/pm_qos_interface.rst</code>).</li>
+<li><strong>Benchmark Status</strong>: <code>[Verified - 1.2.0]</code></li>
+</ul>
+<hr />
+<h3 id="tweak-18-transparent_hugepage_defrag">Tweak 18: <code>transparent_hugepage_defrag</code></h3>
+<ul>
+<li><strong>Kernel Path</strong>: <code>/sys/kernel/mm/transparent_hugepage/defrag</code>, <code>/sys/kernel/mm/transparent_hugepage/khugepaged/defrag</code></li>
+<li><strong>Min Kernel</strong>: Linux 2.6.38+</li>
+<li><strong>Mechanism</strong>: Sets THP defragmentation strategy to <code>madvise</code> and disables synchronous khugepaged defrag (<code>0</code>). Prevents page faults from blocking rendering loops in direct compaction stalls.</li>
+<li><strong>Pros</strong>: Eliminates 10 to 80 millisecond synchronous stalls during intensive texture and shader asset streaming in Vulkan and DirectX 12 titles.</li>
+<li><strong>Risks</strong>: None; processes explicitly requesting hugepages via <code>madvise</code> continue receiving them.</li>
+<li><strong>Where it hurts</strong>: None identified.</li>
+<li><strong>Default</strong>: <code>madvise</code> in <code>balanced</code> and <code>aggressive</code>, distro default in <code>safe</code>.</li>
+<li><strong>Profiles</strong>: <code>balanced</code>, <code>aggressive</code>.</li>
+<li><strong>Source</strong>: Linux Kernel MM Documentation (<code>Documentation/admin-guide/mm/transhuge.rst</code>).</li>
+<li><strong>Benchmark Status</strong>: <code>[Verified - 1.2.0]</code></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>

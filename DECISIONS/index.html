@@ -1,0 +1,2281 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Ultra-low latency Linux gaming optimizer daemon (C++20)">
+      
+      
+        <meta name="author" content="Emir (negg0s)">
+      
+      
+        <link rel="canonical" href="https://negg0s.github.io/zenith-gaming-daemon/DECISIONS/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+    
+    
+      
+        <title>Zenith Gaming Daemon: Architectural Decision Records (ADRs) - Zenith Gaming Daemon</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#zenith-gaming-daemon-architectural-decision-records-adrs" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Zenith Gaming Daemon" class="md-header__button md-logo" aria-label="Zenith Gaming Daemon" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Zenith Gaming Daemon
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Zenith Gaming Daemon: Architectural Decision Records (ADRs)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/negg0s/zenith-gaming-daemon" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    negg0s/zenith-gaming-daemon
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../INSTALL/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../CONFIGURATION/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Configuration
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../PROFILES/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Profiles & Tuning
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../TWEAKS/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Tweaks Catalog
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../ARCHITECTURE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../ANTI_CHEAT/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Anti-Cheat Safety
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../BENCHMARKS/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Benchmarks
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../THREAT_MODEL/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Threat Model
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../TROUBLESHOOTING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Troubleshooting
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../FAQ/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ADDING_A_TWEAK/" class="md-tabs__link">
+          
+  
+  
+  Developer Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ru/" class="md-tabs__link">
+          
+  
+  
+  Документация (RU)
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Zenith Gaming Daemon" class="md-nav__button md-logo" aria-label="Zenith Gaming Daemon" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Zenith Gaming Daemon
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/negg0s/zenith-gaming-daemon" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    negg0s/zenith-gaming-daemon
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../INSTALL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONFIGURATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PROFILES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Profiles & Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TWEAKS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tweaks Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ARCHITECTURE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ANTI_CHEAT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Anti-Cheat Safety
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../BENCHMARKS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../THREAT_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Threat Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TROUBLESHOOTING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FAQ/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ADDING_A_TWEAK/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to Add a Tweak
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ADDING_A_GAME_PROFILE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adding Game Profiles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Документация (RU)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Документация (RU)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ru/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Главная
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0001-modern-c20-for-linux-daemon-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0001: Modern C++20 for Linux Daemon Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0001: Modern C++20 for Linux Daemon Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0002-raii-subsystem-mutation-rollback-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0002: RAII Subsystem Mutation &amp; Rollback Pattern
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0002: RAII Subsystem Mutation &amp; Rollback Pattern">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0003-strict-workspace-and-storage-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0003: Strict Workspace and Storage Isolation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0003: Strict Workspace and Storage Isolation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0004-defense-in-depth-security-hardening-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0004: Defense-in-Depth Security &amp; Hardening Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0004: Defense-in-Depth Security &amp; Hardening Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0005-tweak-justification-modular-subsystems-and-three-tier-profiles-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0005: Tweak Justification, Modular Subsystems, and Three-Tier Profiles Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0005: Tweak Justification, Modular Subsystems, and Three-Tier Profiles Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0006-hardware-topology-engine-with-amd_x3d_vcache-integration-and-multi-architecture-fixtures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0006: Hardware Topology Engine with amd_x3d_vcache Integration and Multi-Architecture Fixtures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0006: Hardware Topology Engine with amd_x3d_vcache Integration and Multi-Architecture Fixtures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0007-event-driven-game-detection-thread-classification-and-non-invasive-anti-cheat-compatibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0007: Event-Driven Game Detection, Thread Classification, and Non-Invasive Anti-Cheat Compatibility
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0007: Event-Driven Game Detection, Thread Classification, and Non-Invasive Anti-Cheat Compatibility">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0008-modular-latency-subsystems-dynamic-nvml-loading-and-hardware-safety-guardrails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0008: Modular Latency Subsystems, Dynamic NVML Loading, and Hardware Safety Guardrails
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0008: Modular Latency Subsystems, Dynamic NVML Loading, and Hardware Safety Guardrails">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0009-adaptive-state-machine-psi-pressure-monitoring-and-offline-local-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0009: Adaptive State Machine, PSI Pressure Monitoring, and Offline Local Learning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0009: Adaptive State Machine, PSI Pressure Monitoring, and Offline Local Learning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0010-c20-architectural-paradigm-monadic-result-dependency-inversion-raii-containment-and-single-threaded-reactor-event-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0010: C++20 Architectural Paradigm: Monadic Result, Dependency Inversion, RAII Containment, and Single-Threaded Reactor Event Loop
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0010: C++20 Architectural Paradigm: Monadic Result, Dependency Inversion, RAII Containment, and Single-Threaded Reactor Event Loop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0011-empirical-benchmarking-statistical-ablation-tweak-decision-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0011: Empirical Benchmarking, Statistical Ablation &amp; Tweak Decision Framework
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0011: Empirical Benchmarking, Statistical Ablation &amp; Tweak Decision Framework">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0012-ux-architecture-unix-socket-protocol-doctor-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0012: UX Architecture, Unix Socket Protocol &amp; Doctor Diagnostics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0012: UX Architecture, Unix Socket Protocol &amp; Doctor Diagnostics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0013-distribution-packaging-supply-chain-security-config-migrations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0013: Distribution, Packaging, Supply Chain Security &amp; Config Migrations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0013: Distribution, Packaging, Supply Chain Security &amp; Config Migrations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-0014-project-showcase-public-profile-database-community-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-0014: Project Showcase, Public Profile Database &amp; Community Documentation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-0014: Project Showcase, Public Profile Database &amp; Community Documentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="zenith-gaming-daemon-architectural-decision-records-adrs">Zenith Gaming Daemon: Architectural Decision Records (ADRs)</h1>
+<hr />
+<h2 id="adr-0001-modern-c20-for-linux-daemon-implementation">ADR-0001: Modern C++20 for Linux Daemon Implementation</h2>
+<h3 id="context">Context</h3>
+<p>Low-latency game optimization requires microsecond-level process manipulation, direct sysfs/procfs filesystem interaction, cgroups v2 tree management, and robust POSIX system call execution without garbage collection pauses or runtime bloat.</p>
+<h3 id="options-considered">Options Considered</h3>
+<ol>
+<li><strong>Python / Bash Scripting</strong>: Quick to write, but introduces interpreter overhead, lack of static type safety, high memory footprint, and fragile error handling during atomic rollbacks.</li>
+<li><strong>Rust</strong>: Strong memory safety, but increases build friction in minimal CachyOS/Arch environments without cargo installed.</li>
+<li><strong>C++20</strong>: Zero-overhead abstraction, native <code>std::filesystem</code>, <code>std::format</code>, RAII resource lifecycle management, clean header/source modularity, and native integration with GCC/Clang on Arch Linux.</li>
+</ol>
+<h3 id="decision">Decision</h3>
+<p>Adopt <strong>C++20</strong> with strict compiler flags (<code>-Wall -Wextra -Wpedantic -Werror</code> / <code>/W4 /permissive-</code>).</p>
+<h3 id="status">Status</h3>
+<p>Accepted and verified in CI.</p>
+<hr />
+<h2 id="adr-0002-raii-subsystem-mutation-rollback-pattern">ADR-0002: RAII Subsystem Mutation &amp; Rollback Pattern</h2>
+<h3 id="context_1">Context</h3>
+<p>A gaming daemon fundamentally alters critical kernel parameters (split-lock mitigations, CPU core affinities, GPU clocks, cgroup structures). If a game crashes or the daemon receives <code>SIGTERM</code>/<code>SIGINT</code>, the system must never be left in an unstable, locked, or power-draining state.</p>
+<h3 id="decision_1">Decision</h3>
+<p>Every system modifying component must implement an explicit 4-phase contract:
+1. <code>probe()</code>: Check if hardware/kernel interfaces exist and are writable without throwing.
+2. <code>apply()</code>: Atomically save previous state and apply the optimized value.
+3. <code>revert()</code>: Guaranteed restoration of the saved original state (called in destructor/signal handler).
+4. <code>describe()</code>: Human-readable diagnostic description of the parameter and active delta.</p>
+<h3 id="status_1">Status</h3>
+<p>Accepted. Universal interface adoption scheduled for Stage 1.</p>
+<hr />
+<h2 id="adr-0003-strict-workspace-and-storage-isolation">ADR-0003: Strict Workspace and Storage Isolation</h2>
+<h3 id="context_2">Context</h3>
+<p>To maintain disk hygiene and comply with user system requirements, work must strictly avoid modifying or occupying space on system drive <code>C:</code>.</p>
+<h3 id="decision_2">Decision</h3>
+<p>All builds, cloned repositories, logs, fixtures, and source files must reside exclusively on partition <code>D:</code> (<code>D:\zenith-gaming-daemon</code>). Any temporary build caches must be cleaned after execution.</p>
+<h3 id="status_2">Status</h3>
+<p>Accepted and strictly enforced.</p>
+<hr />
+<h2 id="adr-0004-defense-in-depth-security-hardening-architecture">ADR-0004: Defense-in-Depth Security &amp; Hardening Architecture</h2>
+<h3 id="context_3">Context</h3>
+<p>Zenith operates with elevated privileges (<code>CAP_SYS_ADMIN</code>, <code>CAP_SYS_NICE</code>, <code>CAP_SYS_RESOURCE</code>) to adjust kernel parameters, process priorities, and GPU power profiles. This creates potential attack surfaces: command injection via malicious process names, symlink traversal in virtual filesystems, socket spoofing by local unprivileged users, configuration corruption, and memory safety vulnerabilities.</p>
+<h3 id="options-considered_1">Options Considered</h3>
+<ol>
+<li><strong>Unchecked Shell / System Invocations</strong>: Use <code>std::system()</code> or <code>popen()</code> with formatted strings. Highly susceptible to command injection via crafted game titles or executable paths.</li>
+<li><strong>Minimal Hardening</strong>: Standard file I/O and unauthenticated UNIX domain sockets. Vulnerable to symlink races (<code>/proc</code> pointing outside) and unprivileged local users sending commands to alter hardware clock states.</li>
+<li><strong>Defense-in-Depth Hardening</strong>:</li>
+<li>Zero Shell Policy: Total elimination of <code>std::system()</code> and <code>popen()</code>. All external tools executed via <code>fork()</code> + <code>execve()</code> with whitelisted binaries (<code>/usr/bin/nvidia-smi</code>, <code>/usr/bin/pw-metadata</code>) and sanitized environment variables.</li>
+<li>Filesystem Sandboxing: <code>openat2</code> with <code>RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS</code> via trusted base dirfds to prevent symlink traversal attacks.</li>
+<li>IPC Authorization: UNIX domain socket at <code>/run/zenith/zenith.sock</code> with <code>0660</code> permissions, group ownership restricted to <code>wheel</code>/<code>gamemode</code>, kernel-level <code>SO_PEERCRED</code> validation, and 4 KB payload limit.</li>
+<li>Strict Configuration Validation: Config files capped at 64 KB; any unknown key triggers parse failure; strict type and numerical range enforcement.</li>
+<li>Privilege Containment: <code>PR_SET_NO_NEW_PRIVS</code> set on startup; systemd service hardened with <code>ProtectSystem=strict</code>, <code>ProtectHome=yes</code>, <code>PrivateTmp=yes</code>, and <code>ProtectKernelModules=yes</code>.</li>
+<li>Toolchain Hardening: PIE, Full RELRO (<code>-Wl,-z,relro,-z,now</code>), <code>-fstack-protector-strong</code>, <code>-fstack-clash-protection</code>, <code>-fcf-protection=full</code>, <code>_FORTIFY_SOURCE=3</code>, and <code>-Wl,-z,noexecstack</code>.</li>
+</ol>
+<h3 id="decision_3">Decision</h3>
+<p>Adopt <strong>Option 3: Defense-in-Depth Hardening</strong>.</p>
+<h3 id="status_3">Status</h3>
+<p>Accepted and implemented for Stage 2.</p>
+<hr />
+<h2 id="adr-0005-tweak-justification-modular-subsystems-and-three-tier-profiles-architecture">ADR-0005: Tweak Justification, Modular Subsystems, and Three-Tier Profiles Architecture</h2>
+<h3 id="context_4">Context</h3>
+<p>A gaming daemon that mutates system state without fine-grained scoping risks system instability, thermal throttling, battery drain on laptops, or audio/IPC stutter on non-game background processes. Each optimization must be technically justified, guarded by kernel compatibility probes, categorized into operational profiles, and audited against conflicting daemons in the Linux ecosystem.</p>
+<h3 id="options-considered_2">Options Considered</h3>
+<ol>
+<li><strong>Monolithic Global Switches</strong>: All tweaks enabled simultaneously. Increases the risk of regressions on unstable hardware or battery-powered devices.</li>
+<li><strong>Ad-Hoc Manual Flags</strong>: Every knob exposed independently with no profile grouping. Overwhelms users and complicates safe defaults.</li>
+<li><strong>Modular Subsystems with Three-Tier Profiles</strong>:</li>
+<li>Universal <code>ITweak</code> Interface: Every tweak implements <code>probe()</code>, <code>apply(profile)</code>, <code>revert()</code>, <code>describe()</code>, <code>explain()</code>, <code>get_current_value()</code>, <code>get_target_value(profile)</code>.</li>
+<li>Three Operational Profiles:<ul>
+<li><code>safe</code>: Near-zero risk; no hardware clock overrides; soft cgroup prioritization; PipeWire quantum 128.</li>
+<li><code>balanced</code> (Default): THP <code>madvise</code>, NVMe <code>none</code>, EPP <code>performance</code>, soft cgroups, <code>uclamp.min = 512</code>, USB autosuspend disabled.</li>
+<li><code>aggressive</code>: Split-lock mitigation disabled (<code>0</code>), THP <code>always</code>, GPU clock lock, <code>SCHED_RR</code> priority with 3-second watchdog, PipeWire quantum 32.</li>
+</ul>
+</li>
+<li>Non-Destructive CLI Introspection:<ul>
+<li><code>--dry-run</code>: Colorized diff of "Before $\to$ After" values without applying mutations.</li>
+<li><code>--explain</code>: Human-readable technical breakdown of kernel mechanisms, pros, and risks.</li>
+<li><code>--conflicts</code>: Proactive detection and coordination with <code>gamemode</code>, <code>ananicy</code>, <code>tuned</code>, <code>power-profiles-daemon</code>, <code>irqbalance</code>, and <code>scx</code>.</li>
+</ul>
+</li>
+<li>Per-Game Profile Overrides: Match by Steam AppID (e.g. <code>[730]</code>) or executable pattern, with tweak blacklisting support.</li>
+<li>Empirical Rigor: All tweaks documented in <code>docs/TWEAKS.md</code> and explicitly labeled <code>[Эффект не измерен]</code> until empirical benchmark verification in Stage 9.</li>
+</ol>
+<h3 id="decision_4">Decision</h3>
+<p>Adopt <strong>Option 3: Modular Subsystems with Three-Tier Profiles</strong>.</p>
+<h3 id="status_4">Status</h3>
+<p>Accepted and implemented for Stage 3.</p>
+<hr />
+<h2 id="adr-0006-hardware-topology-engine-with-amd_x3d_vcache-integration-and-multi-architecture-fixtures">ADR-0006: Hardware Topology Engine with amd_x3d_vcache Integration and Multi-Architecture Fixtures</h2>
+<h3 id="context_5">Context</h3>
+<p>Modern gaming systems feature diverse hardware topologies: AMD asymmetric dual-CCD 3D V-Cache CPUs (7950X3D, 9950X3D), single-CCD V-Cache (7800X3D, 5800X3D), Intel Hybrid architectures (12th-14th Gen P/E cores, Core Ultra P/E/LP-E cores), multi-socket NUMA servers, virtual machines, and handheld APUs (Steam Deck). Statically assuming core capabilities or attempting thread pinning without knowing cache topology leads to performance regressions.</p>
+<h3 id="options-considered_3">Options Considered</h3>
+<ol>
+<li><strong>Frequency-Only Heuristic</strong>: Guess P vs E cores by comparing max frequencies. Fails on architectures where E-cores clock high or when thermal throttling occurs. Fails on AMD 3D V-Cache where core types are identical except for L3 cache attachment.</li>
+<li><strong>Hardcoded CPU Model Tables</strong>: Maintain a hardcoded database of CPU models by name string. Fragile, requires constant updates, breaks on unreleased or custom CPUs.</li>
+<li><strong>Hardware Discovery via Kernel Virtual Filesystem &amp; Driver Abstraction</strong>:</li>
+<li><code>amd_x3d_vcache</code> Driver (Linux 6.13+): Primary driver probe via <code>/sys/devices/platform/amd_x3d_vcache/amd_x3d_mode</code> (<code>cache</code>, <code>frequency</code>, <code>none</code>). Fallback to L3 cache asymmetry if driver not present.</li>
+<li>Cache Parsing: Parse <code>cache/index3/size</code> and <code>cache/index3/shared_cpu_list</code> to identify distinct L3 clusters.</li>
+<li>Intel Core Types: Parse <code>topology/core_type</code> (<code>0x20</code> P-core, <code>0x40</code> E-core, <code>0x10</code> LP-E core) and <code>cpu_capacity</code>.</li>
+<li>Core Selection Modes: <code>cache</code> (prioritize V-Cache), <code>frequency</code> (prioritize high clock CCD), <code>auto</code>.</li>
+<li>Virtualization &amp; Platform Awareness: Detect VMs (<code>QEMU</code>, <code>KVM</code>, <code>VMware</code>), Handhelds (Steam Deck, ROG Ally), and laptops on battery via <code>chassis_type</code> and <code>power_supply</code>.</li>
+<li>FileSystem Abstraction (<code>ITopologyFs</code>): Decouple topology detection from the live host filesystem, enabling full unit test validation across 11 synthetic architecture fixtures.</li>
+</ol>
+<h3 id="decision_5">Decision</h3>
+<p>Adopt <strong>Option 3: Hardware Discovery via Kernel Virtual Filesystem &amp; Driver Abstraction</strong>.</p>
+<h3 id="status_5">Status</h3>
+<p>Accepted and implemented for Stage 4.</p>
+<hr />
+<h2 id="adr-0007-event-driven-game-detection-thread-classification-and-non-invasive-anti-cheat-compatibility">ADR-0007: Event-Driven Game Detection, Thread Classification, and Non-Invasive Anti-Cheat Compatibility</h2>
+<h3 id="context_6">Context</h3>
+<p>Detecting game launches and process lifecycles via high-frequency <code>/proc</code> polling consumes unnecessary CPU cycles and incurs 500-1000ms latency. At the same time, aggressive or naive process manipulation can trigger game anti-cheat bans (Easy Anti-Cheat, BattlEye, VAC) if tools attach debuggers (<code>ptrace</code>), inspect memory, inject dynamic libraries, or modify anti-cheat service threads. Furthermore, naive background killing or hard CPU pinning disrupts user workflows (compositors, browsers, audio daemons).</p>
+<h3 id="options-considered_4">Options Considered</h3>
+<ol>
+<li><strong>Periodic High-Frequency Polling</strong>: Poll <code>/proc</code> every 50ms, reading cmdline and stat for all PIDs. Inefficient, causes constant cache line thrashing and energy drain, especially on handhelds/laptops.</li>
+<li><strong>Ptrace / In-Memory Inspection / DLL Injection</strong>: Attach to game processes with <code>ptrace</code>, hook Vulkan/OpenGL symbols with <code>LD_PRELOAD</code>. Strictly prohibited: triggers immediate anti-cheat bans, causes game crashes, and violates zero-overhead design.</li>
+<li><strong>Event-Driven Kernel Connector + Non-Invasive OS-Standard Tuning</strong>:</li>
+<li><strong>Netlink Process Connector (<code>AF_NETLINK</code>, <code>NETLINK_CONNECTOR</code>, <code>CN_IDX_PROC</code>)</strong>: Kernel sends instant asynchronous events (<code>PROC_EVENT_EXEC</code>, <code>PROC_EVENT_EXIT</code>, <code>PROC_EVENT_FORK</code>) directly to Zenith with sub-millisecond delivery and zero CPU polling overhead. Graceful fallback to timer-based polling if unprivileged or unsupported.</li>
+<li><strong>Deep Recognition &amp; False Positive Immunity</strong>: Detect Steam (<code>SteamAppId</code> in environ/cmdline, reaper), Proton/Wine prefixes and <code>.exe</code> binaries, Lutris, Heroic, Bottles, Gamescope, native games, and emulators (RPCS3, Yuzu, etc.). Specifically filter out <code>steamwebhelper</code>, launchers (Epic, Battle.net), and idle <code>wineserver</code>.</li>
+<li><strong>Real Game Verification &amp; Hysteresis</strong>: Inspect open file descriptors for GPU render nodes (<code>/dev/dri/renderD128</code>, <code>/dev/nvidia*</code>) and mapped graphics drivers (<code>libvulkan</code>, <code>libGL</code>). 100ms debounce on launch and 500ms hysteresis on exit prevent fluttering.</li>
+<li><strong>Background Soft Throttling (Never Kill)</strong>: Whitelist essential system services (compositor, PipeWire, audio, network, security, agent terminal). Blacklist heavy apps (browsers, Discord, torrents) and throttle them non-destructively via cgroup v2 soft weights (<code>cpu.weight=50</code>, <code>cpu.idle=1</code>, <code>io.weight=50</code>).</li>
+<li><strong>Selective Thread-Level Tuning</strong>: Scan <code>/proc/&lt;pid&gt;/task/*/comm</code> to classify threads: Main and Render threads receive performance core pinning and <code>uclamp.min</code>; Audio threads receive low-latency scheduling; Shader compilation runs on throughput cores. Anticheat and third-party overlay threads are explicitly excluded from priority elevation.</li>
+<li><strong>Anti-Cheat Safety Contract</strong>: 100% non-invasive. Zero <code>ptrace</code>, zero memory reading (<code>/proc/&lt;pid&gt;/mem</code>), zero code injection. Tuning strictly employs POSIX standard OS scheduler calls (<code>sched_setaffinity</code>, <code>setpriority</code>, <code>sched_setscheduler</code>) and cgroups. Explicit documentation in <code>docs/ANTI_CHEAT.md</code> with transparent VAC/anti-cheat limitations.</li>
+<li><strong>Filesystem Abstraction (<code>IProcFs</code>)</strong>: Decouple procfs operations for unit and stress testing (1000-process fork/exit races, crash injection, zero fd leaks).</li>
+</ol>
+<h3 id="decision_6">Decision</h3>
+<p>Adopt <strong>Option 3: Event-Driven Kernel Connector + Non-Invasive OS-Standard Tuning</strong>.</p>
+<h3 id="status_6">Status</h3>
+<p>Accepted and implemented for Stage 5.</p>
+<hr />
+<h2 id="adr-0008-modular-latency-subsystems-dynamic-nvml-loading-and-hardware-safety-guardrails">ADR-0008: Modular Latency Subsystems, Dynamic NVML Loading, and Hardware Safety Guardrails</h2>
+<h3 id="context_7">Context</h3>
+<p>Low latency in competitive gaming requires orchestrating multiple independent hardware and kernel domains: IRQ interrupt steering, network queueing disciplines, audio server buffering, and GPU clock domains. However, systems exhibit wide hardware heterogeneity: AMD vs NVIDIA vs Intel graphics, diverse network adapters (Ethernet, Wi-Fi), and varying audio daemons. Crucially, a failure or absence of one component (e.g. no NVIDIA driver, or an unmanaged network interface) must never cause a cascading failure in other subsystems. Furthermore, aggressive GPU clock forcing without thermal and power guardrails can cause thermal throttling or battery exhaustion.</p>
+<h3 id="options-considered_5">Options Considered</h3>
+<ol>
+<li><strong>Monolithic Procedural Tuning</strong>: Combine all tuning steps into a single sequence. Fragile: if any command fails (e.g. <code>tc</code> fails on a virtual bridge, or <code>nvidia-smi</code> is missing), the entire optimization pipeline aborts.</li>
+<li><strong>External Shell Scripting</strong>: Call unvetted bash scripts for <code>tc</code>, <code>iw</code>, <code>nvidia-smi</code>, <code>pw-metadata</code>. Violates the Zero Shell Policy and makes atomic rollback impossible.</li>
+<li><strong>Modular Subsystems with Safety Guardrails &amp; Dynamic NVML Loading</strong>:</li>
+<li><strong>Independent Subsystems</strong>: Each subsystem (<code>IrqTuner</code>, <code>NetworkTuner</code>, <code>PipewireTuner</code>, <code>GpuController</code>) implements an independent RAII contract with isolated <code>probe()</code>, <code>apply()</code>, <code>revert()</code>, and <code>describe()</code> methods. Failure in one subsystem is non-fatal and does not block others.</li>
+<li><strong>IRQ Steering</strong>: Move network, USB, and NVMe interrupts to housekeeping cores while binding GPU interrupts to gaming CCD cores. Temporarily pause <code>irqbalance</code> during gaming sessions and restore it on exit.</li>
+<li><strong>Targeted Network QoS &amp; Wi-Fi Power Save</strong>: Discover active default gateway route from <code>/proc/net/route</code> and apply CAKE/FQ_CODEL strictly to the active interface, preserving the original qdisc for clean restoration. Disable Wi-Fi power save via <code>iw</code> during gaming.</li>
+<li><strong>Audio Latency &amp; xrun Guardian</strong>: Configure PipeWire quantum via <code>pw-metadata</code> or ephemeral drop-in configuration (<code>/run/pipewire/pipewire.conf.d/99-zenith.conf</code>), avoiding modification of <code>/etc</code> or user configuration. Monitor xrun counters; dynamically elevate quantum upon audio dropouts.</li>
+<li><strong>Multi-Vendor GPU &amp; Dynamic NVML</strong>:<ul>
+<li>NVIDIA: Dynamically load <code>libnvidia-ml.so.1</code> via <code>dlopen</code>/<code>dlsym</code> for direct in-process NVML queries and clock locking without fork/exec overhead. Graceful fallback to <code>nvidia-smi</code> binary.</li>
+<li>AMD: Manage <code>power_dpm_force_performance_level</code> via sysfs with rollback.</li>
+<li>Intel: Tune <code>gt_min_freq_mhz</code> and <code>gt_boost_freq_mhz</code> via sysfs.</li>
+</ul>
+</li>
+<li><strong>Thermal &amp; Battery Safety Guard</strong>:<ul>
+<li>Thermal Guard: Check GPU temperature via hwmon/NVML. If $T \ge 85^\circ\text{C}$, refuse to lock maximum clocks.</li>
+<li>Battery Guard: Probe power supplies. If discharging on battery, refuse to engage aggressive GPU performance profiles.</li>
+</ul>
+</li>
+</ol>
+<h3 id="decision_7">Decision</h3>
+<p>Adopt <strong>Option 3: Modular Subsystems with Safety Guardrails &amp; Dynamic NVML Loading</strong>.</p>
+<h3 id="status_7">Status</h3>
+<p>Accepted and implemented for Stage 6.</p>
+<hr />
+<h2 id="adr-0009-adaptive-state-machine-psi-pressure-monitoring-and-offline-local-learning">ADR-0009: Adaptive State Machine, PSI Pressure Monitoring, and Offline Local Learning</h2>
+<h3 id="context_8">Context</h3>
+<p>Static system tuning is inherently fragile: applying aggressive sysctl tweaks, uclamp allocations, or locked clocks on thermally constrained hardware or memory-starved systems can cause latency spikes, severe thrashing, and thermal throttling. Furthermore, blindly forcing aggressive settings regardless of whether a game benefits from them can degrade performance.</p>
+<h3 id="options-considered_6">Options Considered</h3>
+<ol>
+<li><strong>Static Blind Tuning</strong>: Apply configured profile once and never adapt during runtime. Fails under dynamic workload spikes, thermal buildup, or memory exhaustion.</li>
+<li><strong>Cloud Telemetry / Remote Optimization Profiles</strong>: Collect user frametimes and upload them to a remote server for profile generation. Violates user privacy and adds remote network dependencies.</li>
+<li><strong>Local Closed-Loop Adaptive Controller &amp; Offline Learning Engine</strong>:</li>
+<li><strong>Pressure Stall Information (PSI)</strong>: Continuously sample <code>/proc/pressure/{cpu,memory,io}</code> (<code>some</code> and <code>full</code> avg10/avg60/avg300) along with CPU/GPU hwmon temperatures and hardware throttle counts (<code>core_throttle_count</code>).</li>
+<li><strong>Adaptive Degradation &amp; Hysteresis</strong>:<ul>
+<li>When thresholds are breached (e.g. <code>memory.some.avg10 &gt; 25%</code>, <code>io.some.avg10 &gt; 30%</code>, $T \ge 85^\circ\text{C}$, or thermal throttling events increment), automatically degrade profile: <code>Aggressive</code> $\to$ <code>Balanced</code> $\to$ <code>Safe</code>, logging the exact metric breach.</li>
+<li>Recovery requires remaining healthy for $N=5$ consecutive sampling cycles and exceeding a cooldown window (10s) to guarantee zero oscillation.</li>
+</ul>
+</li>
+<li><strong>Offline Local Learning (<code>zenithctl suggest</code>)</strong>:<ul>
+<li>Parses local MangoHud CSV frametime logs (<code>avg_fps</code>, <code>1%_low</code>, <code>0.1%_low</code>, <code>frametime_variance</code>).</li>
+<li>Recommends the optimal profile per game based on historical variance and thermal headroom.</li>
+<li>100% offline: all profiles stored in local JSON (<code>/var/lib/zenith/learning_db.json</code>), zero external telemetry.</li>
+</ul>
+</li>
+<li><strong>Sched_ext Extensibility</strong>:<ul>
+<li>Probe Linux 6.12+ <code>/sys/kernel/sched_ext/state</code>.</li>
+<li>Support optional user-configured BPF schedulers (<code>scx_lavd</code>, <code>scx_rusty</code>, <code>scx_bpfland</code>) with non-destructive lifecycle management and rollback.</li>
+</ul>
+</li>
+<li><strong>Platform Clamps</strong>:<ul>
+<li>Automatically enforce battery and handheld ceilings (clamping profile to Balanced or Safe).</li>
+</ul>
+</li>
+</ol>
+<h3 id="decision_8">Decision</h3>
+<p>Adopt <strong>Option 3: Local Closed-Loop Adaptive Controller &amp; Offline Learning Engine</strong>.</p>
+<h3 id="status_8">Status</h3>
+<p>Accepted and implemented for Stage 7.</p>
+<hr />
+<h2 id="adr-0010-c20-architectural-paradigm-monadic-result-dependency-inversion-raii-containment-and-single-threaded-reactor-event-loop">ADR-0010: C++20 Architectural Paradigm: Monadic Result, Dependency Inversion, RAII Containment, and Single-Threaded Reactor Event Loop</h2>
+<h3 id="context_9">Context</h3>
+<p>Zenith is an ultra-low latency system daemon operating with root privileges. As the codebase scales across subsystems (cgroups, CPU topology, process detection, latency tuners, telemetry, BPF), maintaining zero runtime overhead, testability without root privileges, deterministic resource release, and thread safety is paramount.
+Traditional C++ patterns using exceptions on hot paths, raw pointers, direct system calls embedded in business logic, and ad-hoc multithreading introduce latency jitter, data races, and make testing dependent on physical Linux root access.</p>
+<h3 id="options-considered_7">Options Considered</h3>
+<ol>
+<li><strong>Traditional Exceptions &amp; Multithreaded Locks</strong>: Throw <code>std::runtime_error</code> on failures and use mutexes across multiple worker threads. Incurs non-deterministic stack unwinding penalties, risk of deadlocks, and complexity under ThreadSanitizer (TSan).</li>
+<li><strong>Pure C-style Return Codes</strong>: Return integer status codes (<code>int err</code>) with output parameters (<code>int func(T* out)</code>). Lacks composability, lacks type safety, and separates error metadata from return values.</li>
+<li><strong>Reference C++20 Clean Architecture</strong>:</li>
+<li><strong>Monadic <code>Result&lt;T, Error&gt;</code></strong>: Zero-allocation error handling with functional chaining (<code>.map()</code>, <code>.and_then()</code>, <code>.or_else()</code>). Rich <code>Error</code> structs with <code>ErrorCode</code>, message, errno, and source location. Zero exceptions on hot latency paths.</li>
+<li><strong>Dependency Inversion Interfaces</strong>: Core operating system interactions abstracted behind clean C++ interfaces (<code>ISysfs</code>, <code>IProcessSource</code>, <code>ICommandRunner</code>, <code>IClock</code>, <code>INetlink</code>) with production and mock implementations, enabling 100% test coverage without root permissions.</li>
+<li><strong>Plugin-like Tweak Registry</strong>: Self-contained tweak definition with auto-registration macros (<code>ZENITH_REGISTER_TWEAK</code>), allowing additions with zero boilerplate.</li>
+<li><strong>Strict RAII</strong>: Move-only <code>UniqueFd</code>, <code>CgroupDirGuard</code>, and <code>ScopeExitGuard</code>. Absolutely zero raw <code>new</code>/<code>delete</code>.</li>
+<li><strong>Single-Threaded Epoll Core Reactor</strong>: One event loop thread for all signalfd, timerfd, netlink, and socket events, with thread-safe worker posting, proving zero data races under TSan.</li>
+<li><strong>Structured High-Performance Logger</strong>: Sinks for ANSI console, journald, and JSON lines with per-key rate limiting to prevent logging overhead.</li>
+</ol>
+<h3 id="decision_9">Decision</h3>
+<p>Adopt <strong>Option 3: Reference C++20 Clean Architecture</strong>.</p>
+<h3 id="status_9">Status</h3>
+<p>Accepted and implemented for Stage 8.</p>
+<hr />
+<h2 id="adr-0011-empirical-benchmarking-statistical-ablation-tweak-decision-framework">ADR-0011: Empirical Benchmarking, Statistical Ablation &amp; Tweak Decision Framework</h2>
+<h3 id="context_10">Context</h3>
+<p>System optimization daemons frequently suffer from "snake oil" syndrome: declaring hundreds of sysctl or scheduler tweaks without verifiable statistical evidence, or making unproven marketing assertions ("eliminates 100% of stutters", "applies in 5 ms"). Furthermore, complex configurations can introduce regressions where a tweak benefits one hardware topology while degrading another. Zenith requires a rigorous empirical framework where every tweak is measured across $\ge 10$ runs with 95% Confidence Intervals, and unproven tweaks are disabled by default.</p>
+<h3 id="options-considered_8">Options Considered</h3>
+<ol>
+<li><strong>Ad-hoc Manual Testing</strong>: Developers run informal manual tests without warm-up, statistical confidence intervals, or automated baseline comparisons. Highly subjective, unreproducible, and prone to placebo bias.</li>
+<li><strong>Third-Party Game Benchmarking Exclusively</strong>: Relying solely on built-in game benchmarks. Impractical for automated headless CI environments and lacks isolation of individual kernel knobs.</li>
+<li><strong>Reproducible Empirical Benchmarking &amp; Ablation Suite (<code>bench/</code>)</strong>:</li>
+<li><strong>Multi-Iteration Statistical Rigor</strong>: $\ge 10$ runs per scenario preceded by 2 unrecorded warmup runs. Calculation of Median, Mean, Interquartile Range (IQR), Standard Deviation, and 95% Confidence Intervals.</li>
+<li><strong>Condition Pinning &amp; Safety Guards</strong>: Thermal stabilization verification, CPU scaling governor verification, and automatic flagging of runs experiencing thermal throttling ($\ge 85^\circ\text{C}$).</li>
+<li><strong>A/B &amp; Ablation Architecture (<code>bench/runner.py</code>)</strong>: Tests Baseline vs complete Profiles (Safe, Balanced, Aggressive) vs Individual Isolated Tweaks (e.g. <code>split_lock</code>, <code>thp</code>, <code>vcache</code>, <code>cgroups</code>, <code>epp</code>, <code>pipewire</code>, <code>nvme</code>) to measure the discrete delta of each intervention.</li>
+<li><strong>Dual Execution Engine</strong>:<ul>
+<li><em>Bare-Metal Mode</em>: Real cyclictest, pw-top, ping load, and MangoHud/CapFrameX game logs.</li>
+<li><em>Synthetic/Simulation Mode</em>: Deterministic, mathematically modeled frame time generator enabling full test execution in cloud CI without GPU or bare-metal hardware.</li>
+</ul>
+</li>
+<li><strong>Publication-Ready Visualizations (<code>bench/plot_results.py</code>)</strong>: Automated rendering of Matplotlib bar charts with 95% CI error bars and frametime jitter distributions.</li>
+<li><strong>Nanosecond-Precision Daemon Footprint Probe (<code>zenith_bench_daemon</code>)</strong>: Real empirical measurements of startup latency, memory RSS, and mutation apply/revert duration.</li>
+<li><strong>Empirical Tweak Decision Table</strong>: Every tweak must declare its measured effect; tweaks without proven benefit are disabled by default.</li>
+<li><strong>Documentation Integrity</strong>: Purging all unverified claims from <code>README.md</code> and providing a single reproduction command (<code>./bench/run_benchmarks.sh</code>).</li>
+</ol>
+<h3 id="decision_10">Decision</h3>
+<p>Adopt <strong>Option 3: Reproducible Empirical Benchmarking &amp; Ablation Suite</strong>.</p>
+<h3 id="status_10">Status</h3>
+<p>Accepted and implemented for Stage 9.</p>
+<hr />
+<h2 id="adr-0012-ux-architecture-unix-socket-protocol-doctor-diagnostics">ADR-0012: UX Architecture, Unix Socket Protocol &amp; Doctor Diagnostics</h2>
+<h3 id="context_11">Context</h3>
+<p>Zenith operates primarily as a background system daemon, but end-users interact with it through CLI tools, Steam launch options, and shell prompts. A subpar user experience (cryptic error codes, failure without actionable guidance, difficulty diagnosing system incompatibilities, or complex multi-step setups) leads to user frustration and misconfigurations.
+A first-class UX is required such that any user can install Zenith, run a diagnostic health check, inspect live core topologies, and launch games directly without complex setup.</p>
+<h3 id="options-considered_9">Options Considered</h3>
+<ol>
+<li><strong>Direct Configuration File Editing Exclusively</strong>: Require users to manually modify <code>/etc/zenith/zenith.conf</code> and restart systemd. High friction, error-prone, and provides zero real-time feedback during gaming.</li>
+<li><strong>Heavy Desktop Electron / Web GUI</strong>: Package a complete web/electron desktop application. Violates Zenith's ultra-low latency philosophy by consuming hundreds of megabytes of RAM and background CPU cycles.</li>
+<li><strong>Multi-Tiered CLI, Doctor Engine, and Lightweight Socket Protocol</strong>:</li>
+<li><strong>Unified Control CLI (<code>zenithctl</code>)</strong>: Intuitive verb-based command interface (<code>status</code>, <code>doctor</code>, <code>profile</code>, <code>game</code>, <code>dry-run</code>, <code>explain</code>, <code>rollback</code>, <code>suggest</code>, <code>logs</code>, <code>report</code>, <code>completions</code>).</li>
+<li><strong>Versioned UNIX Domain Socket Protocol (<code>/run/zenith/zenith.sock</code>)</strong>: JSON-based request/response protocol (<code>STATUS</code>, <code>GET_PROFILES</code>, <code>SET_PROFILE</code>, <code>ROLLBACK</code>) with fallback to local inspection when the daemon is offline.</li>
+<li><strong>Comprehensive Health Doctor (<code>zenithctl doctor</code>)</strong>: Automated verification of cgroups v2, kernel version, privileges, competing daemons (gamemode/ananicy/tuned), AMD X3D driver, Intel hybrid cores, PSI, and PipeWire, outputting formatted colored results with <strong>exact actionable bash remediation commands</strong>.</li>
+<li><strong>Live Terminal Dashboard (<code>zenithctl status --watch</code>)</strong>: Real-time ASCII/ANSI TUI monitor displaying active game, core topology map (CCD0 V-Cache vs CCD1 background cores), PSI pressure gauges, temperatures, and state journal status.</li>
+<li><strong>Steam Launch Options Wrapper (<code>zenith-run %command%</code>)</strong>: Transparent wrapper supporting <code>gamescope</code>, forwarding exit codes without shell expansion, and dispatching D-Bus desktop notifications (<code>notify-send</code>) upon game start and exit.</li>
+<li><strong>Bilingual Internationalization (<code>zenith::i18n</code>)</strong>: English and Russian localization with standardized error codes catalog (<code>docs/ERRORS.md</code>) linked directly in output.</li>
+<li><strong>Anonymized Issue Reporter (<code>zenithctl report</code>)</strong>: Generates a GitHub-ready diagnostics markdown snippet with redacting of usernames, home paths, and non-loopback IP addresses.</li>
+</ol>
+<h3 id="decision_11">Decision</h3>
+<p>Adopt <strong>Option 3: Multi-Tiered CLI, Doctor Engine, and Lightweight Socket Protocol</strong>.</p>
+<h3 id="status_11">Status</h3>
+<p>Accepted and implemented for Stage 10.</p>
+<hr />
+<h2 id="adr-0013-distribution-packaging-supply-chain-security-config-migrations">ADR-0013: Distribution, Packaging, Supply Chain Security &amp; Config Migrations</h2>
+<h3 id="context_12">Context</h3>
+<p>Zenith is deployed across diverse Linux distributions (Arch Linux, CachyOS, SteamOS, Debian, Ubuntu, Fedora, NixOS) and must guarantee safe installation, upgrades, and removal. A system-tuning package running with root privileges presents distinct supply chain and lifecycle risks:
+1. Uninstalling the package while optimizations are active could orphan mutated sysctl/cgroup values indefinitely.
+2. Upgrading between major/minor releases must not corrupt user configuration or wipe out custom gaming overrides.
+3. Distribution pipelines must ensure binary reproducibility and defend against supply-chain tampering.</p>
+<h3 id="options-considered_10">Options Considered</h3>
+<ol>
+<li><strong>Source Tarballs Only</strong>: Provide only source archives and rely on users to build manually. Unacceptable UX for gamers; fails to provide system integration or uninstall guarantees.</li>
+<li><strong>Distribution-Agnostic Binaries (Flatpak / Snap)</strong>: Run Zenith inside a desktop sandbox. Impossible due to sandboxing boundaries; Zenith requires access to kernel <code>/proc/sys</code>, <code>/sys/fs/cgroup</code>, and Netlink sockets.</li>
+<li><strong>Multi-Format Native Packaging with Guaranteed Rollback, Reproducible Builds &amp; Hardened Supply Chain</strong>:</li>
+<li><strong>Native Multi-Platform Packages</strong>:<ul>
+<li>Arch Linux: <code>PKGBUILD</code> (namcap verified) + <code>zenith-gaming-daemon-git</code> + <code>zenith.install</code> hooks.</li>
+<li>Debian / Ubuntu: CPack <code>.deb</code> generation with custom <code>postinst</code>, <code>prerm</code>, and <code>postrm</code>.</li>
+<li>Fedora / RHEL: CPack <code>.rpm</code> generation and standalone <code>zenith.spec</code>.</li>
+<li>NixOS / Nix: <code>flake.nix</code> with package, devShell, and declarative systemd service module.</li>
+</ul>
+</li>
+<li><strong>Guaranteed Rollback on Removal (<code>prerm</code>)</strong>:<ul>
+<li>Pre-removal scripts strictly execute <code>zenithctl rollback || zenith --rollback</code> before binaries are unlinked, guaranteeing that all sysctl, sysfs, and cgroups alterations are reverted to their baseline snapshot.</li>
+</ul>
+</li>
+<li><strong>Zero-Downtime Configuration Migration Engine (<code>ConfigMigrator</code>)</strong>:<ul>
+<li>Versioned configuration schemas with automatic detection, schema upgrading, legacy key preservation, and validation before persisting.</li>
+</ul>
+</li>
+<li><strong>End-to-End Privileged &amp; Rollback Integration Suite (<code>test_e2e_privileged.sh</code>)</strong>:<ul>
+<li>Takes baseline snapshot $\to$ applies Aggressive profile mutations $\to$ asserts target parameter state $\to$ triggers rollback $\to$ asserts zero-drift comparison with baseline.</li>
+</ul>
+</li>
+<li><strong>Supply Chain Hardening &amp; Release Reproducibility</strong>:<ul>
+<li>Pinning all GitHub Actions to exact immutable commit SHAs.</li>
+<li>Weekly Dependabot automated workflow updates.</li>
+<li>GitHub CodeQL advanced static security scanning.</li>
+<li>OpenSSF Scorecard supply chain integrity verification.</li>
+<li>Deterministic release compilation using <code>SOURCE_DATE_EPOCH</code> and <code>-ffile-prefix-map</code>.</li>
+<li>CycloneDX 1.5 Software Bill of Materials (<code>cyclonedx.json</code>) and cryptographic <code>SHA256SUMS</code> manifests attached to GitHub Releases.</li>
+</ul>
+</li>
+</ol>
+<h3 id="decision_12">Decision</h3>
+<p>Adopt <strong>Option 3: Multi-Format Native Packaging with Guaranteed Rollback, Reproducible Builds &amp; Hardened Supply Chain</strong>.</p>
+<h3 id="status_12">Status</h3>
+<p>Accepted and implemented for Stage 11.</p>
+<hr />
+<h2 id="adr-0014-project-showcase-public-profile-database-community-documentation">ADR-0014: Project Showcase, Public Profile Database &amp; Community Documentation</h2>
+<h3 id="context_13">Context</h3>
+<p>Zenith has reached feature completeness across its low-latency engine, topology detection, security model, and packaging. However, high-performance system daemons frequently suffer from steep learning curves, ambiguous performance expectations ("snake oil" vs reality), and fragmented documentation. </p>
+<p>To ensure maximum adoption, transparency, and community contributions:
+1. Documentation must provide an honest accounting of benefits, limitations, risks, and anti-cheat compliance.
+2. Man pages must adhere to Section 1, 5, and 8 UNIX standards.
+3. A public, community-extensible game profiles database (<code>profiles/*.toml</code>) must allow users to contribute specific game settings with automated CI validation.
+4. The project must provide bilingual documentation (EN and RU) and an automated documentation website via MkDocs Material and GitHub Pages.</p>
+<h3 id="options-considered_11">Options Considered</h3>
+<ol>
+<li><strong>Minimalist README Only</strong>: Rely exclusively on source code comments and short markdown notes. Inadequate for new users; leaves questions regarding anti-cheat safety unanswered.</li>
+<li><strong>Third-Party Wiki</strong>: Host documentation on external wikis (e.g. GitHub Wiki). Difficult to version control alongside code changes; cannot be tested in CI.</li>
+<li><strong>Integrated Documentation Site, UNIX Man Pages, Public Game Profiles &amp; Showcase Repository</strong>:</li>
+<li><strong>Showcase README</strong>: Concise technical overview, real-time TUI mock, badges, hardware compatibility matrix, and the explicit "What it does / What it does NOT do / Risks / Anti-cheat compliance" section.</li>
+<li><strong>UNIX Man Pages</strong>: <code>man/zenith.8</code>, <code>man/zenithctl.1</code>, and <code>man/zenith.conf.5</code> installed into <code>${CMAKE_INSTALL_MANDIR}</code>.</li>
+<li><strong>Community Guidelines</strong>: <code>CONTRIBUTING.md</code>, <code>CODE_OF_CONDUCT.md</code> (Contributor Covenant 2.1), <code>NOTICE</code>, structured GitHub issue templates (requiring <code>zenithctl report --redact</code>), and PR templates.</li>
+<li><strong>Public Game Profiles Database</strong>: Curated <code>profiles/*.toml</code> for major titles (<em>Cyberpunk 2077</em>, <em>CS2</em>, <em>Dota 2</em>, <em>Starfield</em>, <em>Baldur's Gate 3</em>, <em>Elden Ring</em>, <em>Apex Legends</em>) accompanied by a standalone Python validator script (<code>scripts/validate_game_profiles.py</code>) enforced in CI.</li>
+<li><strong>Bilingual Documentation Site</strong>: Modern MkDocs Material site supporting English and Russian, dark/light theme, search, code copy, and Mermaid diagrams deployed via GitHub Actions.</li>
+<li><strong>SPDX Compliance</strong>: Standard <code>// SPDX-License-Identifier: MIT</code> headers across all source and header files.</li>
+</ol>
+<h3 id="decision_13">Decision</h3>
+<p>Adopt <strong>Option 3: Integrated Documentation Site, UNIX Man Pages, Public Game Profiles &amp; Showcase Repository</strong>.</p>
+<h3 id="status_13">Status</h3>
+<p>Accepted and implemented for Stage 12.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
+      
+    
+  </body>
+</html>
