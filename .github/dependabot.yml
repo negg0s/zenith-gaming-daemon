@@ -7,3 +7,9 @@ updates:
     commit-message:
       prefix: "ci(deps)"
     open-pull-requests-limit: 5
+    # codeql-action refuses to run when init, analyze, and upload-sarif are on
+    # different versions. Keep every action update in a single PR.
+    groups:
+      github-actions:
+        patterns:
+          - "*"
