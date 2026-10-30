@@ -17,6 +17,7 @@ The current source version is 1.6.0. Packages are published on the [Releases](ht
 - Applies kernel settings such as split-lock mitigation, THP and compaction proactiveness for the session.
 - Can lock GPU clocks through the AMDGPU sysfs interface or NVIDIA NVML.
 - Lowers the PipeWire quantum and adjusts the network qdisc for lower audio and packet latency.
+- Optionally starts a sched_ext (scx) scheduler for the game session on Linux 6.12+ and stops it on exit.
 - Writes a rollback journal before changing system state and restores it when the game exits or the daemon restarts.
 
 Every change is session-scoped. The daemon does not write persistent sysctl or security configuration files.
@@ -101,6 +102,8 @@ zenithctl status --watch
 ```
 
 `doctor` checks cgroups v2, kernel features, drivers and conflicting services. `status --watch` shows the active session, CPU topology, pressure stall information, GPU state and recent events.
+
+If your kernel supports sched_ext, inspect it with `zenithctl scx status` and `zenithctl scx list`. Enable the handoff in `/etc/zenith/zenith.conf` with `sched_ext_enabled = true` and `sched_ext_scheduler = scx_lavd`. Leave it off when `scx_loader` already manages the scheduler.
 
 Start a game in Steam or another launcher. The daemon detects the process and applies the configured profile without a `%command%` wrapper.
 

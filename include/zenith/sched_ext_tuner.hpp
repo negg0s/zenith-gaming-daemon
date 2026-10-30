@@ -54,6 +54,7 @@ public:
     ~SchedExtTuner();
 
     [[nodiscard]] bool is_supported() const;
+    [[nodiscard]] bool is_active() const;
     [[nodiscard]] std::string get_active_scheduler() const;
     [[nodiscard]] std::vector<std::string> get_available_schedulers() const;
 
@@ -63,6 +64,10 @@ public:
     [[nodiscard]] bool is_running() const { return running_; }
     [[nodiscard]] const std::string& current_scheduler() const { return current_scheduler_; }
 
+    // The engine owns the scheduler for the game session. The CLI can leave it
+    // running after the process exits.
+    void set_auto_stop(bool enabled) { auto_stop_ = enabled; }
+
     // Mock command runner hook
     using CommandExecutor = std::function<std::pair<bool, std::string>(const std::string&, const std::vector<std::string>&)>;
     void set_command_executor(CommandExecutor executor) { cmd_executor_ = std::move(executor); }
@@ -70,10 +75,12 @@ public:
 private:
     ISchedExtFs* fs_;
     bool running_ = false;
+    bool auto_stop_ = true;
     std::string current_scheduler_;
     CommandExecutor cmd_executor_;
 
     [[nodiscard]] std::pair<bool, std::string> run_cmd(const std::string& bin, const std::vector<std::string>& args);
+    [[nodiscard]] std::string find_scheduler_binary(const std::string& scheduler_name) const;
 };
 
 } // namespace zenith

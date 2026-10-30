@@ -158,7 +158,25 @@ Profiles override location: `/etc/zenith/profiles.conf`
 
 ---
 
-### 17. `poll_interval_ms`
+### 17. `sched_ext_enabled`
+* **Type**: `boolean`
+* **Default**: `false`
+* **Participating Profiles**: all
+* **Mechanism**: Starts a sched_ext (scx) scheduler for the game session and stops it on exit. The scheduler is only started when `/sys/kernel/sched_ext/state` is not already `enabled`.
+* **Requirements**: Linux 6.12+, a scheduler binary such as `scx_lavd` in `/usr/bin` or `/usr/local/bin`, and root permissions.
+* **Conflict**: If `scx_loader`, a systemd unit, or another tool already manages the scheduler, leave this disabled. Zenith will not kill a scheduler it did not start.
+
+---
+
+### 18. `sched_ext_scheduler`
+* **Type**: `string`
+* **Default**: `scx_lavd`
+* **Allowed Values**: letters, digits, `_`, and `-`. The binary must exist in `/usr/bin` or `/usr/local/bin`.
+* **Description**: Scheduler name passed to the binary. Common choices are `scx_lavd` for gaming and `scx_bpfland` for desktop responsiveness.
+
+---
+
+### 19. `poll_interval_ms`
 * **Type**: `integer`
 * **Default**: `500`
 * **Allowed Range**: `50` to `10000`

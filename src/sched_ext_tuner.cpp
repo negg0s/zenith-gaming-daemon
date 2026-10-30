@@ -8,7 +8,9 @@ SchedExtTuner::SchedExtTuner(ISchedExtFs* fs)
     : fs_(fs ? fs : &RealSchedExtFs::instance()) {}
 
 SchedExtTuner::~SchedExtTuner() {
-    stop_scheduler();
+    if (auto_stop_) {
+        stop_scheduler();
+    }
 }
 
 std::pair<bool, std::string> SchedExtTuner::run_cmd(const std::string& bin, const std::vector<std::string>& args) {
@@ -23,7 +25,7 @@ bool SchedExtTuner::is_supported() const {
     if (fs_->exists("/sys/kernel/sched_ext/state")) {
         return true;
     }
-    // Check osrelease >= 6.12
+    // sched_ext is part of the mainline kernel since 6.12.
     if (auto rel = fs_->read_file("/proc/sys/kernel/osrelease")) {
         try {
             double ver = std::stod(*rel);
@@ -33,11 +35,33 @@ bool SchedExtTuner::is_supported() const {
     return false;
 }
 
-std::string SchedExtTuner::get_active_scheduler() const {
+bool SchedExtTuner::is_active() const {
     if (auto state = fs_->read_file("/sys/kernel/sched_ext/state")) {
-        return trim(*state);
+        return trim(*state) == "enabled";
+    }
+    return false;
+}
+
+std::string SchedExtTuner::get_active_scheduler() const {
+    if (auto ops = fs_->read_file("/sys/kernel/sched_ext/root/ops")) {
+        auto name = trim(*ops);
+        if (!name.empty()) return name;
+    }
+    if (auto state = fs_->read_file("/sys/kernel/sched_ext/state")) {
+        auto name = trim(*state);
+        if (!name.empty()) return name;
     }
     return "disabled";
+}
+
+std::string SchedExtTuner::find_scheduler_binary(const std::string& scheduler_name) const {
+    for (const char* dir : {"/usr/bin", "/usr/local/bin"}) {
+        std::string path = std::string(dir) + "/" + scheduler_name;
+        if (fs_->exists(path)) {
+            return path;
+        }
+    }
+    return {};
 }
 
 std::vector<std::string> SchedExtTuner::get_available_schedulers() const {
@@ -47,7 +71,7 @@ std::vector<std::string> SchedExtTuner::get_available_schedulers() const {
     };
 
     for (const auto& scx : candidates) {
-        if (fs_->exists("/usr/bin/" + scx)) {
+        if (!find_scheduler_binary(scx).empty()) {
             schedulers.push_back(scx);
         }
     }
@@ -58,13 +82,20 @@ bool SchedExtTuner::start_scheduler(const std::string& scheduler_name) {
     if (running_) return true;
 
     if (!is_supported()) {
-        ZENITH_LOG_WARN("sched_ext is not supported by current kernel (requires Linux 6.12+).");
+        ZENITH_LOG_WARN("sched_ext is not supported by the current kernel (requires Linux 6.12+).");
         return false;
     }
 
-    std::string bin = "/usr/bin/" + scheduler_name;
-    if (!fs_->exists(bin)) {
-        ZENITH_LOG_WARN("sched_ext binary not found: " + bin);
+    if (is_active()) {
+        ZENITH_LOG_INFO("sched_ext is already active (" + get_active_scheduler() +
+                        "); leaving the system scheduler untouched.");
+        return false;
+    }
+
+    std::string bin = find_scheduler_binary(scheduler_name);
+    if (bin.empty()) {
+        ZENITH_LOG_WARN("sched_ext binary not found: " + scheduler_name +
+                        " (looked in /usr/bin and /usr/local/bin)");
         return false;
     }
 
@@ -76,13 +107,18 @@ bool SchedExtTuner::start_scheduler(const std::string& scheduler_name) {
         return true;
     }
 
+    ZENITH_LOG_WARN("Failed to start sched_ext scheduler " + scheduler_name +
+                    (out.empty() ? std::string() : ": " + out));
     return false;
 }
 
 bool SchedExtTuner::stop_scheduler() {
     if (!running_) return true;
 
-    (void)run_cmd("/usr/bin/killall", {"-SIGINT", current_scheduler_});
+    auto [ok, out] = run_cmd("/usr/bin/killall", {"-SIGINT", current_scheduler_});
+    if (!ok) {
+        (void)run_cmd("/usr/bin/pkill", {"-INT", "-x", current_scheduler_});
+    }
     running_ = false;
     ZENITH_LOG_INFO("Stopped sched_ext BPF scheduler: " + current_scheduler_);
     current_scheduler_.clear();

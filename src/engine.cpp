@@ -153,6 +153,16 @@ bool ZenithEngine::activate(const DetectedGame& game) {
         gpu_.lock_clocks(config_.active_profile);
     }
 
+    // 3.1. Optional sched_ext scheduler handoff. Skip when scx_loader or the
+    // user already manages a scheduler.
+    if (config_.sched_ext_enabled) {
+        if (sched_ext_.start_scheduler(config_.sched_ext_scheduler)) {
+            ZENITH_LOG_INFO("sched_ext scheduler active: " + config_.sched_ext_scheduler);
+        } else {
+            ZENITH_LOG_WARN("sched_ext scheduler was not started; continuing without it.");
+        }
+    }
+
     // 4. IRQ Affinity Steering
     irq_.apply(topology_.get_gaming_cores(), topology_.get_background_cores());
 
@@ -188,6 +198,7 @@ void ZenithEngine::deactivate() {
         ZENITH_LOG_INFO("Thawed and restored " + std::to_string(restored) + " background processes to normal priority.");
     }
 
+    sched_ext_.stop_scheduler();
     irq_.revert();
     network_.revert();
     pipewire_.revert();
@@ -288,6 +299,7 @@ void ZenithEngine::print_status() const {
     std::cout << "Gaming Cores      : " << topology_.to_cpuset_string(topology_.get_gaming_cores()) << "\n";
     std::cout << "Background Cores  : " << topology_.to_cpuset_string(topology_.get_background_cores()) << "\n";
     std::cout << "cgroups v2 isol   : " << (isolator_.is_supported() ? "Supported" : "Disabled/Unsupported") << "\n";
+    std::cout << "sched_ext         : " << (sched_ext_.is_supported() ? (sched_ext_.is_active() ? "Active (" + sched_ext_.get_active_scheduler() + ")" : "Supported") : "Unsupported") << "\n";
     std::cout << "Active Game       : " << (active_game_.has_value() ? active_game_->name + " (PID " + std::to_string(active_game_->pid) + ")" : "None (Idle)") << "\n";
     std::cout << "Journal Entries   : " << journal_.get_entries().size() << "\n";
     std::cout << "==========================================================\n\n";
@@ -330,6 +342,11 @@ std::string ZenithEngine::build_status_json() const {
        << "  \"total_cores\": " << topology_.total_cores() << ",\n"
        << "  \"gaming_cores\": \"" << topology_.to_cpuset_string(topology_.get_gaming_cores()) << "\",\n"
        << "  \"housekeeping_cores\": \"" << topology_.to_cpuset_string(topology_.get_background_cores()) << "\",\n"
+       << "  \"sched_ext\": {\n"
+       << "    \"supported\": " << (sched_ext_.is_supported() ? "true" : "false") << ",\n"
+       << "    \"active\": " << (sched_ext_.is_active() ? "true" : "false") << ",\n"
+       << "    \"scheduler\": \"" << json_escape(sched_ext_.get_active_scheduler()) << "\"\n"
+       << "  },\n"
        << "  \"pressure\": {\n"
        << "    \"cpu_avg10\": " << sp.cpu_some.avg10 << ",\n"
        << "    \"mem_avg10\": " << sp.memory_some.avg10 << ",\n"

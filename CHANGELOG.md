@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+- **sched_ext session handoff**: optional `sched_ext_enabled` and `sched_ext_scheduler` config keys start an scx scheduler for the game session and stop it on exit. Existing schedulers managed by `scx_loader` are left untouched.
+- **`zenithctl scx`**: `list`, `status`, `start`, and `stop` subcommands.
+- **sched_ext tests**: mock filesystem and command executor coverage for support detection, start/stop, conflict handling, and auto-stop.
+
+---
+
 ## [1.6.0] - 2026-10-25
 
 ### Added

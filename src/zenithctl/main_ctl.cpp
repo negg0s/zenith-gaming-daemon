@@ -10,6 +10,7 @@
 #include "zenith/local_learner.hpp"
 #include "zenith/per_game_profile.hpp"
 #include "zenith/report.hpp"
+#include "zenith/sched_ext_tuner.hpp"
 #include "zenith/socket_client.hpp"
 #include "zenith/tui.hpp"
 #include "zenith/tweaks/tweak_registry.hpp"
@@ -42,6 +43,7 @@ void print_ctl_help() {
 "  profile set <safe|balanced|aggressive|ultra> Switch active performance profile\n"
 "  game list                        List per-game profile and tweak overrides\n"
 "  game add <name/appid> [profile]  Add custom per-game optimization profile\n"
+"  scx <list|status|start|stop>     Inspect or control sched_ext (scx) schedulers\n"
 "  dry-run [profile]                Simulate tweak application with colorized diff\n"
 "  explain                          Explain kernel mechanisms, pros, and risks of all tweaks\n"
 "  rollback                         Perform emergency state rollback to baseline\n"
@@ -192,6 +194,60 @@ int main(int argc, char* argv[]) {
             std::cout << "Added game override: '" << target << "' -> Profile: " << prof << "\n";
             return 0;
         }
+    }
+
+    // sched_ext (scx) Command
+    if (cmd == "scx") {
+        if (argc < 3) {
+            std::cerr << "Usage: zenithctl scx <list|status|start|stop> [scheduler]\n";
+            return 1;
+        }
+        std::string sub = argv[2];
+        zenith::SchedExtTuner tuner;
+        tuner.set_auto_stop(false);
+
+        if (sub == "list") {
+            auto available = tuner.get_available_schedulers();
+            std::cout << "sched_ext support: " << (tuner.is_supported() ? "yes" : "no") << "\n";
+            std::cout << "Available schedulers:\n";
+            if (available.empty()) {
+                std::cout << "  (none found in /usr/bin or /usr/local/bin)\n";
+            } else {
+                for (const auto& name : available) {
+                    std::cout << "  - " << name << "\n";
+                }
+            }
+            return 0;
+        }
+
+        if (sub == "status") {
+            std::cout << "sched_ext support : " << (tuner.is_supported() ? "yes" : "no") << "\n";
+            std::cout << "sched_ext active  : " << (tuner.is_active() ? "yes" : "no") << "\n";
+            std::cout << "scheduler         : " << tuner.get_active_scheduler() << "\n";
+            return 0;
+        }
+
+        if (sub == "start") {
+            std::string scheduler = (argc >= 4) ? argv[3] : "scx_lavd";
+            if (!tuner.start_scheduler(scheduler)) {
+                std::cerr << "Could not start " << scheduler << ". Check kernel 6.12+, root permissions, and the binary path.\n";
+                return 1;
+            }
+            std::cout << "Started " << scheduler << "\n";
+            return 0;
+        }
+
+        if (sub == "stop") {
+            if (!tuner.stop_scheduler()) {
+                std::cerr << "Could not stop the scheduler.\n";
+                return 1;
+            }
+            std::cout << "Scheduler stopped\n";
+            return 0;
+        }
+
+        std::cerr << "Unknown scx command: " << sub << "\n";
+        return 1;
     }
 
     // Dry Run

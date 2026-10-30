@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 #include "zenith/config.hpp"
+#include <cctype>
 #include <unordered_set>
 
 namespace zenith {
@@ -19,6 +20,23 @@ static bool parse_bool_strict(std::string_view val, bool& out, std::string& err)
     }
     err = "Invalid boolean value: '" + std::string(val) + "'. Expected 'true', 'false', '1', or '0'.";
     return false;
+}
+
+static bool parse_scheduler_name(std::string_view val, std::string& out, std::string& err) {
+    if (val.empty()) {
+        err = "sched_ext_scheduler must not be empty";
+        return false;
+    }
+    for (char c : val) {
+        unsigned char uc = static_cast<unsigned char>(c);
+        if (!(std::isalnum(uc) || c == '_' || c == '-')) {
+            err = "Invalid sched_ext scheduler name: '" + std::string(val) +
+                  "'. Use letters, digits, '_' or '-'.";
+            return false;
+        }
+    }
+    out = std::string(val);
+    return true;
 }
 
 static bool parse_int_range(std::string_view val, int min_val, int max_val, int& out, std::string& err) {
@@ -75,7 +93,8 @@ std::pair<Config, ConfigResult> Config::parse_string(std::string_view content) {
         "compaction_proactiveness",
         "poll_interval_ms",
         "background_freeze_enabled",
-        "background_freeze_enabled"
+        "sched_ext_enabled",
+        "sched_ext_scheduler"
     };
 
     auto lines = split(content, '\n');
@@ -145,6 +164,10 @@ std::pair<Config, ConfigResult> Config::parse_string(std::string_view content) {
             if (!parse_bool_strict(val, cfg.pipewire_quantum_tuning, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
         } else if (key == "background_freeze_enabled") {
             if (!parse_bool_strict(val, cfg.background_freeze_enabled, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
+        } else if (key == "sched_ext_enabled") {
+            if (!parse_bool_strict(val, cfg.sched_ext_enabled, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
+        } else if (key == "sched_ext_scheduler") {
+            if (!parse_scheduler_name(val, cfg.sched_ext_scheduler, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
         } else if (key == "pipewire_latency_numerator") {
             if (!parse_int_range(val, 16, 8192, cfg.pipewire_latency_numerator, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
         } else if (key == "pipewire_latency_denominator") {
@@ -157,8 +180,6 @@ std::pair<Config, ConfigResult> Config::parse_string(std::string_view content) {
             if (!parse_int_range(val, 0, 100, cfg.compaction_proactiveness, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
         } else if (key == "poll_interval_ms") {
             if (!parse_int_range(val, 50, 10000, cfg.poll_interval_ms, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
-        } else if (key == "background_freeze_enabled") {
-            if (!parse_bool_strict(val, cfg.background_freeze_enabled, err)) { res.success = false; res.error_message = err; return {cfg, res}; }
         }
     }
 

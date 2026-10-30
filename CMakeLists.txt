@@ -191,6 +191,10 @@ add_executable(test_config_migration tests/test_config_migration.cpp)
 target_link_libraries(test_config_migration PRIVATE zenith_core)
 add_test(NAME ConfigMigrationTest COMMAND test_config_migration)
 
+add_executable(test_sched_ext_tuner tests/test_sched_ext_tuner.cpp)
+target_link_libraries(test_sched_ext_tuner PRIVATE zenith_core)
+add_test(NAME SchedExtTunerTest COMMAND test_sched_ext_tuner)
+
 # ==============================================================================
 # Packaging (CPack: .deb, .rpm, .tar.gz)
 # ==============================================================================

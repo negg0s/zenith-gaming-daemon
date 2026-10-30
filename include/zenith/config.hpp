@@ -29,6 +29,8 @@ struct Config {
     bool realtime_process_priority = true;
     bool pipewire_quantum_tuning = true;
     bool background_freeze_enabled = false;
+    bool sched_ext_enabled = false;
+    std::string sched_ext_scheduler = "scx_lavd";
 
     // Advanced latency settings
     int pipewire_latency_numerator = 64;
