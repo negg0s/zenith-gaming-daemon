@@ -98,7 +98,7 @@ std::string NvmeTweak::describe() const {
 
 std::string NvmeTweak::explain() const {
     return "Sets NVMe block queue scheduler to 'none', bypassing unnecessary software I/O elevator locking overhead. "
-           "Allows DirectStorage and game asset streaming to leverage hardware NVMe submission queues directly. "
+           "Allows DirectStorage and game asset streaming to use hardware NVMe submission queues directly. "
            "Risks: None on NVMe drives.";
 }
 

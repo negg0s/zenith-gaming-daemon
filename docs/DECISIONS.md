@@ -5,7 +5,7 @@
 ## ADR-0001: Modern C++20 for Linux Daemon Implementation
 
 ### Context
-Low-latency game optimization requires microsecond-level process manipulation, direct sysfs/procfs filesystem interaction, cgroups v2 tree management, and robust POSIX system call execution without garbage collection pauses or runtime bloat.
+Low-latency game optimization requires microsecond-level process manipulation, direct sysfs/procfs filesystem interaction, cgroups v2 tree management, and reliable POSIX system call execution without garbage collection pauses or runtime bloat.
 
 ### Options Considered
 1. **Python / Bash Scripting**: Quick to write, but introduces interpreter overhead, lack of static type safety, high memory footprint, and fragile error handling during atomic rollbacks.
@@ -164,7 +164,7 @@ Low latency in competitive gaming requires orchestrating multiple independent ha
   - **Independent Subsystems**: Each subsystem (`IrqTuner`, `NetworkTuner`, `PipewireTuner`, `GpuController`) implements an independent RAII contract with isolated `probe()`, `apply()`, `revert()`, and `describe()` methods. Failure in one subsystem is non-fatal and does not block others.
   - **IRQ Steering**: Move network, USB, and NVMe interrupts to housekeeping cores while binding GPU interrupts to gaming CCD cores. Temporarily pause `irqbalance` during gaming sessions and restore it on exit.
   - **Targeted Network QoS & Wi-Fi Power Save**: Discover active default gateway route from `/proc/net/route` and apply CAKE/FQ_CODEL strictly to the active interface, preserving the original qdisc for clean restoration. Disable Wi-Fi power save via `iw` during gaming.
-  - **Audio Latency & xrun Guardian**: Configure PipeWire quantum via `pw-metadata` or ephemeral drop-in configuration (`/run/pipewire/pipewire.conf.d/99-zenith.conf`), avoiding modification of `/etc` or user configuration. Monitor xrun counters; dynamically elevate quantum upon audio dropouts.
+  - **Audio Latency & xrun Guardian**: Configure PipeWire quantum via `pw-metadata` or ephemeral drop-in configuration (`/run/pipewire/pipewire.conf.d/99-zenith.conf`), avoiding modification of `/etc` or user configuration. Monitor xrun counters; dynamically increase quantum upon audio dropouts.
   - **Multi-Vendor GPU & Dynamic NVML**:
     - NVIDIA: Dynamically load `libnvidia-ml.so.1` via `dlopen`/`dlsym` for direct in-process NVML queries and clock locking without fork/exec overhead. Graceful fallback to `nvidia-smi` binary.
     - AMD: Manage `power_dpm_force_performance_level` via sysfs with rollback.
@@ -277,7 +277,7 @@ A first-class UX is required such that any user can install Zenith, run a diagno
 3. **Multi-Tiered CLI, Doctor Engine, and Lightweight Socket Protocol**:
   - **Unified Control CLI (`zenithctl`)**: Intuitive verb-based command interface (`status`, `doctor`, `profile`, `game`, `dry-run`, `explain`, `rollback`, `suggest`, `logs`, `report`, `completions`).
   - **Versioned UNIX Domain Socket Protocol (`/run/zenith/zenith.sock`)**: JSON-based request/response protocol (`STATUS`, `GET_PROFILES`, `SET_PROFILE`, `ROLLBACK`) with fallback to local inspection when the daemon is offline.
-  - **Comprehensive Health Doctor (`zenithctl doctor`)**: Automated verification of cgroups v2, kernel version, privileges, competing daemons (gamemode/ananicy/tuned), AMD X3D driver, Intel hybrid cores, PSI, and PipeWire, outputting formatted colored results with **exact actionable bash remediation commands**.
+  - **Health Doctor (`zenithctl doctor`)**: Automated verification of cgroups v2, kernel version, privileges, competing daemons (gamemode/ananicy/tuned), AMD X3D driver, Intel hybrid cores, PSI, and PipeWire, outputting formatted colored results with **exact actionable bash remediation commands**.
   - **Live Terminal Dashboard (`zenithctl status --watch`)**: Real-time ASCII/ANSI TUI monitor displaying active game, core topology map (CCD0 V-Cache vs CCD1 background cores), PSI pressure gauges, temperatures, and state journal status.
   - **Steam Launch Options Wrapper (`zenith-run %command%`)**: Transparent wrapper supporting `gamescope`, forwarding exit codes without shell expansion, and dispatching D-Bus desktop notifications (`notify-send`) upon game start and exit.
   - **Bilingual Internationalization (`zenith::i18n`)**: English and Russian localization with standardized error codes catalog (`docs/ERRORS.md`) linked directly in output.

@@ -47,7 +47,7 @@ Additionally, Zenith features an **Adaptive Controller with Hysteresis** that co
 
 ## 3. Aggressive Profile (`aggressive`)
 * **Philosophy**: Maximum performance profile. Prioritizes 0.1% frame pacing above power consumption and thermal conservation.
-* **Intended Audience**: Esports players, competitive titles (CS2, Apex Legends, Overwatch), high-refresh displays (165Hz-360Hz+), systems with robust cooling.
+* **Intended Audience**: Esports players, competitive titles (CS2, Apex Legends, Overwatch), high-refresh displays (165Hz-360Hz+), systems with adequate cooling.
 * **Mechanism**:
   - Disables split-lock mitigation (`kernel.split_lock_mitigate=0`), eliminating atomic instruction stalls in DirectX/Wine.
   - Locks GPU memory and compute clocks to peak performance states, eliminating downclock latency.

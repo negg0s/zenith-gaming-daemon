@@ -258,7 +258,7 @@ bool ProcessTuner::tune_process_fine_grained(
                 break;
 
             case ThreadRole::ShaderCompile:
-                // Allow shader compilers to leverage all cores at normal nice level
+                // Shader compilers run across all cores at normal nice level
                 if (!all_cores.empty()) {
                     set_cpu_affinity(thread.tid, all_cores);
                 }

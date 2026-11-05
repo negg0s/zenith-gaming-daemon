@@ -36,7 +36,7 @@ void print_ctl_help() {
 "Usage: zenithctl <command> [options] [arguments]\n\n"
 "Core Commands:\n"
 "  status [--watch, -w] [--json]    Display daemon status, active game, and core topology\n"
-"  doctor [--json]                  Run comprehensive system diagnostic audit with fix advice\n"
+"  doctor [--json]                  Run diagnostic audit with fix advice\n"
 "  enable                           Enable dynamic background gaming optimizations\n"
 "  disable                          Disable dynamic gaming optimizations\n"
 "  profile list                     List available performance tuning profiles\n"
