@@ -97,6 +97,7 @@ MigrationResult ConfigMigrator::migrate_to_latest(std::string_view content) {
 
 bool ConfigMigrator::validate_migrated_config(std::string_view content) {
     auto [cfg, err] = Config::parse_string(content);
+    (void)cfg;
     return err.success;
 }
 

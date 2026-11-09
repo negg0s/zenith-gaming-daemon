@@ -25,6 +25,7 @@ void test_sched_ext_config() {
 
     auto [bad, bad_res] = zenith::Config::parse_string(
         "sched_ext_scheduler = ../scx_lavd\n");
+    (void)bad;
     assert(!bad_res.success);
 
     std::cout << "[PASS] test_sched_ext_config\n";

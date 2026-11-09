@@ -75,24 +75,28 @@ void test_strict_config_validation() {
     // 1. Oversized config rejection (> 64 KB)
     std::string huge_config(70 * 1024, 'a');
     auto [cfg1, res1] = Config::parse_string(huge_config);
+    (void)cfg1;
     assert(res1.success == false);
     assert(res1.error_message.find("exceeds maximum allowed size") != std::string::npos);
 
     // 2. Unknown key rejection
     std::string unknown_key_cfg = "cgroup_isolation_enabled = true\nmalicious_param = 42\n";
     auto [cfg2, res2] = Config::parse_string(unknown_key_cfg);
+    (void)cfg2;
     assert(res2.success == false);
     assert(res2.error_message.find("Unknown configuration key: 'malicious_param'") != std::string::npos);
 
     // 3. Invalid boolean rejection
     std::string invalid_bool_cfg = "split_lock_mitigation_disabled = perhaps\n";
     auto [cfg3, res3] = Config::parse_string(invalid_bool_cfg);
+    (void)cfg3;
     assert(res3.success == false);
     assert(res3.error_message.find("Invalid boolean value") != std::string::npos);
 
     // 4. Out-of-bounds integer rejection
     std::string oob_int_cfg = "swappiness = 9999\n";
     auto [cfg4, res4] = Config::parse_string(oob_int_cfg);
+    (void)cfg4;
     assert(res4.success == false);
     assert(res4.error_message.find("Integer out of bounds") != std::string::npos);
 

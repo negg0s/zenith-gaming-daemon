@@ -77,7 +77,8 @@ bool SocketServer::handle_connection(int client_fd) {
     if (!authenticate_peer(client_fd, creds)) {
 #ifdef __linux__
         const char* err_msg = "{\"status\":\"error\",\"message\":\"Unauthorized: access denied by SO_PEERCRED policy\"}\n";
-        if (::write(client_fd, err_msg, std::strlen(err_msg)) < 0) {}
+        auto w1 = ::write(client_fd, err_msg, std::strlen(err_msg));
+        (void)w1;
         ::close(client_fd);
 #endif
         return false;
@@ -106,7 +107,8 @@ bool SocketServer::handle_connection(int client_fd) {
         if (!response.ends_with('\n')) response += '\n';
     }
 
-    if (::write(client_fd, response.data(), response.size()) < 0) {}
+    auto w2 = ::write(client_fd, response.data(), response.size());
+    (void)w2;
     ::close(client_fd);
 #else
     (void)client_fd;

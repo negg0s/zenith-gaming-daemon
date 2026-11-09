@@ -50,7 +50,13 @@ std::string IssueReportGenerator::generate_anonymized_report() {
     std::time_t now_c = std::chrono::system_clock::to_time_t(now);
 
     ss << "### Zenith System Diagnostics & Issue Report\n\n";
-    ss << "- **Timestamp**: " << std::put_time(std::gmtime(&now_c), "%Y-%m-%d %H:%M:%S UTC") << "\n";
+    std::tm tm_buf{};
+#if defined(_WIN32)
+    gmtime_s(&tm_buf, &now_c);
+#else
+    gmtime_r(&now_c, &tm_buf);
+#endif
+    ss << "- **Timestamp**: " << std::put_time(&tm_buf, "%Y-%m-%d %H:%M:%S UTC") << "\n";
     ss << "- **Zenith Version**: " << zenith::ZENITH_VERSION << "\n";
 
 #if defined(__linux__)
