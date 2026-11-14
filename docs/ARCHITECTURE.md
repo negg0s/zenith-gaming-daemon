@@ -188,7 +188,7 @@ flowchart TD
 - **`TweakMutationGuard`**: Automatically executes rollback logic if an exception or early return occurs before explicit commit.
 
 ### 5.2 Monadic `Result<T, Error>`
-Zenith utilizes a C++20 monadic `Result<T, Error>` type across all core subsystems:
+Zenith uses a C++20 monadic `Result<T, Error>` type across all core subsystems:
 ```cpp
 // Explicit error code with rich context
 struct Error {
